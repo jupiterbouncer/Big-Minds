@@ -1,0 +1,19 @@
+# OS metadata
+.DS_Store
+Thumbs.db
+*.pem
+
+# IDEs and editors
+.vscode/*
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Environment variables & local secrets (if using Firebase or API keys later)
+.env
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
