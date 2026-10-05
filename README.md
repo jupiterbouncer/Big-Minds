@@ -35,6 +35,7 @@ It helps young learners discover how their current curiosities connect to emergi
 Big Minds/
 ├── index.html          # Main application structure, kiosk header & discovery drawer
 ├── styles.css          # Neo-tactile styling, animations, custom sliders & stickers
+├── favicon.svg         # Neo-tactile vector lightbulb favicon
 ├── js/
 │   ├── pathwaysData.js # Domains, 10 pathway nodes, edge connections & 6-question quiz
 │   ├── canvas.js       # Pan/zoom canvas engine with Bézier SVG edge routing
