@@ -1,60 +1,124 @@
-/* Base Font Configurations */
+/* ============================================
+   Big Minds — Neo-Tactile Stylesheet
+   ============================================ */
+
+/* ── Base ── */
 body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  background-color: #F8FAFC;
+  background-color: #FAF8F5;
 }
 
-h1, h2, h3, .font-heading {
-  font-family: 'Lexend', system-ui, sans-serif;
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Space Grotesk', 'Lexend', system-ui, sans-serif;
 }
 
-/* SVG Line Animations for Matches */
+/* ── Canvas workspace ── */
+#canvasViewport {
+  background-image: radial-gradient(circle, #d4d4d8 0.7px, transparent 0.7px);
+  background-size: 28px 28px;
+  touch-action: none;           /* prevent browser scroll/zoom gestures */
+}
+
+/* ── SVG Edge animations ── */
 .edge-path {
   transition: stroke 0.3s ease, stroke-width 0.3s ease;
 }
 
 .edge-path-active {
   stroke-dasharray: 8, 6;
-  animation: edgeDash 1.5s linear infinite;
+  animation: edgeDash 1.2s linear infinite;
 }
 
 @keyframes edgeDash {
-  to {
-    stroke-dashoffset: -28;
-  }
+  to { stroke-dashoffset: -28; }
 }
 
-/* Tactile Soft Glows & Card Shadows */
+/* ── Node cards ── */
 .node-card {
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease;
+}
+
+.node-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #0F172A;
 }
 
 .node-match-high {
-  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.25), 0 0 15px 2px rgba(99, 102, 241, 0.2);
-  transform: scale(1.03);
+  box-shadow: 6px 6px 0px #4F46E5 !important;
+  transform: translate(-2px, -2px) scale(1.02);
 }
 
 .node-match-low {
-  box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.12);
+  box-shadow: 4px 4px 0px #0F172A !important;
 }
 
-/* Custom Backdrop Blur fallback */
-.backdrop-blur-xs {
-  backdrop-filter: blur(4px);
+/* ── Sticker badges (tiny rotations) ── */
+.sticker     { transform: rotate(-2deg); }
+.sticker-alt { transform: rotate(1.5deg); }
+
+/* ── Interest badges ── */
+.interest-badge {
+  transition: all 0.15s ease;
+}
+.interest-badge:active {
+  transform: scale(0.93);
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ── Quiz radio styling ── */
+.quiz-option:has(input:checked) {
+  border-color: #4F46E5;
+  background-color: #EEF2FF;
 }
-::-webkit-scrollbar-track {
-  background: #F1F5F9;
+
+/* ── Custom range sliders ── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  background: #E2E8F0;
+  outline: none;
 }
-::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 9999px;
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #4F46E5;
+  border: 3px solid #0F172A;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #0F172A;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #4F46E5;
+  border: 3px solid #0F172A;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #0F172A;
 }
+
+/* ── Custom scrollbars ── */
+::-webkit-scrollbar       { width: 8px; height: 8px; }
+::-webkit-scrollbar-track  { background: #FAF8F5; }
+::-webkit-scrollbar-thumb  { background: #CBD5E1; border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* ── Utility animations ── */
+@keyframes pop {
+  0%   { transform: scale(0.5) rotate(-2deg); opacity: 0; }
+  70%  { transform: scale(1.12) rotate(-2deg); }
+  100% { transform: scale(1) rotate(-2deg); }
+}
+.badge-pop { animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.35s ease-out; }
