@@ -74,6 +74,14 @@ class BigMindsApp {
     this.renderInterestBadges();
     this.updateProgress();
     this.refreshCanvas();
+
+    // Notify if arriving fresh from the standalone quiz page
+    if (window.location.search.includes('fromQuiz=true')) {
+      setTimeout(() => {
+        this.showToast('✨ Curiosities loaded from your quiz! Check out the highlighted pathways!');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 350);
+    }
   }
 
   /* ─────────────────────────────────────────────────────────────
@@ -149,8 +157,18 @@ class BigMindsApp {
     this.dom.nextStudentBtn?.addEventListener('click', () => this.resetForNextStudent());
 
     // Quiz Open / Close
-    this.dom.takeQuizBtn?.addEventListener('click', () => this.openQuiz());
-    this.dom.mobileQuizBtn?.addEventListener('click', () => this.openQuiz());
+    this.dom.takeQuizBtn?.addEventListener('click', (e) => {
+      if (!this.dom.takeQuizBtn.getAttribute('href')) {
+        e.preventDefault();
+        this.openQuiz();
+      }
+    });
+    this.dom.mobileQuizBtn?.addEventListener('click', (e) => {
+      if (!this.dom.mobileQuizBtn.getAttribute('href')) {
+        e.preventDefault();
+        this.openQuiz();
+      }
+    });
     this.dom.closeQuizBtn?.addEventListener('click', () => this.closeQuiz());
     this.dom.submitQuizBtn?.addEventListener('click', () => this.submitQuiz());
 

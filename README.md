@@ -33,7 +33,8 @@ It helps young learners discover how their current curiosities connect to emergi
 
 ```text
 Big Minds/
-├── index.html          # Main application structure, kiosk header & discovery drawer
+├── index.html          # Main pathway explorer map, kiosk header & discovery drawer
+├── quiz.html           # Dedicated 30s Curiosity Quiz page (mobile & desktop)
 ├── styles.css          # Neo-tactile styling, animations, custom sliders & stickers
 ├── favicon.svg         # Neo-tactile vector lightbulb favicon
 ├── js/

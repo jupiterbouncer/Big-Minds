@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Curiosity Quiz | Big Minds</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-[#FAF8F5] text-slate-900 antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- HEADER -->
+  <header class="bg-white/95 backdrop-blur-md border-b-2 border-slate-900 sticky top-0 z-30 px-4 md:px-8 py-3 shadow-xs">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 border-2 border-slate-900 flex items-center justify-center text-white font-extrabold text-xl shadow-[2px_2px_0px_#0F172A]">
+          💡
+        </div>
+        <div>
+          <span class="text-lg font-black tracking-tight text-slate-900">Big Minds</span>
+          <span class="text-[10px] font-black uppercase bg-amber-300 text-slate-900 px-1.5 py-0.5 rounded border border-slate-900 ml-1.5">Quiz</span>
+        </div>
+      </a>
+
+      <a href="index.html" class="text-xs font-black text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 px-3 py-1.5 rounded-xl transition-all shadow-[2px_2px_0px_#0F172A]">
+        ← Back to Map
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN QUIZ CONTENT -->
+  <main class="max-w-3xl w-full mx-auto px-4 py-6 flex-1 flex flex-col justify-center">
+    
+    <!-- Hero / Progress Header -->
+    <div class="bg-white rounded-3xl border-2 border-slate-900 p-5 md:p-7 shadow-[4px_4px_0px_#0F172A] mb-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-black text-slate-900 font-heading">Discover Your Curiosities ✨</h1>
+          <p class="text-xs md:text-sm text-slate-600 font-bold mt-1">Answer 6 quick questions to see which pathway leads you toward 2042.</p>
+        </div>
+        <div class="flex items-center gap-2 self-start md:self-auto bg-amber-50 border border-amber-300 px-3 py-1.5 rounded-xl text-xs font-black text-amber-900">
+          <span>⏱️ Takes ~30 secs</span>
+        </div>
+      </div>
+
+      <!-- Quiz Form Container -->
+      <form id="standaloneQuizForm" class="space-y-6">
+        <div id="quizQuestionsContainer" class="space-y-6">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Submit & Actions -->
+        <div class="pt-4 border-t-2 border-slate-200 flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <button type="button" id="clearQuizBtn" class="w-full sm:w-auto text-xs font-black text-slate-600 hover:text-slate-900 px-4 py-2.5 rounded-xl border border-slate-300 transition-colors">
+            Reset Answers
+          </button>
+          
+          <button type="submit" id="submitStandaloneQuiz" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2">
+            <span>🚀 Explore My Matched Pathways</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white/70 px-4 py-3 text-center text-xs text-slate-500 font-semibold">
+    Big Minds Mentorship Project • Crown Prince Academy, Lapaz • Ashesi Leadership IV
+  </footer>
+
+  <script src="js/pathwaysData.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('quizQuestionsContainer');
+      const form = document.getElementById('standaloneQuizForm');
+      const clearBtn = document.getElementById('clearQuizBtn');
+
+      // Render questions
+      QUIZ_QUESTIONS.forEach((q, qIndex) => {
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50/70 rounded-2xl border-2 border-slate-900 p-4 shadow-[2px_2px_0px_#0F172A]';
+
+        card.innerHTML = `
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center shrink-0">
+              ${qIndex + 1}
+            </span>
+            <h2 class="text-sm md:text-base font-black text-slate-900">${q.question}</h2>
+          </div>
+          <div class="space-y-2">
+            ${q.options.map((opt, optIdx) => `
+              <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-300 bg-white hover:bg-indigo-50/50 cursor-pointer text-xs md:text-sm font-bold text-slate-800 transition-all select-none quiz-option">
+                <input type="radio" name="question_${q.id}" value="${qIndex}_${optIdx}" class="w-4 h-4 text-indigo-600 accent-indigo-600" />
+                <span>${opt.text}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      // Clear button
+      clearBtn?.addEventListener('click', () => {
+        form.reset();
+      });
+
+      // Submit handler
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const tagScores = {};
+        QUIZ_QUESTIONS.forEach((q) => {
+          const checked = document.querySelector(`input[name="question_${q.id}"]:checked`);
+          if (checked) {
+            const [qIdx, optIdx] = checked.value.split('_').map(Number);
+            const tags = QUIZ_QUESTIONS[qIdx]?.options[optIdx]?.tags || [];
+            tags.forEach(t => {
+              tagScores[t] = (tagScores[t] || 0) + 1;
+            });
+          }
+        });
+
+        const sorted = Object.entries(tagScores).sort((a, b) => b[1] - a[1]);
+        if (sorted.length === 0) {
+          alert('Please answer at least one question to discover your interests!');
+          return;
+        }
+
+        const topInterests = sorted.slice(0, 3).map(entry => entry[0]);
+
+        // Save into bigminds_student_session
+        let session = {};
+        try {
+          const saved = localStorage.getItem('bigminds_student_session');
+          if (saved) session = JSON.parse(saved);
+        } catch (err) {}
+
+        session.activeInterests = topInterests;
+        localStorage.setItem('bigminds_student_session', JSON.stringify(session));
+
+        // Redirect back to explore map
+        window.location.href = 'index.html?fromQuiz=true';
+      });
+    });
+  </script>
+</body>
+</html>

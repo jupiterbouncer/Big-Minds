@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Big Minds | Interactive Pathway Explorer</title>
   
   <!-- Fonts -->
@@ -22,48 +22,48 @@
 <body class="bg-[#FAF8F5] text-slate-900 antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
   <!-- TOP HEADER -->
-  <header class="bg-white/90 backdrop-blur-md border-b-2 border-slate-900 sticky top-0 z-30 px-4 md:px-8 py-3 shadow-xs">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3">
+  <header class="bg-white/90 backdrop-blur-md border-b-2 border-slate-900 sticky top-0 z-30 px-3 md:px-8 py-2.5 md:py-3 shadow-xs">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2.5 md:gap-3">
       
       <!-- Brand & Project Identity -->
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-indigo-600 border-2 border-slate-900 flex items-center justify-center text-white font-extrabold text-2xl shadow-[3px_3px_0px_#0F172A]">
+      <div class="flex items-center justify-between w-full md:w-auto">
+        <div class="flex items-center gap-2.5 md:gap-3">
+          <div class="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-indigo-600 border-2 border-slate-900 flex items-center justify-center text-white font-extrabold text-xl md:text-2xl shadow-[2px_2px_0px_#0F172A] shrink-0">
             💡
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-xl font-black tracking-tight text-slate-900">Big Minds</h1>
-              <span class="text-[10px] font-black uppercase bg-amber-300 text-slate-900 px-2 py-0.5 rounded-md border border-slate-900 sticker">Grade 5–6</span>
+            <div class="flex items-center gap-1.5 md:gap-2">
+              <h1 class="text-lg md:text-xl font-black tracking-tight text-slate-900">Big Minds</h1>
+              <span class="text-[9px] md:text-[10px] font-black uppercase bg-amber-300 text-slate-900 px-1.5 py-0.5 rounded border border-slate-900 sticker">Grade 5–6</span>
             </div>
-            <p class="text-xs font-bold text-slate-500">Crown Prince Academy • Interest & Pathway Explorer</p>
+            <p class="text-[11px] md:text-xs font-bold text-slate-500 truncate max-w-[220px] md:max-w-none">Crown Prince Academy • Pathway Explorer</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 md:hidden">
-          <button id="mobileQuizBtn" class="text-xs font-black bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-xl border border-indigo-200">
+        <div class="flex items-center gap-1.5 md:hidden">
+          <a href="quiz.html" id="mobileQuizBtn" class="text-xs font-black bg-indigo-50 text-indigo-700 px-2.5 py-1.5 rounded-xl border-2 border-slate-900 shadow-[1px_1px_0px_#0F172A] active:scale-95 transition-all">
             ✨ Quiz
-          </button>
+          </a>
         </div>
       </div>
 
       <!-- Classroom Kiosk & Progress Bar -->
-      <div class="flex items-center gap-3 self-end md:self-auto">
+      <div class="flex items-center justify-between md:justify-end gap-2.5 w-full md:w-auto">
         <!-- Progress Meter -->
-        <div class="flex items-center gap-3 bg-white border-2 border-slate-900 px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_#0F172A]">
-          <div class="text-right">
+        <div class="flex items-center gap-2.5 bg-white border-2 border-slate-900 px-2.5 py-1.5 rounded-xl shadow-[2px_2px_0px_#0F172A] flex-1 md:flex-initial justify-between md:justify-start">
+          <div class="text-left md:text-right">
             <div class="text-xs font-black text-slate-800">
               <span id="exploredCount">0</span> of <span id="totalNodesCount">0</span> Explored
             </div>
-            <div id="progressPercent" class="text-[10px] text-slate-500 font-bold">0% Discovered</div>
+            <div id="progressPercent" class="text-[9px] md:text-[10px] text-slate-500 font-bold">0% Discovered</div>
           </div>
-          <div class="w-20 bg-slate-100 border border-slate-900 h-2.5 rounded-full overflow-hidden">
+          <div class="w-16 md:w-20 bg-slate-100 border border-slate-900 h-2.5 rounded-full overflow-hidden shrink-0">
             <div id="progressBar" class="bg-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
           </div>
         </div>
 
         <!-- Next Student / Classroom Kiosk Button -->
-        <button id="nextStudentBtn" title="Reset map and progress for the next classmate on this laptop" class="text-xs font-black text-slate-900 bg-amber-300 hover:bg-amber-400 border-2 border-slate-900 px-3 py-2 rounded-xl transition-all shadow-[2px_2px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none flex items-center gap-1.5">
+        <button id="nextStudentBtn" title="Reset map and progress for the next classmate on this laptop" class="text-xs font-black text-slate-900 bg-amber-300 hover:bg-amber-400 border-2 border-slate-900 px-3 py-1.5 md:py-2 rounded-xl transition-all shadow-[2px_2px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none flex items-center gap-1 shrink-0">
           <span>👤 Next Student</span>
         </button>
       </div>
@@ -72,21 +72,21 @@
   </header>
 
   <!-- MAIN APP CONTAINER -->
-  <main class="max-w-7xl w-full mx-auto px-4 md:px-8 py-3.5 flex-1 flex flex-col gap-3.5">
+  <main class="max-w-7xl w-full mx-auto px-3 md:px-8 py-3 flex-1 flex flex-col gap-3">
     
     <!-- CONTROLS & INTEREST FILTER BAR -->
-    <section class="bg-white rounded-2xl border-2 border-slate-900 p-4 shadow-[4px_4px_0px_#0F172A] flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <section class="bg-white rounded-2xl border-2 border-slate-900 p-3.5 md:p-4 shadow-[4px_4px_0px_#0F172A] flex flex-col lg:flex-row lg:items-center justify-between gap-3 md:gap-4">
       <div class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 md:gap-2 flex-wrap">
             <span class="text-xs font-black text-slate-900 uppercase tracking-wider">What are you curious about?</span>
-            <span class="text-[11px] font-bold text-slate-500">(Pick 1–3 interests)</span>
+            <span class="text-[10px] md:text-[11px] font-bold text-slate-500">(Pick 1–3)</span>
           </div>
-          <button id="takeQuizBtn" class="hidden md:inline-flex text-xs font-black text-indigo-700 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-lg transition-colors items-center gap-1">
+          <a href="quiz.html" id="takeQuizBtn" class="hidden md:inline-flex text-xs font-black text-indigo-700 hover:text-indigo-900 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl transition-all shadow-[1px_1px_0px_#0F172A] hover:bg-indigo-100 items-center gap-1">
             <span>✨ Take 30s Curiosity Quiz</span>
-          </button>
+          </a>
         </div>
-        <div id="interestBadges" class="flex flex-wrap gap-2">
+        <div id="interestBadges" class="flex flex-wrap gap-1.5 md:gap-2">
           <!-- Dynamically populated by app.js -->
         </div>
       </div>
