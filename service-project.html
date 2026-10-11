@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Big Minds — Service Project Planner | Crown Prince Academy</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body class="planner-body">
+
+  <!-- TOP HEADER & NAV -->
+  <header class="planner-header">
+    <div class="planner-header-container">
+      <div class="brand-group">
+        <a href="index.html" class="back-link">← Student Explorer</a>
+        <h1 class="planner-title">Big Minds <span>Service Project Planner</span></h1>
+        <p class="planner-subtitle">Leadership Seminar IV: Leadership as Service | Crown Prince Academy, Lapaz</p>
+      </div>
+
+      <div class="header-actions">
+        <span id="save-indicator" class="save-status-badge">✓ Saved to browser</span>
+        <button id="btn-export-json" class="btn btn-secondary">📥 Export Plan</button>
+        <button id="btn-import-trigger" class="btn btn-secondary">📤 Import Plan</button>
+        <input type="file" id="import-file-input" accept=".json" style="display:none;">
+        <button id="btn-print-plan" class="btn btn-primary">🖨️ Print Summary</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="planner-main-content">
+
+    <!-- PROJECT STATUS BANNER -->
+    <section class="status-banner neo-card">
+      <div class="status-banner-header">
+        <div>
+          <span class="status-pill status-draft" id="project-status-label">Draft — Awaiting School Confirmation</span>
+          <h2>Mentorship Initiative Overview</h2>
+        </div>
+        <button class="btn btn-sm btn-outline" id="btn-edit-status">✏️ Edit Status & Info</button>
+      </div>
+
+      <div class="status-stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">Target School</span>
+          <strong class="stat-value" id="stat-school-name">Crown Prince Academy</strong>
+          <span class="stat-sub">Lapaz, Ghana</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Target Class</span>
+          <strong class="stat-value" id="stat-target-class">Grade 5 / 6 (TBC)</strong>
+          <span class="stat-sub" id="stat-student-count">Est. ~25 Students</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Visits Planned</span>
+          <strong class="stat-value" id="stat-visits-count">5 Visits</strong>
+          <span class="stat-sub" id="stat-visits-confirmed">0 Confirmed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Est. Budget Total</span>
+          <strong class="stat-value" id="stat-budget-total">GHS 0.00</strong>
+          <span class="stat-sub" id="stat-budget-confirmed">GHS 0.00 Confirmed</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Unassigned Roles</span>
+          <strong class="stat-value text-warning" id="stat-unassigned-roles">0 Roles</strong>
+          <span class="stat-sub">Team Allocation</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION NAVIGATION TABS -->
+    <nav class="planner-tabs">
+      <button class="tab-btn active" data-tab="tab-areas">1. Areas & Target Class</button>
+      <button class="tab-btn" data-tab="tab-schedule">2. Visit Schedule</button>
+      <button class="tab-btn" data-tab="tab-workshops">3. Workshops & Team</button>
+      <button class="tab-btn" data-tab="tab-budget">4. Budget (GHS)</button>
+      <button class="tab-btn" data-tab="tab-handover">5. Assessment & Handover</button>
+    </nav>
+
+    <!-- TAB 1: MENTORSHIP AREAS & TARGET CLASS -->
+    <div id="tab-areas" class="tab-panel active">
+      <div class="section-intro">
+        <h3>1. Mentorship Areas & Target Class Setup</h3>
+        <p>Define the core workshop topics aligned with student needs and configure target class details for Crown Prince Academy.</p>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Target Class Configuration Card -->
+        <div class="neo-card">
+          <div class="card-header-flex">
+            <h4>🏫 Target Class Configuration</h4>
+            <button class="btn btn-sm btn-outline" id="btn-edit-target-class">✏️ Edit Class Details</button>
+          </div>
+          <div class="details-list" id="target-class-display">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Integration Note Card -->
+        <div class="neo-card bg-cream-accent">
+          <h4>🔗 Integration with Student Discovery Map</h4>
+          <p>Workshop topics map directly to Big Minds digital pathway nodes. Students explore concepts digitally on the interactive map and practice hands-on skills during team school visits.</p>
+          <ul class="integration-bullets">
+            <li><strong>Programming & Web:</strong> Connected to Node #1 (Coding & Logic)</li>
+            <li><strong>Graphic Design:</strong> Connected to Node #2 (Visual Arts & Design)</li>
+            <li><strong>Financial Literacy:</strong> Connected to Node #4 (Money & Markets)</li>
+            <li><strong>Entrepreneurship:</strong> Connected to Node #3 (Innovation & Business)</li>
+            <li><strong>Public Speaking:</strong> Connected to Node #5 (Public Speaking)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card-header-flex margin-top-lg">
+        <h4>📚 Proposed Mentorship Areas</h4>
+        <button class="btn btn-primary btn-sm" id="btn-add-area">+ Add Mentorship Area</button>
+      </div>
+
+      <div class="areas-grid" id="mentorship-areas-list">
+        <!-- Dynamically rendered mentorship cards -->
+      </div>
+    </div>
+
+    <!-- TAB 2: VISIT SCHEDULE & SESSION PLANNING -->
+    <div id="tab-schedule" class="tab-panel">
+      <div class="section-intro">
+        <h3>2. Visit Schedule & Session Sequence</h3>
+        <p>Plan and track the proposed 5 school visits to Crown Prince Academy. Dates remain provisional until confirmed with school management.</p>
+      </div>
+
+      <div class="card-header-flex">
+        <div class="schedule-summary-badges">
+          <span class="badge badge-info" id="badge-total-visits">5 Total Visits</span>
+          <span class="badge badge-warning" id="badge-proposed-visits">5 Proposed</span>
+          <span class="badge badge-success" id="badge-confirmed-visits">0 Confirmed</span>
+          <span class="badge badge-neutral" id="badge-completed-visits">0 Completed</span>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-add-visit">+ Add Visit</button>
+      </div>
+
+      <div class="visits-timeline" id="visits-container">
+        <!-- Dynamically rendered visit cards -->
+      </div>
+    </div>
+
+    <!-- TAB 3: WORKSHOPS & TEAM RESPONSIBILITIES -->
+    <div id="tab-workshops" class="tab-panel">
+      <div class="section-intro">
+        <h3>3. Teaching Lesson Plans & Team Responsibilities</h3>
+        <p>Detailed workshop plans specifying learning objectives, hands-on tasks, and designated team member responsibilities.</p>
+      </div>
+
+      <!-- Team Allocation Banner -->
+      <div class="neo-card margin-bottom-lg" id="team-allocation-summary">
+        <h4>👥 Team Responsibilities Overview</h4>
+        <div id="unassigned-roles-alert" class="alert-box alert-warning">
+          <!-- Dynamically populated -->
+        </div>
+        <div class="team-grid" id="team-members-grid">
+          <!-- Dynamically rendered team roles -->
+        </div>
+      </div>
+
+      <div class="card-header-flex">
+        <h4>📖 Workshop Lesson Plans</h4>
+        <button class="btn btn-primary btn-sm" id="btn-add-workshop">+ Add Lesson Plan</button>
+      </div>
+
+      <div class="workshops-list" id="workshops-container">
+        <!-- Dynamically rendered workshop lesson cards -->
+      </div>
+    </div>
+
+    <!-- TAB 4: BUDGET & RESOURCE PLANNING -->
+    <div id="tab-budget" class="tab-panel">
+      <div class="section-intro">
+        <h3>4. Project Budget & Resource Planning (GHS)</h3>
+        <p>Itemized project expenses in Ghana Cedis (GHS). Automatically calculates line totals and grand totals.</p>
+      </div>
+
+      <div class="budget-stats-grid margin-bottom-md">
+        <div class="neo-card bg-white">
+          <span class="stat-label">Grand Total Estimated</span>
+          <h3 class="stat-number" id="budget-grand-total">GHS 0.00</h3>
+        </div>
+        <div class="neo-card bg-white">
+          <span class="stat-label">Confirmed Expenses</span>
+          <h3 class="stat-number text-success" id="budget-confirmed-total">GHS 0.00</h3>
+        </div>
+        <div class="neo-card bg-white">
+          <span class="stat-label">Essential Core Costs</span>
+          <h3 class="stat-number text-primary" id="budget-essential-total">GHS 0.00</h3>
+        </div>
+      </div>
+
+      <div class="neo-card">
+        <div class="card-header-flex">
+          <h4>Expense Line Items</h4>
+          <button class="btn btn-primary btn-sm" id="btn-add-expense">+ Add Expense Item</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="budget-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Qty</th>
+                <th>Unit Cost (GHS)</th>
+                <th>Total (GHS)</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="budget-table-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+            <tfoot>
+              <tr class="table-total-row">
+                <td colspan="4" class="text-right"><strong>Calculated Project Total:</strong></td>
+                <td colspan="4"><strong id="budget-footer-total">GHS 0.00</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: ASSESSMENT & HANDOVER -->
+    <div id="tab-handover" class="tab-panel">
+      <div class="section-intro">
+        <h3>5. Outcome Assessment & Program Handover</h3>
+        <p>Track aggregate impact indicators and complete the handover checklist for long-term sustainability at Crown Prince Academy.</p>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Baseline & Outcome Indicators -->
+        <div class="neo-card">
+          <div class="card-header-flex">
+            <h4>📊 Aggregate Assessment Indicators</h4>
+            <button class="btn btn-sm btn-outline" id="btn-edit-assessment">✏️ Update Metrics</button>
+          </div>
+          <p class="text-muted text-sm">Stores aggregate counts only. No individual student data or personal details are collected.</p>
+          <div class="metrics-list" id="assessment-metrics-container">
+            <!-- Dynamically rendered indicators -->
+          </div>
+        </div>
+
+        <!-- Peer-Mentorship Model & Sustainability -->
+        <div class="neo-card">
+          <h4>🌱 Peer-Mentorship Progression Model</h4>
+          <p class="text-sm">Proposed long-term framework for student leadership continuity at Crown Prince Academy:</p>
+          
+          <div class="peer-ladder">
+            <div class="ladder-step"><strong>1. Ashesi Mentor</strong> ➔ Delivers initial interactive workshops</div>
+            <div class="ladder-step"><strong>2. CPA Student</strong> ➔ Participates in hands-on activities</div>
+            <div class="ladder-step"><strong>3. Experienced Student</strong> ➔ Masters micro-skills and digital tools</div>
+            <div class="ladder-step"><strong>4. Peer Supporter</strong> ➔ Assists younger Grade 5 students</div>
+            <div class="ladder-step"><strong>5. Sustainable Club</strong> ➔ School continues pathway activities</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Handover Checklist Card -->
+      <div class="neo-card margin-top-lg">
+        <div class="card-header-flex">
+          <h4>📋 School Handover Checklist</h4>
+          <button class="btn btn-sm btn-outline" id="btn-edit-handover">✏️ Edit Handover Info</button>
+        </div>
+        <div class="checklist-grid" id="handover-checklist-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL CONTAINER FOR DYNAMIC FORMS -->
+  <div id="planner-modal-overlay" class="modal-overlay hidden">
+    <div class="modal-card neo-card">
+      <div class="modal-header">
+        <h3 id="modal-title">Modal Title</h3>
+        <button id="btn-close-modal" class="btn-close">&times;</button>
+      </div>
+      <div id="modal-body" class="modal-body">
+        <!-- Form injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="planner-footer">
+    <p>Big Minds Service Project Planner — Leadership Seminar IV | Ashesi University & Crown Prince Academy</p>
+  </footer>
+
+  <script src="js/plannerData.js"></script>
+  <script src="js/planner.js"></script>
+</body>
+</html>
