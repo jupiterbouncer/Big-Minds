@@ -11,6 +11,9 @@ let planData = null;
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
   loadPlanData();
+  if (window.firebaseSync) {
+    window.firebaseSync.init();
+  }
   setupNavigation();
   setupActionButtons();
   renderAll();
@@ -38,7 +41,13 @@ function loadPlanData() {
 function savePlanData() {
   planData.projectMeta.lastUpdated = new Date().toISOString().split("T")[0];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(planData));
-  showSaveIndicator();
+
+  // Sync to Firebase if configured & online, or show local indicator
+  if (window.firebaseSync && window.firebaseSync.isConfigured()) {
+    window.firebaseSync.pushPlan(planData);
+  } else {
+    showSaveIndicator();
+  }
 }
 
 function showSaveIndicator() {
@@ -76,6 +85,17 @@ function setupNavigation() {
 }
 
 function setupActionButtons() {
+  // Cloud Sync Settings
+  const btnCloudSync = document.getElementById("btn-cloud-sync");
+  if (btnCloudSync && window.firebaseSync) {
+    btnCloudSync.addEventListener("click", () => window.firebaseSync.openSettingsModal());
+  }
+
+  const saveIndicator = document.getElementById("save-indicator");
+  if (saveIndicator && window.firebaseSync) {
+    saveIndicator.addEventListener("click", () => window.firebaseSync.openSettingsModal());
+  }
+
   // Export JSON
   document.getElementById("btn-export-json").addEventListener("click", () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(planData, null, 2));

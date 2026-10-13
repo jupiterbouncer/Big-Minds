@@ -229,6 +229,37 @@ body.planner-body {
   border: 1.5px solid var(--border-indigo);
   padding: 0.25rem 0.6rem;
   border-radius: 6px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.save-status-badge:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.save-status-badge.status-cloud-live {
+  color: #065F46;
+  background: #D1FAE5;
+  border-color: #047857;
+}
+
+.save-status-badge.status-offline {
+  color: #92400E;
+  background: #FEF3C7;
+  border-color: #D97706;
+}
+
+.save-status-badge.status-local {
+  color: #1E3A8A;
+  background: #EFF6FF;
+  border-color: #3B82F6;
+}
+
+.save-status-badge.status-syncing {
+  color: #5B21B6;
+  background: #EDE9FE;
+  border-color: #7C3AED;
 }
 
 /* NEO-TACTILE CARDS & BUTTONS */

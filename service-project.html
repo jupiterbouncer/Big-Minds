@@ -19,7 +19,8 @@
       </div>
 
       <div class="header-actions">
-        <span id="save-indicator" class="save-status-badge">✓ Saved to browser</span>
+        <span id="save-indicator" class="save-status-badge" style="cursor: pointer;" title="Click to view Cloud Sync status">✓ Saved to browser</span>
+        <button id="btn-cloud-sync" class="btn btn-secondary">☁️ Cloud Sync</button>
         <button id="btn-export-json" class="btn btn-secondary">📥 Export Plan</button>
         <button id="btn-import-trigger" class="btn btn-secondary">📤 Import Plan</button>
         <input type="file" id="import-file-input" accept=".json" style="display:none;">
@@ -289,9 +290,11 @@
     </div>
   </div>
 
-  <footer class="planner-footer">
-    <p>Big Minds Service Project Planner — Leadership Seminar IV | Ashesi University & Crown Prince Academy</p>
-  </footer>
+  <!-- Firebase Cloud Persistence SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebaseConfig.js"></script>
+  <script src="js/firebaseSync.js"></script>
 
   <script src="js/plannerData.js"></script>
   <script src="js/planner.js"></script>

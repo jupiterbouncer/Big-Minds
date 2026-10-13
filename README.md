@@ -26,19 +26,23 @@ The project consists of two integrated components:
 5. **Assessment, Sustainability & Handover**:
    * Aggregate metric tracking for participation and pre/post skill awareness (no individual child personal data is collected).
    * Handover checklist and optional Peer-Mentorship progression ladder.
-6. **Data Storage & Portability**:
-   * Local persistence using `localStorage` key `bigminds_service_project_plan_v1`.
-   * Completely isolated from student explorer session state (`bigminds_student_session`).
-   * One-click JSON Export & Import for team backup and synchronization.
-   * Print stylesheet support for internal project proposals.
+6. **Data Storage & Multi-Device Persistence**:
+   * **Local-First Reliability**: Instant client-side persistence using `localStorage` (`bigminds_service_project_plan_v1`), completely isolated from student explorer session state (`bigminds_student_session`).
+   * **Real-Time Cloud Sync (Firebase Firestore)**: Live synchronization across admin laptops and mobile devices with offline-first write caching.
+   * **One-Click JSON Export & Import**: Backup files for offline archival and version snapshots.
+   * **Print Stylesheet**: Generates clean formatted printouts for team meetings and school administration proposals.
 
 ---
 
-### How to Run
+### How to Run & Connect Across Devices
 
-1. Open `index.html` in any modern web browser to access the Student Discovery Explorer.
+1. Open `index.html` in any browser to access the Student Discovery Explorer.
 2. Click **📋 Facilitator Planner** in the top navigation bar (or navigate to `service-project.html`) to manage project planning.
-3. Use the **Export Plan** button to download a `.json` backup of your planning data.
+3. **To sync across multiple devices**:
+   * Click **☁️ Cloud Sync** in the top-right header of `service-project.html`.
+   * Paste your team's free Google Firebase configuration JSON (or configure `js/firebaseConfig.js`).
+   * Edits made on one device will automatically reflect in real-time across all team members' laptops and phones!
+4. Use the **Export Plan** button at any time to download an offline `.json` backup.
 
 ---
 
