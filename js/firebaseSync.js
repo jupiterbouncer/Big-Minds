@@ -30,7 +30,12 @@ class FirebaseSyncController {
   }
 
   getConfig() {
-    // Check localStorage first
+    // Check local git-ignored override first
+    if (window.LOCAL_FIREBASE_CONFIG && window.LOCAL_FIREBASE_CONFIG.projectId && window.LOCAL_FIREBASE_CONFIG.apiKey) {
+      return window.LOCAL_FIREBASE_CONFIG;
+    }
+
+    // Check localStorage
     try {
       const stored = localStorage.getItem(FIREBASE_CONFIG_STORAGE_KEY);
       if (stored) {
@@ -234,70 +239,89 @@ class FirebaseSyncController {
 
     if (!overlay || !title || !body) return;
 
-    title.textContent = "☁️ Multi-Device Cloud Sync Settings";
+    title.textContent = "☁️ Multi-Device Cloud Sync";
 
     const currentConfig = this.getConfig() || {};
     const isConn = this.isConfigured() && this.isInitialized;
-    const configString = isConn ? JSON.stringify(currentConfig, null, 2) : "";
+    const timeStr = this.lastSyncedAt
+      ? this.lastSyncedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      : 'Pending first sync';
 
     body.innerHTML = `
-      <div style="margin-bottom: 1.25rem;">
-        <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 0.75rem;">
-          Connect Big Minds to <strong>Google Firebase Firestore</strong> to view and edit the Service Project Plan in real-time across multiple laptops and mobile devices.
+      <div style="margin-bottom: 1rem;">
+        <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 1rem;">
+          Real-time cloud database synchronization for the Big Minds Service Project Plan.
         </p>
 
-        <!-- Current Status Banner -->
-        <div style="padding: 0.85rem 1rem; border-radius: 8px; border: 2px solid ${isConn ? '#047857' : '#D97706'}; background: ${isConn ? '#ECFDF5' : '#FEF3C7'}; margin-bottom: 1rem;">
-          <div style="font-weight: 800; font-size: 0.85rem; color: ${isConn ? '#065F46' : '#92400E'};">
-            ${isConn ? '🟢 Status: Connected to Cloud' : '🟡 Status: Running in Local Browser Mode'}
+        <!-- Status Card -->
+        <div style="padding: 1rem; border-radius: 10px; border: 2px solid ${isConn ? '#047857' : '#D97706'}; background: ${isConn ? '#ECFDF5' : '#FEF3C7'}; margin-bottom: 1.25rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+            <div style="font-weight: 800; font-size: 0.95rem; color: ${isConn ? '#065F46' : '#92400E'};">
+              ${isConn ? '🟢 Status: Connected to Cloud' : '🟡 Status: Local Offline Mode'}
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; color: #6B7280;">
+              ${this.isOnline ? '🌐 Network Online' : '⚠️ Network Offline'}
+            </span>
           </div>
-          <div style="font-size: 0.75rem; color: #4B5563; margin-top: 0.25rem;">
-            ${isConn ? `Project ID: <code>${currentConfig.projectId}</code> • Real-time synchronization active.` : 'Changes currently persist only in this device\'s browser local storage.'}
+
+          <div style="font-size: 0.8rem; color: #374151; line-height: 1.6;">
+            ${isConn ? `
+              <div>• <strong>Cloud Project:</strong> <code>${currentConfig.projectId}</code></div>
+              <div>• <strong>Last Synced:</strong> ${timeStr}</div>
+              <div>• <strong>Security:</strong> Credentials secured in <code>.env</code> / environment config. Secrets hidden.</div>
+            ` : `
+              <div>• <strong>Mode:</strong> Changes persist only in this device's browser cache.</div>
+              <div>• <strong>To Connect:</strong> Set your credentials in <code>.env</code> and <code>js/firebaseConfig.js</code>.</div>
+            `}
           </div>
         </div>
 
-        <!-- Configuration Form -->
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label style="font-weight: 700; font-size: 0.8rem; display: block; margin-bottom: 0.35rem;">
-            Firebase Web App Configuration (Paste JSON or fill below):
-          </label>
-          <textarea id="fb-config-json" rows="6" placeholder='Paste your firebaseConfig object here, e.g.:
-{
-  "apiKey": "AIzaSy...",
-  "projectId": "big-minds-lapaz",
-  "authDomain": "...",
-  "storageBucket": "...",
-  "appId": "..."
-}' style="width: 100%; font-family: monospace; font-size: 0.75rem; padding: 0.6rem; border: 2px solid #1E1B4B; border-radius: 8px;">${configString}</textarea>
-        </div>
+        <!-- Sync Operational Controls -->
+        ${isConn ? `
+          <div style="background: #F8FAFC; border: 2px solid #1E1B4B; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
+            <h4 style="font-size: 0.85rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #1E1B4B;">
+              ⚡ Team Sync Operations
+            </h4>
+            <p style="font-size: 0.75rem; color: #64748B; margin-bottom: 0.75rem;">
+              Edits automatically sync across devices on save. You can also force a sync action below:
+            </p>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button id="btn-force-push" type="button" class="btn btn-primary" style="font-size: 0.8rem;">
+                ⬆️ Push Local Plan to Cloud
+              </button>
+              <button id="btn-force-pull" type="button" class="btn btn-secondary" style="font-size: 0.8rem;">
+                ⬇️ Pull Latest from Cloud
+              </button>
+              <button id="btn-trigger-sync" type="button" class="btn btn-secondary" style="font-size: 0.8rem;">
+                🔄 Refresh Connection
+              </button>
+            </div>
+          </div>
+        ` : `
+          <!-- Manual Connection Helper if not configured via .env -->
+          <details style="background: #FAF6F0; border: 1.5px solid #1E1B4B; border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 1.25rem; font-size: 0.75rem;">
+            <summary style="font-weight: 700; cursor: pointer; color: #4338CA;">
+              🔑 Need to configure Cloud credentials?
+            </summary>
+            <div style="margin-top: 0.5rem; line-height: 1.5; color: #374151;">
+              <p style="margin-bottom: 0.5rem;">Configure your Firebase variables inside <code>.env</code> and <code>js/firebaseConfig.js</code>, or paste your Project ID below:</p>
+              <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+                <input id="quick-project-id" type="text" placeholder="e.g. big-minds-lapaz" style="flex: 1; padding: 0.4rem 0.6rem; border: 1.5px solid #1E1B4B; border-radius: 6px; font-size: 0.75rem;" />
+                <button id="btn-quick-connect" type="button" class="btn btn-sm btn-primary">Connect</button>
+              </div>
+            </div>
+          </details>
+        `}
 
-        <!-- Quick Help & Setup Instructions -->
-        <details style="background: #FAF6F0; border: 1.5px solid #1E1B4B; border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 1.25rem; font-size: 0.75rem;">
-          <summary style="font-weight: 700; cursor: pointer; color: #4338CA;">
-            ❓ How to get a free Firebase Config (3 quick steps)
-          </summary>
-          <ol style="margin-top: 0.5rem; padding-left: 1.25rem; line-height: 1.5; color: #374151;">
-            <li>Go to <a href="https://console.firebase.google.com" target="_blank" style="color: #4338CA; font-weight: 700;">console.firebase.google.com</a> and click <strong>Add project</strong> (e.g. <code>big-minds-project</code>).</li>
-            <li>In the left sidebar, click <strong>Build > Firestore Database</strong>, choose <strong>Create database</strong>, and start in <strong>Test mode</strong>.</li>
-            <li>In <strong>Project Settings (gear icon) > General</strong>, scroll to <em>Your apps</em>, add a <strong>Web App (&lt;/&gt;)</strong>, and copy the <code>firebaseConfig</code> object into the box above.</li>
-          </ol>
-        </details>
-
-        <!-- Actions -->
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+        <!-- Footer Actions -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; pt: 0.75rem; margin-top: 1rem; padding-top: 0.75rem;">
           ${isConn ? `
-            <button id="btn-force-pull" type="button" class="btn btn-secondary" style="font-size: 0.8rem;">
-              ⬇️ Force Pull from Cloud
-            </button>
-            <button id="btn-force-push" type="button" class="btn btn-secondary" style="font-size: 0.8rem;">
-              ⬆️ Force Push to Cloud
-            </button>
-            <button id="btn-clear-cloud-config" type="button" class="btn btn-outline" style="font-size: 0.8rem; color: #EF4444; border-color: #EF4444;">
+            <button id="btn-clear-cloud-config" type="button" class="btn btn-outline" style="font-size: 0.75rem; color: #DC2626; border-color: #DC2626; padding: 0.35rem 0.6rem;">
               Disconnect Cloud
             </button>
-          ` : ''}
-          <button id="btn-save-cloud-config" type="button" class="btn btn-primary" style="font-size: 0.8rem;">
-            💾 Connect & Sync Now
+          ` : `<span></span>`}
+          <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;" onclick="closeModal()">
+            Done
           </button>
         </div>
       </div>
@@ -306,39 +330,6 @@ class FirebaseSyncController {
     overlay.classList.remove("hidden");
 
     // Wire Modal Buttons
-    document.getElementById("btn-save-cloud-config")?.addEventListener("click", () => {
-      const txt = document.getElementById("fb-config-json").value.trim();
-      if (!txt) {
-        alert("Please paste your Firebase configuration JSON.");
-        return;
-      }
-
-      try {
-        let parsed = null;
-        // Strip `const firebaseConfig = ` if user pasted raw JS code
-        const sanitized = txt.replace(/^(const|var|let)\s+firebaseConfig\s*=\s*/, "").replace(/;$/, "");
-        parsed = JSON.parse(sanitized);
-
-        if (!parsed.projectId || !parsed.apiKey) {
-          alert("Invalid config: Must contain at least 'projectId' and 'apiKey'.");
-          return;
-        }
-
-        localStorage.setItem(FIREBASE_CONFIG_STORAGE_KEY, JSON.stringify(parsed));
-        this.init();
-
-        // Push current local planData to initialize cloud
-        if (window.planData) {
-          this.pushPlan(window.planData);
-        }
-
-        closeModal();
-        alert("🎉 Firebase Cloud Sync connected successfully! All changes will now persist in real-time across devices.");
-      } catch (err) {
-        alert("Could not parse JSON. Please check formatting:\n" + err.message);
-      }
-    });
-
     document.getElementById("btn-force-pull")?.addEventListener("click", async () => {
       try {
         await this.pullPlan();
@@ -359,8 +350,13 @@ class FirebaseSyncController {
       }
     });
 
+    document.getElementById("btn-trigger-sync")?.addEventListener("click", () => {
+      this.init();
+      closeModal();
+    });
+
     document.getElementById("btn-clear-cloud-config")?.addEventListener("click", () => {
-      if (confirm("Disconnect cloud sync on this browser? Data will stay saved locally in this browser.")) {
+      if (confirm("Disconnect cloud sync on this browser? Data will remain safely in your local browser cache.")) {
         localStorage.removeItem(FIREBASE_CONFIG_STORAGE_KEY);
         if (this.unsubscribeSnapshot) this.unsubscribeSnapshot();
         this.db = null;

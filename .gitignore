@@ -13,6 +13,8 @@ Thumbs.db
 # Environment variables & local secrets (if using Firebase or API keys later)
 .env
 .env*.local
+*.local.js
+js/firebaseConfig.local.js
 
 # Logs
 *.log
