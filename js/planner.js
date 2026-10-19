@@ -424,6 +424,11 @@ function openModal(title, contentHtml) {
 
 function closeModal() {
   document.getElementById("planner-modal-overlay").classList.add("hidden");
+  
+  // Apply any queued cloud updates that arrived while editing
+  if (window.FirebaseSync && typeof window.FirebaseSync.applyPendingUpdate === "function") {
+    window.FirebaseSync.applyPendingUpdate();
+  }
 }
 
 // Global Exports bound to window to resolve inline click handlers

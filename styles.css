@@ -530,3 +530,28 @@ body.planner-body {
   .tab-panel { display: block !important; margin-bottom: 2rem; page-break-inside: avoid; }
   .neo-card { box-shadow: none !important; border-width: 1px !important; }
 }
+
+/* Realtime Cloud Sync Status Pills */
+.save-status-badge.sync-connected {
+  background-color: #ECFDF5;
+  color: #065F46;
+  border-color: #10B981;
+}
+
+.save-status-badge.sync-syncing {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border-color: #F59E0B;
+}
+
+.save-status-badge.sync-local {
+  background-color: #FFFBEB;
+  color: #B45309;
+  border-color: #D97706;
+}
+
+.save-status-badge.sync-error {
+  background-color: #FEF2F2;
+  color: #991B1B;
+  border-color: #EF4444;
+}
