@@ -6,43 +6,15 @@
 const STORAGE_KEY = "bigminds_service_project_plan_v1";
 
 // Global In-Memory State
-var planData = null;
 window.planData = null;
 
-// State accessors for multi-device sync
-window.getPlanData = function() {
-  return planData;
-};
-
-window.setPlanData = function(newData) {
-  planData = newData;
-  window.planData = newData;
-  if (typeof renderAll === "function") {
-    renderAll();
-  }
-};
-
 // Initialize Application
-function initApp() {
+document.addEventListener("DOMContentLoaded", () => {
   loadPlanData();
   setupNavigation();
   setupActionButtons();
   renderAll();
-
-  if (window.firebaseSync) {
-    try {
-      window.firebaseSync.init();
-    } catch (e) {
-      console.warn("Firebase sync init error:", e);
-    }
-  }
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initApp);
-} else {
-  initApp();
-}
+});
 
 /* ==========================================================================
    STORAGE & STATE MANAGEMENT
@@ -52,37 +24,42 @@ function loadPlanData() {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
-      planData = JSON.parse(saved);
+      window.planData = JSON.parse(saved);
     } catch (e) {
       console.error("Error parsing saved plan data, reverting to defaults:", e);
-      planData = JSON.parse(JSON.stringify(INITIAL_PLANNER_DATA));
+      window.planData = JSON.parse(JSON.stringify(INITIAL_PLANNER_DATA));
     }
   } else {
-    // Fresh device load: start with default template in memory without overwriting cloud
-    planData = JSON.parse(JSON.stringify(INITIAL_PLANNER_DATA));
-  }
-  window.planData = planData;
-}
-
-function savePlanData() {
-  if (!planData) return;
-  planData.projectMeta.lastUpdated = new Date().toISOString().split("T")[0];
-  window.planData = planData;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(planData));
-
-  // Sync to Firebase if configured, or show local indicator
-  if (window.firebaseSync && window.firebaseSync.isConfigured()) {
-    window.firebaseSync.pushPlan(planData);
-  } else {
-    showSaveIndicator();
+    window.planData = JSON.parse(JSON.stringify(INITIAL_PLANNER_DATA));
+    savePlanData(false);
   }
 }
+
+function savePlanData(triggerSync = true) {
+  if (!window.planData) return;
+  window.planData.projectMeta.lastUpdated = new Date().toISOString().split("T")[0];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(window.planData));
+  showSaveIndicator();
+
+  if (triggerSync && window.FirebaseSync) {
+    window.FirebaseSync.syncToRemote(window.planData);
+  }
+}
+
+// Remote update listener called from firebaseSync.js
+window.updatePlanDataFromRemote = function(remoteData) {
+  if (!remoteData || typeof remoteData !== "object") return;
+  window.planData = remoteData;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
+  renderAll();
+  showSaveIndicator();
+};
 
 function showSaveIndicator() {
   const badge = document.getElementById("save-indicator");
   if (badge) {
     badge.classList.add("saved-pulse");
-    badge.textContent = "✓ Saved to browser";
+    badge.textContent = "✓ Saved";
     setTimeout(() => badge.classList.remove("saved-pulse"), 1500);
   }
 }
@@ -105,7 +82,6 @@ function setupNavigation() {
     });
   });
 
-  // Modal Close Events
   document.getElementById("btn-close-modal")?.addEventListener("click", closeModal);
   document.getElementById("planner-modal-overlay")?.addEventListener("click", (e) => {
     if (e.target.id === "planner-modal-overlay") closeModal();
@@ -113,29 +89,16 @@ function setupNavigation() {
 }
 
 function setupActionButtons() {
-  // Cloud Sync Settings
-  const btnCloudSync = document.getElementById("btn-cloud-sync");
-  btnCloudSync?.addEventListener("click", () => {
-    if (window.firebaseSync) window.firebaseSync.openSettingsModal();
-  });
-
-  const saveIndicator = document.getElementById("save-indicator");
-  saveIndicator?.addEventListener("click", () => {
-    if (window.firebaseSync) window.firebaseSync.openSettingsModal();
-  });
-
-  // Export JSON
   document.getElementById("btn-export-json")?.addEventListener("click", () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(planData, null, 2));
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.planData, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `Big_Minds_Service_Project_Plan_${(planData?.projectMeta?.schoolName || "CPA").replace(/\s+/g, '_')}.json`);
+    downloadAnchor.setAttribute("download", `Big_Minds_Service_Project_Plan.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
   });
 
-  // Import JSON Trigger
   const fileInput = document.getElementById("import-file-input");
   document.getElementById("btn-import-trigger")?.addEventListener("click", () => fileInput?.click());
   fileInput?.addEventListener("change", (e) => {
@@ -146,8 +109,8 @@ function setupActionButtons() {
       try {
         const imported = JSON.parse(event.target.result);
         if (imported && imported.targetClass && imported.mentorshipAreas) {
-          planData = imported;
-          savePlanData();
+          window.planData = imported;
+          savePlanData(true);
           renderAll();
           alert("Project Plan imported successfully!");
         } else {
@@ -160,33 +123,23 @@ function setupActionButtons() {
     reader.readAsText(file);
   });
 
-  // Print Summary
-  document.getElementById("btn-print-plan")?.addEventListener("click", () => {
-    window.print();
-  });
-
-  // Header Status Edit
+  document.getElementById("btn-print-plan")?.addEventListener("click", () => window.print());
   document.getElementById("btn-edit-status")?.addEventListener("click", editProjectStatusModal);
-
-  // Target Class Edit
   document.getElementById("btn-edit-target-class")?.addEventListener("click", editTargetClassModal);
-
-  // Add Item Buttons
   document.getElementById("btn-add-area")?.addEventListener("click", () => editAreaModal(null));
   document.getElementById("btn-add-visit")?.addEventListener("click", () => editVisitModal(null));
   document.getElementById("btn-add-workshop")?.addEventListener("click", () => editWorkshopModal(null));
   document.getElementById("btn-add-expense")?.addEventListener("click", () => editExpenseModal(null));
-
-  // Edit Assessment & Handover
   document.getElementById("btn-edit-assessment")?.addEventListener("click", editAssessmentModal);
   document.getElementById("btn-edit-handover")?.addEventListener("click", editHandoverModal);
 }
 
 /* ==========================================================================
-   RENDERERS FOR ALL SECTIONS
+   RENDERERS
    ========================================================================== */
 
 function renderAll() {
+  if (!window.planData) return;
   renderOverviewHeader();
   renderTargetClass();
   renderMentorshipAreas();
@@ -198,36 +151,34 @@ function renderAll() {
   renderHandover();
 }
 
-// Render Header & Status Summary
 function renderOverviewHeader() {
-  document.getElementById("project-status-label").textContent = planData.projectMeta.status;
-  document.getElementById("stat-school-name").textContent = planData.projectMeta.schoolName;
-  document.getElementById("stat-target-class").textContent = planData.targetClass.targetGrade;
-  document.getElementById("stat-student-count").textContent = `Est. ~${planData.targetClass.expectedStudents} Students`;
+  const m = window.planData.projectMeta;
+  document.getElementById("project-status-label").textContent = m.status;
+  document.getElementById("stat-school-name").textContent = m.schoolName;
+  document.getElementById("stat-target-class").textContent = window.planData.targetClass.targetGrade;
+  document.getElementById("stat-student-count").textContent = `Est. ~${window.planData.targetClass.expectedStudents} Students`;
 
-  const totalVisits = planData.visitSchedule.length;
-  const confirmedVisits = planData.visitSchedule.filter(v => v.status === "Confirmed" || v.status === "Completed").length;
+  const totalVisits = window.planData.visitSchedule.length;
+  const confirmedVisits = window.planData.visitSchedule.filter(v => v.status === "Confirmed" || v.status === "Completed").length;
   document.getElementById("stat-visits-count").textContent = `${totalVisits} Visits`;
   document.getElementById("stat-visits-confirmed").textContent = `${confirmedVisits} Confirmed`;
 
-  // Budget Calculations
-  const grandTotal = planData.budgetItems.reduce((sum, item) => sum + (item.quantity * item.unitCostGHS), 0);
-  const confirmedTotal = planData.budgetItems
+  const grandTotal = window.planData.budgetItems.reduce((sum, item) => sum + (item.quantity * item.unitCostGHS), 0);
+  const confirmedTotal = window.planData.budgetItems
     .filter(item => item.status === "Confirmed" || item.status === "Purchased")
     .reduce((sum, item) => sum + (item.quantity * item.unitCostGHS), 0);
 
   document.getElementById("stat-budget-total").textContent = `GHS ${grandTotal.toFixed(2)}`;
   document.getElementById("stat-budget-confirmed").textContent = `GHS ${confirmedTotal.toFixed(2)} Confirmed`;
 
-  // Unassigned Roles Count
-  const unassigned = planData.teamRoles.filter(r => !r.assignedTo || r.assignedTo.trim() === "").length;
+  const unassigned = window.planData.teamRoles.filter(r => !r.assignedTo || r.assignedTo.trim() === "").length;
   document.getElementById("stat-unassigned-roles").textContent = `${unassigned} Roles`;
 }
 
-// Render Target Class Configuration
 function renderTargetClass() {
-  const tc = planData.targetClass;
+  const tc = window.planData.targetClass;
   const container = document.getElementById("target-class-display");
+  if (!container) return;
   container.innerHTML = `
     <div class="detail-row"><strong>Target Grade:</strong> <span>${escapeHtml(tc.targetGrade)}</span></div>
     <div class="detail-row"><strong>Class Identifier:</strong> <span>${escapeHtml(tc.classIdentifier || "Not specified")}</span></div>
@@ -238,15 +189,14 @@ function renderTargetClass() {
   `;
 }
 
-// Render Mentorship Areas
 function renderMentorshipAreas() {
   const container = document.getElementById("mentorship-areas-list");
+  if (!container) return;
   container.innerHTML = "";
 
-  planData.mentorshipAreas.forEach(area => {
+  window.planData.mentorshipAreas.forEach(area => {
     const card = document.createElement("div");
     card.className = "neo-card area-card";
-    
     const statusClass = area.status === "Confirmed" ? "badge-success" : (area.status === "Reviewed" ? "badge-info" : "badge-warning");
 
     card.innerHTML = `
@@ -264,31 +214,30 @@ function renderMentorshipAreas() {
         <div><strong>Required Materials:</strong> ${escapeHtml(area.requiredMaterials || "Standard stationary")}</div>
       </div>
       <div class="card-actions margin-top-sm">
-        <button class="btn btn-sm btn-outline" onclick="editAreaModal('${area.id}')">✏️ Edit Area</button>
-        <button class="btn btn-sm btn-danger-outline" onclick="deleteArea('${area.id}')">🗑️ Remove</button>
+        <button class="btn btn-sm btn-outline" onclick="window.editAreaModal('${area.id}')">✏️ Edit Area</button>
+        <button class="btn btn-sm btn-danger-outline" onclick="window.deleteArea('${area.id}')">🗑️ Remove</button>
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-// Render Visits
 function renderVisits() {
   const container = document.getElementById("visits-container");
+  if (!container) return;
   container.innerHTML = "";
 
-  // Summary Counters
-  const total = planData.visitSchedule.length;
-  const proposed = planData.visitSchedule.filter(v => v.status === "Draft" || v.status === "Proposed").length;
-  const confirmed = planData.visitSchedule.filter(v => v.status === "Confirmed").length;
-  const completed = planData.visitSchedule.filter(v => v.status === "Completed").length;
+  const total = window.planData.visitSchedule.length;
+  const proposed = window.planData.visitSchedule.filter(v => v.status === "Draft" || v.status === "Proposed").length;
+  const confirmed = window.planData.visitSchedule.filter(v => v.status === "Confirmed").length;
+  const completed = window.planData.visitSchedule.filter(v => v.status === "Completed").length;
 
   document.getElementById("badge-total-visits").textContent = `${total} Total Visits`;
   document.getElementById("badge-proposed-visits").textContent = `${proposed} Proposed`;
   document.getElementById("badge-confirmed-visits").textContent = `${confirmed} Confirmed`;
   document.getElementById("badge-completed-visits").textContent = `${completed} Completed`;
 
-  planData.visitSchedule.forEach(visit => {
+  window.planData.visitSchedule.forEach(visit => {
     const card = document.createElement("div");
     card.className = "neo-card visit-card";
     const statusClass = visit.status === "Confirmed" ? "badge-success" : (visit.status === "Completed" ? "badge-primary" : "badge-warning");
@@ -301,45 +250,44 @@ function renderVisits() {
         </div>
         <span class="badge ${statusClass}">${escapeHtml(visit.status)}</span>
       </div>
-
       <div class="visit-meta-grid text-sm margin-top-sm">
         <div><strong>Date:</strong> ${escapeHtml(visit.proposedDate || "Unscheduled")}</div>
         <div><strong>Time:</strong> ${escapeHtml(visit.startTime ? `${visit.startTime} -${visit.endTime}` : "TBC")}</div>
         <div><strong>Location:</strong> ${escapeHtml(visit.location || "CPA Classroom")}</div>
         <div><strong>Lead Facilitator:</strong> ${escapeHtml(visit.leadFacilitator || "Unassigned")}</div>
       </div>
-
       <div class="visit-body margin-top-sm text-sm">
         <p><strong>Main Objective:</strong> ${escapeHtml(visit.mainObjective)}</p>
         <p><strong>Agenda / Activities:</strong></p>
         <pre class="formatted-pre">${escapeHtml(visit.activitiesAgenda)}</pre>
         <p><strong>Materials Needed:</strong> ${escapeHtml(visit.requiredMaterials || "None listed")}</p>
       </div>
-
       <div class="card-actions margin-top-sm">
-        <button class="btn btn-sm btn-outline" onclick="editVisitModal('${visit.id}')">✏️ Edit Visit</button>
-        <button class="btn btn-sm btn-danger-outline" onclick="deleteVisit('${visit.id}')">🗑️ Remove</button>
+        <button class="btn btn-sm btn-outline" onclick="window.editVisitModal('${visit.id}')">✏️ Edit Visit</button>
+        <button class="btn btn-sm btn-danger-outline" onclick="window.deleteVisit('${visit.id}')">🗑️ Remove</button>
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-// Render Team Roles
 function renderTeamRoles() {
   const container = document.getElementById("team-members-grid");
   const alertBox = document.getElementById("unassigned-roles-alert");
+  if (!container) return;
   container.innerHTML = "";
 
-  const unassignedRoles = planData.teamRoles.filter(r => !r.assignedTo || r.assignedTo.trim() === "");
-  if (unassignedRoles.length > 0) {
-    alertBox.style.display = "block";
-    alertBox.innerHTML = `⚠️ <strong>Attention:</strong> There are currently ${unassignedRoles.length} unassigned role(s). Assign facilitators to ensure full workshop coverage.`;
-  } else {
-    alertBox.style.display = "none";
+  const unassignedRoles = window.planData.teamRoles.filter(r => !r.assignedTo || r.assignedTo.trim() === "");
+  if (alertBox) {
+    if (unassignedRoles.length > 0) {
+      alertBox.style.display = "block";
+      alertBox.innerHTML = `⚠️ <strong>Attention:</strong> There are currently ${unassignedRoles.length} unassigned role(s).`;
+    } else {
+      alertBox.style.display = "none";
+    }
   }
 
-  planData.teamRoles.forEach(role => {
+  window.planData.teamRoles.forEach(role => {
     const card = document.createElement("div");
     card.className = "team-role-card neo-card";
     const isAssigned = role.assignedTo && role.assignedTo.trim() !== "";
@@ -349,23 +297,22 @@ function renderTeamRoles() {
       <div class="role-assignee ${isAssigned ? 'assigned' : 'unassigned'}">
         ${isAssigned ? `👤 ${escapeHtml(role.assignedTo)}` : '⚠️ Unassigned'}
       </div>
-      <button class="btn btn-xs btn-outline margin-top-xs" onclick="assignRoleModal('${role.id}')">Assign / Edit</button>
+      <button class="btn btn-xs btn-outline margin-top-xs" onclick="window.assignRoleModal('${role.id}')">Assign / Edit</button>
     `;
     container.appendChild(card);
   });
 }
 
-// Render Workshops
 function renderWorkshops() {
   const container = document.getElementById("workshops-container");
+  if (!container) return;
   container.innerHTML = "";
 
-  planData.workshops.forEach(ws => {
+  window.planData.workshops.forEach(ws => {
     const card = document.createElement("div");
     card.className = "neo-card workshop-card";
 
-    // Find matching mentorship area
-    const area = planData.mentorshipAreas.find(a => a.id === ws.areaId);
+    const area = window.planData.mentorshipAreas.find(a => a.id === ws.areaId);
     const areaName = area ? area.name : "General Mentorship";
 
     card.innerHTML = `
@@ -383,33 +330,29 @@ function renderWorkshops() {
         <div><strong>Reflection Question:</strong> <em>"${escapeHtml(ws.reflectionQuestion)}"</em></div>
       </div>
       <div class="card-actions margin-top-sm">
-        <button class="btn btn-sm btn-outline" onclick="editWorkshopModal('${ws.id}')">✏️ Edit Lesson Plan</button>
-        <button class="btn btn-sm btn-danger-outline" onclick="deleteWorkshop('${ws.id}')">🗑️ Remove</button>
+        <button class="btn btn-sm btn-outline" onclick="window.editWorkshopModal('${ws.id}')">✏️ Edit Lesson Plan</button>
+        <button class="btn btn-sm btn-danger-outline" onclick="window.deleteWorkshop('${ws.id}')">🗑️ Remove</button>
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-// Render Budget Table
 function renderBudget() {
   const tbody = document.getElementById("budget-table-body");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
   let grandTotal = 0;
   let confirmedTotal = 0;
   let essentialTotal = 0;
 
-  planData.budgetItems.forEach(item => {
+  window.planData.budgetItems.forEach(item => {
     const lineTotal = (Number(item.quantity) || 0) * (Number(item.unitCostGHS) || 0);
     grandTotal += lineTotal;
 
-    if (item.status === "Confirmed" || item.status === "Purchased") {
-      confirmedTotal += lineTotal;
-    }
-    if (item.essential) {
-      essentialTotal += lineTotal;
-    }
+    if (item.status === "Confirmed" || item.status === "Purchased") confirmedTotal += lineTotal;
+    if (item.essential) essentialTotal += lineTotal;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -421,8 +364,8 @@ function renderBudget() {
       <td>${item.essential ? '<span class="badge badge-primary">Essential</span>' : '<span class="badge badge-neutral">Optional</span>'}</td>
       <td><span class="badge ${item.status === 'Confirmed' || item.status === 'Purchased' ? 'badge-success' : 'badge-warning'}">${escapeHtml(item.status)}</span></td>
       <td>
-        <button class="btn btn-xs btn-outline" onclick="editExpenseModal('${item.id}')">Edit</button>
-        <button class="btn btn-xs btn-danger-outline" onclick="deleteExpense('${item.id}')">Delete</button>
+        <button class="btn btn-xs btn-outline" onclick="window.editExpenseModal('${item.id}')">Edit</button>
+        <button class="btn btn-xs btn-danger-outline" onclick="window.deleteExpense('${item.id}')">Delete</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -434,10 +377,10 @@ function renderBudget() {
   document.getElementById("budget-footer-total").textContent = `GHS ${grandTotal.toFixed(2)}`;
 }
 
-// Render Assessment Indicators
 function renderAssessment() {
-  const a = planData.assessment;
+  const a = window.planData.assessment;
   const container = document.getElementById("assessment-metrics-container");
+  if (!container || !a) return;
   container.innerHTML = `
     <div class="metric-row"><span>Baseline Participating Students:</span> <strong>${a.baselineStudents}</strong></div>
     <div class="metric-row"><span>Final Participating Students:</span> <strong>${a.finalStudents}</strong></div>
@@ -450,17 +393,17 @@ function renderAssessment() {
   `;
 }
 
-// Render Handover Checklist
 function renderHandover() {
   const container = document.getElementById("handover-checklist-container");
+  if (!container) return;
   container.innerHTML = "";
 
-  planData.handoverChecklist.forEach(item => {
+  window.planData.handoverChecklist.forEach(item => {
     const div = document.createElement("div");
     div.className = "checklist-item neo-card";
     div.innerHTML = `
       <label class="checkbox-label">
-        <input type="checkbox" ${item.completed ? "checked" : ""} onchange="toggleHandoverTask('${item.id}', this.checked)">
+        <input type="checkbox" ${item.completed ? "checked" : ""} onchange="window.toggleHandoverTask('${item.id}', this.checked)">
         <span class="${item.completed ? 'completed-task' : ''}"><strong>${escapeHtml(item.task)}</strong></span>
       </label>
       <div class="text-xs text-muted margin-top-xs">${escapeHtml(item.notes || "")}</div>
@@ -470,7 +413,7 @@ function renderHandover() {
 }
 
 /* ==========================================================================
-   MODALS AND INTERACTIVE EDITORS
+   MODALS AND EXPOSED WINDOW ACTIONS
    ========================================================================== */
 
 function openModal(title, contentHtml) {
@@ -483,9 +426,9 @@ function closeModal() {
   document.getElementById("planner-modal-overlay").classList.add("hidden");
 }
 
-// Edit Project Status & Info Modal
-function editProjectStatusModal() {
-  const m = planData.projectMeta;
+// Global Exports bound to window to resolve inline click handlers
+window.editProjectStatusModal = function() {
+  const m = window.planData.projectMeta;
   const html = `
     <form id="form-edit-status">
       <div class="form-group">
@@ -511,17 +454,16 @@ function editProjectStatusModal() {
 
   document.getElementById("form-edit-status").addEventListener("submit", (e) => {
     e.preventDefault();
-    planData.projectMeta.status = document.getElementById("edit-status-val").value;
-    planData.projectMeta.schoolName = document.getElementById("edit-school-name").value;
-    savePlanData();
+    window.planData.projectMeta.status = document.getElementById("edit-status-val").value;
+    window.planData.projectMeta.schoolName = document.getElementById("edit-school-name").value;
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
+};
 
-// Edit Target Class Modal
-function editTargetClassModal() {
-  const tc = planData.targetClass;
+window.editTargetClassModal = function() {
+  const tc = window.planData.targetClass;
   const html = `
     <form id="form-edit-target-class">
       <div class="form-group">
@@ -538,7 +480,7 @@ function editTargetClassModal() {
         <input type="text" id="tc-identifier" class="form-control" value="${escapeHtml(tc.classIdentifier)}">
       </div>
       <div class="form-group">
-        <label>Expected Student Count (Estimate)</label>
+        <label>Expected Student Count</label>
         <input type="number" id="tc-expected" class="form-control" min="1" max="100" value="${tc.expectedStudents}">
       </div>
       <div class="form-group">
@@ -568,16 +510,15 @@ function editTargetClassModal() {
     tc.confirmedStudents = parseInt(document.getElementById("tc-confirmed").value) || 0;
     tc.approvalStatus = document.getElementById("tc-approval").value;
     tc.needsAssessmentNotes = document.getElementById("tc-notes").value;
-    savePlanData();
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
+};
 
-// Edit/Add Mentorship Area Modal
-function editAreaModal(areaId) {
+window.editAreaModal = function(areaId) {
   const isEdit = !!areaId;
-  const area = isEdit ? planData.mentorshipAreas.find(a => a.id === areaId) : {
+  const area = isEdit ? window.planData.mentorshipAreas.find(a => a.id === areaId) : {
     id: "area-" + Date.now(),
     name: "",
     utility: "",
@@ -613,7 +554,7 @@ function editAreaModal(areaId) {
         <input type="text" id="area-outcome" class="form-control" value="${escapeHtml(area.learningOutcome)}">
       </div>
       <div class="form-group">
-        <label>Linked Big Minds Pathway Node ID (1-10)</label>
+        <label>Linked Node ID (1-10)</label>
         <input type="number" id="area-node" class="form-control" min="1" max="10" value="${area.linkedPathwayNodeId}">
       </div>
       <div class="form-group">
@@ -651,29 +592,26 @@ function editAreaModal(areaId) {
     area.requiredMaterials = document.getElementById("area-materials").value;
     area.status = document.getElementById("area-status").value;
 
-    if (!isEdit) {
-      planData.mentorshipAreas.push(area);
-    }
-    savePlanData();
+    if (!isEdit) window.planData.mentorshipAreas.push(area);
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
+};
 
-function deleteArea(areaId) {
-  if (confirm("Are you sure you want to delete this mentorship area?")) {
-    planData.mentorshipAreas = planData.mentorshipAreas.filter(a => a.id !== areaId);
-    savePlanData();
+window.deleteArea = function(areaId) {
+  if (confirm("Delete this mentorship area?")) {
+    window.planData.mentorshipAreas = window.planData.mentorshipAreas.filter(a => a.id !== areaId);
+    savePlanData(true);
     renderAll();
   }
-}
+};
 
-// Edit/Add Visit Modal
-function editVisitModal(visitId) {
+window.editVisitModal = function(visitId) {
   const isEdit = !!visitId;
-  const visit = isEdit ? planData.visitSchedule.find(v => v.id === visitId) : {
+  const visit = isEdit ? window.planData.visitSchedule.find(v => v.id === visitId) : {
     id: "visit-" + Date.now(),
-    visitNumber: planData.visitSchedule.length + 1,
+    visitNumber: window.planData.visitSchedule.length + 1,
     title: "",
     proposedDate: "",
     startTime: "",
@@ -757,26 +695,23 @@ function editVisitModal(visitId) {
     visit.requiredMaterials = document.getElementById("visit-mat").value;
     visit.status = document.getElementById("visit-status").value;
 
-    if (!isEdit) {
-      planData.visitSchedule.push(visit);
-    }
-    savePlanData();
+    if (!isEdit) window.planData.visitSchedule.push(visit);
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
+};
 
-function deleteVisit(visitId) {
+window.deleteVisit = function(visitId) {
   if (confirm("Delete this visit?")) {
-    planData.visitSchedule = planData.visitSchedule.filter(v => v.id !== visitId);
-    savePlanData();
+    window.planData.visitSchedule = window.planData.visitSchedule.filter(v => v.id !== visitId);
+    savePlanData(true);
     renderAll();
   }
-}
+};
 
-// Role Assignment Modal
-function assignRoleModal(roleId) {
-  const role = planData.teamRoles.find(r => r.id === roleId);
+window.assignRoleModal = function(roleId) {
+  const role = window.planData.teamRoles.find(r => r.id === roleId);
   const html = `
     <form id="form-assign-role">
       <div class="form-group">
@@ -785,7 +720,7 @@ function assignRoleModal(roleId) {
       </div>
       <div class="form-group">
         <label>Assigned Team Member Name</label>
-        <input type="text" id="role-assignee-name" class="form-control" placeholder="e.g. Ama Mensah" value="${escapeHtml(role.assignedTo)}">
+        <input type="text" id="role-assignee-name" class="form-control" value="${escapeHtml(role.assignedTo)}">
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Save Assignment</button>
@@ -797,18 +732,17 @@ function assignRoleModal(roleId) {
   document.getElementById("form-assign-role").addEventListener("submit", (e) => {
     e.preventDefault();
     role.assignedTo = document.getElementById("role-assignee-name").value.trim();
-    savePlanData();
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
+};
 
-// Edit/Add Workshop Modal
-function editWorkshopModal(wsId) {
+window.editWorkshopModal = function(wsId) {
   const isEdit = !!wsId;
-  const ws = isEdit ? planData.workshops.find(w => w.id === wsId) : {
+  const ws = isEdit ? window.planData.workshops.find(w => w.id === wsId) : {
     id: "ws-" + Date.now(),
-    areaId: planData.mentorshipAreas[0]?.id || "",
+    areaId: window.planData.mentorshipAreas[0]?.id || "",
     title: "",
     objective: "",
     introduction: "",
@@ -819,12 +753,12 @@ function editWorkshopModal(wsId) {
     reflectionQuestion: ""
   };
 
-  const areaOptions = planData.mentorshipAreas.map(a => `<option value="${a.id}" ${ws.areaId === a.id ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join("");
+  const areaOptions = window.planData.mentorshipAreas.map(a => `<option value="${a.id}" ${ws.areaId === a.id ? 'selected' : ''}>${escapeHtml(a.name)}</option>`).join("");
 
   const html = `
     <form id="form-edit-workshop">
       <div class="form-group">
-        <label>Associated Mentorship Area</label>
+        <label>Mentorship Area</label>
         <select id="ws-area" class="form-control">${areaOptions}</select>
       </div>
       <div class="form-group">
@@ -832,19 +766,19 @@ function editWorkshopModal(wsId) {
         <input type="text" id="ws-title" class="form-control" required value="${escapeHtml(ws.title)}">
       </div>
       <div class="form-group">
-        <label>Learning Objective</label>
+        <label>Objective</label>
         <input type="text" id="ws-obj" class="form-control" value="${escapeHtml(ws.objective)}">
       </div>
       <div class="form-group">
-        <label>Introduction / Relatable Example</label>
+        <label>Introduction</label>
         <textarea id="ws-intro" class="form-control" rows="2">${escapeHtml(ws.introduction)}</textarea>
       </div>
       <div class="form-group">
-        <label>Practical Activity Tasks</label>
+        <label>Practical Activity</label>
         <textarea id="ws-task" class="form-control" rows="2">${escapeHtml(ws.practicalActivity)}</textarea>
       </div>
       <div class="form-group">
-        <label>Materials Required</label>
+        <label>Materials</label>
         <input type="text" id="ws-mat" class="form-control" value="${escapeHtml(ws.materials)}">
       </div>
       <div class="form-group">
@@ -852,15 +786,15 @@ function editWorkshopModal(wsId) {
         <input type="text" id="ws-approach" class="form-control" value="${escapeHtml(ws.facilitationApproach)}">
       </div>
       <div class="form-group">
-        <label>Expected Outcome / Proof of Learning</label>
+        <label>Expected Outcome</label>
         <input type="text" id="ws-outcome" class="form-control" value="${escapeHtml(ws.expectedOutcome)}">
       </div>
       <div class="form-group">
-        <label>Student Reflection Question</label>
+        <label>Reflection Question</label>
         <input type="text" id="ws-reflect" class="form-control" value="${escapeHtml(ws.reflectionQuestion)}">
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">${isEdit ? 'Save Lesson Plan' : 'Add Lesson Plan'}</button>
+        <button type="submit" class="btn btn-primary">${isEdit ? 'Save Plan' : 'Add Plan'}</button>
       </div>
     </form>
   `;
@@ -878,32 +812,30 @@ function editWorkshopModal(wsId) {
     ws.expectedOutcome = document.getElementById("ws-outcome").value;
     ws.reflectionQuestion = document.getElementById("ws-reflect").value;
 
-    if (!isEdit) planData.workshops.push(ws);
-    savePlanData();
+    if (!isEdit) window.planData.workshops.push(ws);
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
+};
 
-function deleteWorkshop(wsId) {
+window.deleteWorkshop = function(wsId) {
   if (confirm("Delete this lesson plan?")) {
-    planData.workshops = planData.workshops.filter(w => w.id !== wsId);
-    savePlanData();
+    window.planData.workshops = window.planData.workshops.filter(w => w.id !== wsId);
+    savePlanData(true);
     renderAll();
   }
-}
+};
 
-// Edit/Add Expense Item Modal
-function editExpenseModal(itemId) {
+window.editExpenseModal = function(itemId) {
   const isEdit = !!itemId;
-  const item = isEdit ? planData.budgetItems.find(b => b.id === itemId) : {
+  const item = isEdit ? window.planData.budgetItems.find(b => b.id === itemId) : {
     id: "bg-" + Date.now(),
     description: "",
     category: "Stationery",
     quantity: 1,
     unitCostGHS: 0,
     essential: true,
-    source: "",
     status: "Estimated",
     notes: ""
   };
@@ -911,19 +843,18 @@ function editExpenseModal(itemId) {
   const html = `
     <form id="form-edit-expense">
       <div class="form-group">
-        <label>Item Description</label>
+        <label>Description</label>
         <input type="text" id="bg-desc" class="form-control" required value="${escapeHtml(item.description)}">
       </div>
       <div class="form-group">
         <label>Category</label>
         <select id="bg-cat" class="form-control">
           <option value="Transportation" ${item.category === 'Transportation' ? 'selected' : ''}>Transportation</option>
-          <option value="Printing" ${item.category === 'Printing' ? 'selected' : ''}>Printing & Photocopying</option>
-          <option value="Stationery" ${item.category === 'Stationery' ? 'selected' : ''}>Stationery & Craft</option>
+          <option value="Printing" ${item.category === 'Printing' ? 'selected' : ''}>Printing</option>
+          <option value="Stationery" ${item.category === 'Stationery' ? 'selected' : ''}>Stationery</option>
           <option value="Data & Internet" ${item.category === 'Data & Internet' ? 'selected' : ''}>Data & Internet</option>
           <option value="Refreshments" ${item.category === 'Refreshments' ? 'selected' : ''}>Refreshments</option>
-          <option value="Equipment" ${item.category === 'Equipment' ? 'selected' : ''}>Equipment / Tech</option>
-          <option value="Other" ${item.category === 'Other' ? 'selected' : ''}>Other Expenses</option>
+          <option value="Other" ${item.category === 'Other' ? 'selected' : ''}>Other</option>
         </select>
       </div>
       <div class="grid-2col">
@@ -940,7 +871,7 @@ function editExpenseModal(itemId) {
         <label>Priority</label>
         <select id="bg-essential" class="form-control">
           <option value="true" ${item.essential ? 'selected' : ''}>Essential Core Need</option>
-          <option value="false" ${!item.essential ? 'selected' : ''}>Optional / Nice to Have</option>
+          <option value="false" ${!item.essential ? 'selected' : ''}>Optional</option>
         </select>
       </div>
       <div class="form-group">
@@ -949,11 +880,10 @@ function editExpenseModal(itemId) {
           <option value="Estimated" ${item.status === 'Estimated' ? 'selected' : ''}>Estimated</option>
           <option value="Confirmed" ${item.status === 'Confirmed' ? 'selected' : ''}>Confirmed Quote</option>
           <option value="Purchased" ${item.status === 'Purchased' ? 'selected' : ''}>Purchased</option>
-          <option value="Not Required" ${item.status === 'Not Required' ? 'selected' : ''}>Not Required</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Notes / Quote Source</label>
+        <label>Notes</label>
         <input type="text" id="bg-notes" class="form-control" value="${escapeHtml(item.notes)}">
       </div>
       <div class="form-actions">
@@ -973,24 +903,32 @@ function editExpenseModal(itemId) {
     item.status = document.getElementById("bg-status").value;
     item.notes = document.getElementById("bg-notes").value;
 
-    if (!isEdit) planData.budgetItems.push(item);
-    savePlanData();
+    if (!isEdit) window.planData.budgetItems.push(item);
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
+};
 
-function deleteExpense(itemId) {
-  if (confirm("Remove expense item?")) {
-    planData.budgetItems = planData.budgetItems.filter(b => b.id !== itemId);
-    savePlanData();
+window.deleteExpense = function(itemId) {
+  if (confirm("Delete expense item?")) {
+    window.planData.budgetItems = window.planData.budgetItems.filter(b => b.id !== itemId);
+    savePlanData(true);
     renderAll();
   }
-}
+};
 
-// Edit Assessment Modal
-function editAssessmentModal() {
-  const a = planData.assessment;
+window.toggleHandoverTask = function(taskId, isChecked) {
+  const task = window.planData.handoverChecklist.find(t => t.id === taskId);
+  if (task) {
+    task.completed = isChecked;
+    savePlanData(true);
+    renderHandover();
+  }
+};
+
+window.editAssessmentModal = function() {
+  const a = window.planData.assessment;
   const html = `
     <form id="form-edit-assessment">
       <div class="form-group">
@@ -1006,14 +944,6 @@ function editAssessmentModal() {
         <input type="number" id="ass-att" class="form-control" min="0" max="100" value="${a.attendanceRatePercent}">
       </div>
       <div class="form-group">
-        <label>Sessions Delivered</label>
-        <input type="number" id="ass-sess" class="form-control" value="${a.sessionsDelivered}">
-      </div>
-      <div class="form-group">
-        <label>Mentors Participated</label>
-        <input type="number" id="ass-ment" class="form-control" value="${a.mentorsParticipated}">
-      </div>
-      <div class="form-group">
         <label>Pre-Skill Awareness (%)</label>
         <input type="number" id="ass-pre" class="form-control" min="0" max="100" value="${a.preSkillAwarenessPercent}">
       </div>
@@ -1021,12 +951,8 @@ function editAssessmentModal() {
         <label>Post-Skill Awareness (%)</label>
         <input type="number" id="ass-post" class="form-control" min="0" max="100" value="${a.postSkillAwarenessPercent}">
       </div>
-      <div class="form-group">
-        <label>Student Satisfaction Summary</label>
-        <input type="text" id="ass-sat" class="form-control" value="${escapeHtml(a.studentSatisfactionScore)}">
-      </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save Indicator Metrics</button>
+        <button type="submit" class="btn btn-primary">Save Metrics</button>
       </div>
     </form>
   `;
@@ -1037,29 +963,17 @@ function editAssessmentModal() {
     a.baselineStudents = parseInt(document.getElementById("ass-base").value) || 0;
     a.finalStudents = parseInt(document.getElementById("ass-final").value) || 0;
     a.attendanceRatePercent = parseInt(document.getElementById("ass-att").value) || 0;
-    a.sessionsDelivered = parseInt(document.getElementById("ass-sess").value) || 0;
-    a.mentorsParticipated = parseInt(document.getElementById("ass-ment").value) || 0;
     a.preSkillAwarenessPercent = parseInt(document.getElementById("ass-pre").value) || 0;
     a.postSkillAwarenessPercent = parseInt(document.getElementById("ass-post").value) || 0;
-    a.studentSatisfactionScore = document.getElementById("ass-sat").value;
 
-    savePlanData();
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
+};
 
-function toggleHandoverTask(taskId, isChecked) {
-  const task = planData.handoverChecklist.find(t => t.id === taskId);
-  if (task) {
-    task.completed = isChecked;
-    savePlanData();
-    renderHandover();
-  }
-}
-
-function editHandoverModal() {
-  const s = planData.sustainability;
+window.editHandoverModal = function() {
+  const s = window.planData.sustainability;
   const html = `
     <form id="form-edit-handover">
       <div class="form-group">
@@ -1071,15 +985,15 @@ function editHandoverModal() {
         <input type="text" id="sus-teacher" class="form-control" value="${escapeHtml(s.cpaTeacherLiaison)}">
       </div>
       <div class="form-group">
-        <label>Recommendations for School Continuity</label>
+        <label>Recommendations</label>
         <textarea id="sus-recs" class="form-control" rows="3">${escapeHtml(s.recommendations)}</textarea>
       </div>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save Handover Info</button>
+        <button type="submit" class="btn btn-primary">Save Handover Details</button>
       </div>
     </form>
   `;
-  openModal("Edit Handover & Sustainability Info", html);
+  openModal("Edit Handover & Sustainability", html);
 
   document.getElementById("form-edit-handover").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -1087,15 +1001,11 @@ function editHandoverModal() {
     s.cpaTeacherLiaison = document.getElementById("sus-teacher").value;
     s.recommendations = document.getElementById("sus-recs").value;
 
-    savePlanData();
+    savePlanData(true);
     renderAll();
     closeModal();
   });
-}
-
-/* ==========================================================================
-   UTILITY FUNCTIONS
-   ========================================================================== */
+};
 
 function escapeHtml(str) {
   if (!str) return "";
@@ -1106,21 +1016,3 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
-
-// Explicit global exposure for inline onclick handlers across all browsers
-window.openModal = openModal;
-window.closeModal = closeModal;
-window.editAreaModal = editAreaModal;
-window.deleteArea = deleteArea;
-window.editVisitModal = editVisitModal;
-window.deleteVisit = deleteVisit;
-window.assignRoleModal = assignRoleModal;
-window.editWorkshopModal = editWorkshopModal;
-window.deleteWorkshop = deleteWorkshop;
-window.editExpenseModal = editExpenseModal;
-window.deleteExpense = deleteExpense;
-window.toggleChecklistItem = toggleChecklistItem;
-window.editProjectStatusModal = editProjectStatusModal;
-window.editTargetClassModal = editTargetClassModal;
-window.editAssessmentModal = editAssessmentModal;
-window.editHandoverModal = editHandoverModal;
