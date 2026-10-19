@@ -23,15 +23,26 @@ window.setPlanData = function(newData) {
 };
 
 // Initialize Application
-document.addEventListener("DOMContentLoaded", () => {
+function initApp() {
   loadPlanData();
-  if (window.firebaseSync) {
-    window.firebaseSync.init();
-  }
   setupNavigation();
   setupActionButtons();
   renderAll();
-});
+
+  if (window.firebaseSync) {
+    try {
+      window.firebaseSync.init();
+    } catch (e) {
+      console.warn("Firebase sync init error:", e);
+    }
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
 
 /* ==========================================================================
    STORAGE & STATE MANAGEMENT
@@ -95,8 +106,8 @@ function setupNavigation() {
   });
 
   // Modal Close Events
-  document.getElementById("btn-close-modal").addEventListener("click", closeModal);
-  document.getElementById("planner-modal-overlay").addEventListener("click", (e) => {
+  document.getElementById("btn-close-modal")?.addEventListener("click", closeModal);
+  document.getElementById("planner-modal-overlay")?.addEventListener("click", (e) => {
     if (e.target.id === "planner-modal-overlay") closeModal();
   });
 }
@@ -104,21 +115,21 @@ function setupNavigation() {
 function setupActionButtons() {
   // Cloud Sync Settings
   const btnCloudSync = document.getElementById("btn-cloud-sync");
-  if (btnCloudSync && window.firebaseSync) {
-    btnCloudSync.addEventListener("click", () => window.firebaseSync.openSettingsModal());
-  }
+  btnCloudSync?.addEventListener("click", () => {
+    if (window.firebaseSync) window.firebaseSync.openSettingsModal();
+  });
 
   const saveIndicator = document.getElementById("save-indicator");
-  if (saveIndicator && window.firebaseSync) {
-    saveIndicator.addEventListener("click", () => window.firebaseSync.openSettingsModal());
-  }
+  saveIndicator?.addEventListener("click", () => {
+    if (window.firebaseSync) window.firebaseSync.openSettingsModal();
+  });
 
   // Export JSON
-  document.getElementById("btn-export-json").addEventListener("click", () => {
+  document.getElementById("btn-export-json")?.addEventListener("click", () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(planData, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `Big_Minds_Service_Project_Plan_${planData.projectMeta.schoolName.replace(/\s+/g, '_')}.json`);
+    downloadAnchor.setAttribute("download", `Big_Minds_Service_Project_Plan_${(planData?.projectMeta?.schoolName || "CPA").replace(/\s+/g, '_')}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -126,8 +137,8 @@ function setupActionButtons() {
 
   // Import JSON Trigger
   const fileInput = document.getElementById("import-file-input");
-  document.getElementById("btn-import-trigger").addEventListener("click", () => fileInput.click());
-  fileInput.addEventListener("change", (e) => {
+  document.getElementById("btn-import-trigger")?.addEventListener("click", () => fileInput?.click());
+  fileInput?.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -150,25 +161,25 @@ function setupActionButtons() {
   });
 
   // Print Summary
-  document.getElementById("btn-print-plan").addEventListener("click", () => {
+  document.getElementById("btn-print-plan")?.addEventListener("click", () => {
     window.print();
   });
 
   // Header Status Edit
-  document.getElementById("btn-edit-status").addEventListener("click", editProjectStatusModal);
+  document.getElementById("btn-edit-status")?.addEventListener("click", editProjectStatusModal);
 
   // Target Class Edit
-  document.getElementById("btn-edit-target-class").addEventListener("click", editTargetClassModal);
+  document.getElementById("btn-edit-target-class")?.addEventListener("click", editTargetClassModal);
 
   // Add Item Buttons
-  document.getElementById("btn-add-area").addEventListener("click", () => editAreaModal(null));
-  document.getElementById("btn-add-visit").addEventListener("click", () => editVisitModal(null));
-  document.getElementById("btn-add-workshop").addEventListener("click", () => editWorkshopModal(null));
-  document.getElementById("btn-add-expense").addEventListener("click", () => editExpenseModal(null));
+  document.getElementById("btn-add-area")?.addEventListener("click", () => editAreaModal(null));
+  document.getElementById("btn-add-visit")?.addEventListener("click", () => editVisitModal(null));
+  document.getElementById("btn-add-workshop")?.addEventListener("click", () => editWorkshopModal(null));
+  document.getElementById("btn-add-expense")?.addEventListener("click", () => editExpenseModal(null));
 
   // Edit Assessment & Handover
-  document.getElementById("btn-edit-assessment").addEventListener("click", editAssessmentModal);
-  document.getElementById("btn-edit-handover").addEventListener("click", editHandoverModal);
+  document.getElementById("btn-edit-assessment")?.addEventListener("click", editAssessmentModal);
+  document.getElementById("btn-edit-handover")?.addEventListener("click", editHandoverModal);
 }
 
 /* ==========================================================================
@@ -1095,3 +1106,21 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// Explicit global exposure for inline onclick handlers across all browsers
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.editAreaModal = editAreaModal;
+window.deleteArea = deleteArea;
+window.editVisitModal = editVisitModal;
+window.deleteVisit = deleteVisit;
+window.assignRoleModal = assignRoleModal;
+window.editWorkshopModal = editWorkshopModal;
+window.deleteWorkshop = deleteWorkshop;
+window.editExpenseModal = editExpenseModal;
+window.deleteExpense = deleteExpense;
+window.toggleChecklistItem = toggleChecklistItem;
+window.editProjectStatusModal = editProjectStatusModal;
+window.editTargetClassModal = editTargetClassModal;
+window.editAssessmentModal = editAssessmentModal;
+window.editHandoverModal = editHandoverModal;
