@@ -1,9 +1,12 @@
 /**
  * Big Minds — Firebase Cloud Synchronization Module
- * Handles multi-device cloud persistence with offline-first localStorage fallback
+ * Leadership IV Service Project: Crown Prince Academy
+ *
+ * Provides transparent, automatic multi-device synchronization.
+ * Every edit made on any phone, tablet, or laptop syncs across all devices.
  */
 
-const FIREBASE_CONFIG_STORAGE_KEY = "bigminds_firebase_config";
+const STORAGE_KEY = "bigminds_service_project_plan_v1";
 const PROJECT_DOC_ID = "crown_prince_academy";
 const COLLECTION_NAME = "service_projects";
 
@@ -21,32 +24,35 @@ class FirebaseSyncController {
     window.addEventListener("online", () => {
       this.isOnline = true;
       this.updateBadge();
+      this.pullPlan().catch(() => {});
     });
 
     window.addEventListener("offline", () => {
       this.isOnline = false;
-      this.updateBadge();
+      this.updateBadge("offline");
+    });
+
+    // Auto-refresh when user switches back to browser tab (critical for mobile phones)
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && this.isInitialized) {
+        this.pullPlan().catch(() => {});
+      }
+    });
+
+    window.addEventListener("focus", () => {
+      if (this.isInitialized) {
+        this.pullPlan().catch(() => {});
+      }
     });
   }
 
   getConfig() {
-    // Check local git-ignored override first
+    // 1. Check local developer override
     if (window.LOCAL_FIREBASE_CONFIG && window.LOCAL_FIREBASE_CONFIG.projectId && window.LOCAL_FIREBASE_CONFIG.apiKey) {
       return window.LOCAL_FIREBASE_CONFIG;
     }
 
-    // Check localStorage
-    try {
-      const stored = localStorage.getItem(FIREBASE_CONFIG_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.projectId && parsed.apiKey) return parsed;
-      }
-    } catch (e) {
-      console.warn("Error reading stored Firebase config:", e);
-    }
-
-    // Fall back to window.DEFAULT_FIREBASE_CONFIG
+    // 2. Default committed production configuration
     if (window.DEFAULT_FIREBASE_CONFIG && window.DEFAULT_FIREBASE_CONFIG.projectId && window.DEFAULT_FIREBASE_CONFIG.apiKey) {
       return window.DEFAULT_FIREBASE_CONFIG;
     }
@@ -73,7 +79,6 @@ class FirebaseSyncController {
     }
 
     try {
-      // Initialize or retrieve existing Firebase App
       if (!firebase.apps.length) {
         this.app = firebase.initializeApp(config);
       } else {
@@ -81,16 +86,6 @@ class FirebaseSyncController {
       }
 
       this.db = firebase.firestore();
-
-      // Enable offline persistence across browser tabs
-      this.db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
-        if (err.code === "failed-precondition") {
-          console.warn("Firestore persistence failed: Multiple tabs open.");
-        } else if (err.code === "unimplemented") {
-          console.warn("Firestore persistence unsupported in this browser.");
-        }
-      });
-
       this.isInitialized = true;
       this.subscribeToChanges();
     } catch (err) {
@@ -114,25 +109,30 @@ class FirebaseSyncController {
           const remoteData = doc.data();
           this.lastSyncedAt = new Date();
 
-          // Only update if remote data differs from local
-          const localStr = JSON.stringify(window.planData || {});
+          // Get current in-memory plan data
+          const currentPlan = typeof window.getPlanData === "function" ? window.getPlanData() : window.planData;
+          const localStr = JSON.stringify(currentPlan || {});
           const remoteStr = JSON.stringify(remoteData || {});
 
           if (localStr !== remoteStr && remoteData && remoteData.projectMeta) {
-            console.log("☁️ Received remote update from another device. Updating local view...");
-            window.planData = remoteData;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
-            if (typeof renderAll === "function") {
-              renderAll();
+            console.log("☁️ Real-time cloud sync update received.");
+            if (typeof window.setPlanData === "function") {
+              window.setPlanData(remoteData);
+            } else {
+              window.planData = remoteData;
+              if (typeof renderAll === "function") renderAll();
             }
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
+            } catch (e) {}
           }
 
           this.updateBadge("cloud-live");
         } else {
-          // Document does not exist in Firestore yet -> seed with initial/local data
-          console.log("☁️ Firestore project document not found. Seeding from local plan...");
-          if (window.planData) {
-            this.pushPlan(window.planData);
+          // Document does not exist in Firestore yet -> seed with current plan
+          const currentPlan = typeof window.getPlanData === "function" ? window.getPlanData() : window.planData;
+          if (currentPlan) {
+            this.pushPlan(currentPlan);
           }
         }
       },
@@ -184,9 +184,15 @@ class FirebaseSyncController {
     const doc = await docRef.get();
     if (doc.exists) {
       const remoteData = doc.data();
-      window.planData = remoteData;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
-      if (typeof renderAll === "function") renderAll();
+      if (typeof window.setPlanData === "function") {
+        window.setPlanData(remoteData);
+      } else {
+        window.planData = remoteData;
+        if (typeof renderAll === "function") renderAll();
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteData));
+      } catch (e) {}
       this.lastSyncedAt = new Date();
       this.updateBadge("cloud-live");
       return remoteData;
@@ -203,8 +209,8 @@ class FirebaseSyncController {
 
     if (!this.isConfigured()) {
       badge.classList.add("status-local");
-      badge.textContent = "💻 Saved to browser (Click ☁️ to connect Cloud)";
-      badge.title = "Local offline storage active. Click 'Cloud Sync' to enable real-time sync across devices.";
+      badge.textContent = "💻 Saved locally";
+      badge.title = "Local storage active.";
       return;
     }
 
@@ -212,20 +218,23 @@ class FirebaseSyncController {
 
     if (effectiveStatus === "cloud-live") {
       badge.classList.add("status-cloud-live");
-      const timeStr = this.lastSyncedAt ? ` at ${this.lastSyncedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : '';
-      badge.textContent = `🟢 Cloud Synced (Live${timeStr})`;
-      badge.title = "Connected to Firestore. All updates sync live across admin laptops & phones.";
+      const timeStr = this.lastSyncedAt
+        ? ` at ${this.lastSyncedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+        : "";
+      badge.textContent = `🟢 Cloud Synced${timeStr}`;
+      badge.title = "Connected to Cloud. Edits sync live across all phones and laptops.";
     } else if (effectiveStatus === "syncing") {
       badge.classList.add("status-syncing");
-      badge.textContent = "⏳ Syncing to Cloud...";
+      badge.textContent = "⏳ Syncing...";
+      badge.title = "Uploading changes to cloud...";
     } else if (effectiveStatus === "offline") {
       badge.classList.add("status-offline");
       badge.textContent = "🟡 Offline — Saved locally";
-      badge.title = "Device is offline. Changes are saved locally and will auto-sync when reconnected.";
+      badge.title = "Device is offline. Changes saved locally and will auto-sync when online.";
     } else if (effectiveStatus === "error") {
       badge.classList.add("status-offline");
       badge.textContent = "⚠️ Cloud warning (Saved locally)";
-      badge.title = errorDetail || "Firebase permission or connection error. Data safely retained locally.";
+      badge.title = errorDetail || "Firebase connection warning. Data is safely saved locally.";
     } else {
       badge.classList.add("status-local");
       badge.textContent = "✓ Saved to browser";
@@ -241,86 +250,56 @@ class FirebaseSyncController {
 
     title.textContent = "☁️ Multi-Device Cloud Sync";
 
-    const currentConfig = this.getConfig() || {};
     const isConn = this.isConfigured() && this.isInitialized;
     const timeStr = this.lastSyncedAt
-      ? this.lastSyncedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-      : 'Pending first sync';
+      ? this.lastSyncedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+      : "Pending first sync";
 
     body.innerHTML = `
-      <div style="margin-bottom: 1rem;">
-        <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 1rem;">
-          Real-time cloud database synchronization for the Big Minds Service Project Plan.
-        </p>
-
+      <div style="margin-bottom: 0.5rem;">
         <!-- Status Card -->
-        <div style="padding: 1rem; border-radius: 10px; border: 2px solid ${isConn ? '#047857' : '#D97706'}; background: ${isConn ? '#ECFDF5' : '#FEF3C7'}; margin-bottom: 1.25rem;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
-            <div style="font-weight: 800; font-size: 0.95rem; color: ${isConn ? '#065F46' : '#92400E'};">
-              ${isConn ? '🟢 Status: Connected to Cloud' : '🟡 Status: Local Offline Mode'}
+        <div style="padding: 1.15rem; border-radius: 12px; border: 2.5px solid ${isConn ? "#047857" : "#D97706"}; background: ${isConn ? "#ECFDF5" : "#FEF3C7"}; margin-bottom: 1.25rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+            <div style="font-weight: 800; font-size: 1rem; color: ${isConn ? "#065F46" : "#92400E"};">
+              ${isConn ? "🟢 Cloud Sync: Active" : "🟡 Cloud Sync: Offline / Connecting"}
             </div>
-            <span style="font-size: 0.75rem; font-weight: 700; color: #6B7280;">
-              ${this.isOnline ? '🌐 Network Online' : '⚠️ Network Offline'}
+            <span style="font-size: 0.75rem; font-weight: 700; color: #4B5563;">
+              ${this.isOnline ? "🌐 Online" : "⚠️ Offline"}
             </span>
           </div>
 
-          <div style="font-size: 0.8rem; color: #374151; line-height: 1.6;">
-            ${isConn ? `
-              <div>• <strong>Cloud Project:</strong> <code>${currentConfig.projectId}</code></div>
-              <div>• <strong>Last Synced:</strong> ${timeStr}</div>
-              <div>• <strong>Security:</strong> Credentials secured in <code>.env</code> / environment config. Secrets hidden.</div>
-            ` : `
-              <div>• <strong>Mode:</strong> Changes persist only in this device's browser cache.</div>
-              <div>• <strong>To Connect:</strong> Set your credentials in <code>.env</code> and <code>js/firebaseConfig.js</code>.</div>
-            `}
+          <p style="font-size: 0.825rem; color: #374151; margin: 0.35rem 0 0.5rem 0; line-height: 1.5;">
+            ${isConn
+              ? "All changes made on any phone, tablet, or laptop automatically sync in real-time."
+              : "Changes are safely saved in this device's browser and will sync once reconnected."}
+          </p>
+
+          <div style="font-size: 0.775rem; color: #4B5563;">
+            <strong>Last synced:</strong> ${timeStr}
           </div>
         </div>
 
-        <!-- Sync Operational Controls -->
-        ${isConn ? `
-          <div style="background: #F8FAFC; border: 2px solid #1E1B4B; border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem;">
-            <h4 style="font-size: 0.85rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #1E1B4B;">
-              ⚡ Team Sync Operations
-            </h4>
-            <p style="font-size: 0.75rem; color: #64748B; margin-bottom: 0.75rem;">
-              Edits automatically sync across devices on save. You can also force a sync action below:
-            </p>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              <button id="btn-force-push" type="button" class="btn btn-primary" style="font-size: 0.8rem;">
-                ⬆️ Push Local Plan to Cloud
-              </button>
-              <button id="btn-force-pull" type="button" class="btn btn-secondary" style="font-size: 0.8rem;">
-                ⬇️ Pull Latest from Cloud
-              </button>
-              <button id="btn-trigger-sync" type="button" class="btn btn-secondary" style="font-size: 0.8rem;">
-                🔄 Refresh Connection
-              </button>
-            </div>
+        <!-- Sync Actions -->
+        <div style="background: #F8FAFC; border: 2px solid #1E1B4B; border-radius: 12px; padding: 1.15rem; margin-bottom: 1.25rem;">
+          <h4 style="font-size: 0.875rem; font-weight: 800; margin: 0 0 0.4rem 0; color: #1E1B4B;">
+            ⚡ Sync Actions
+          </h4>
+          <p style="font-size: 0.775rem; color: #64748B; margin-bottom: 0.85rem;">
+            Edits sync automatically whenever you save. If you just made changes on another device, you can force a refresh below:
+          </p>
+          <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+            <button id="btn-force-pull" type="button" class="btn btn-primary" style="font-size: 0.825rem; padding: 0.5rem 0.85rem;">
+              🔄 Sync Now (Pull Latest)
+            </button>
+            <button id="btn-force-push" type="button" class="btn btn-secondary" style="font-size: 0.825rem; padding: 0.5rem 0.85rem;">
+              ⬆️ Upload Local Plan to Cloud
+            </button>
           </div>
-        ` : `
-          <!-- Manual Connection Helper if not configured via .env -->
-          <details style="background: #FAF6F0; border: 1.5px solid #1E1B4B; border-radius: 8px; padding: 0.6rem 0.8rem; margin-bottom: 1.25rem; font-size: 0.75rem;">
-            <summary style="font-weight: 700; cursor: pointer; color: #4338CA;">
-              🔑 Need to configure Cloud credentials?
-            </summary>
-            <div style="margin-top: 0.5rem; line-height: 1.5; color: #374151;">
-              <p style="margin-bottom: 0.5rem;">Configure your Firebase variables inside <code>.env</code> and <code>js/firebaseConfig.js</code>, or paste your Project ID below:</p>
-              <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
-                <input id="quick-project-id" type="text" placeholder="e.g. big-minds-lapaz" style="flex: 1; padding: 0.4rem 0.6rem; border: 1.5px solid #1E1B4B; border-radius: 6px; font-size: 0.75rem;" />
-                <button id="btn-quick-connect" type="button" class="btn btn-sm btn-primary">Connect</button>
-              </div>
-            </div>
-          </details>
-        `}
+        </div>
 
         <!-- Footer Actions -->
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; pt: 0.75rem; margin-top: 1rem; padding-top: 0.75rem;">
-          ${isConn ? `
-            <button id="btn-clear-cloud-config" type="button" class="btn btn-outline" style="font-size: 0.75rem; color: #DC2626; border-color: #DC2626; padding: 0.35rem 0.6rem;">
-              Disconnect Cloud
-            </button>
-          ` : `<span></span>`}
-          <button type="button" class="btn btn-secondary" style="font-size: 0.8rem;" onclick="closeModal()">
+        <div style="display: flex; justify-content: flex-end; border-top: 1px solid #E5E7EB; padding-top: 0.85rem;">
+          <button type="button" class="btn btn-secondary" style="font-size: 0.825rem;" onclick="closeModal()">
             Done
           </button>
         </div>
@@ -329,40 +308,29 @@ class FirebaseSyncController {
 
     overlay.classList.remove("hidden");
 
-    // Wire Modal Buttons
+    // Wire buttons
     document.getElementById("btn-force-pull")?.addEventListener("click", async () => {
+      const btn = document.getElementById("btn-force-pull");
+      if (btn) btn.textContent = "⏳ Syncing...";
       try {
         await this.pullPlan();
-        closeModal();
-        alert("✓ Latest project plan successfully pulled from cloud!");
+        if (typeof closeModal === "function") closeModal();
       } catch (e) {
-        alert("Failed to pull from cloud: " + e.message);
+        alert("Sync error: " + e.message);
+        if (btn) btn.textContent = "🔄 Sync Now (Pull Latest)";
       }
     });
 
     document.getElementById("btn-force-push")?.addEventListener("click", async () => {
+      const btn = document.getElementById("btn-force-push");
+      if (btn) btn.textContent = "⏳ Uploading...";
       try {
-        await this.pushPlan(window.planData);
-        closeModal();
-        alert("✓ Local project plan successfully pushed to cloud!");
+        const currentPlan = typeof window.getPlanData === "function" ? window.getPlanData() : window.planData;
+        await this.pushPlan(currentPlan);
+        if (typeof closeModal === "function") closeModal();
       } catch (e) {
-        alert("Failed to push to cloud: " + e.message);
-      }
-    });
-
-    document.getElementById("btn-trigger-sync")?.addEventListener("click", () => {
-      this.init();
-      closeModal();
-    });
-
-    document.getElementById("btn-clear-cloud-config")?.addEventListener("click", () => {
-      if (confirm("Disconnect cloud sync on this browser? Data will remain safely in your local browser cache.")) {
-        localStorage.removeItem(FIREBASE_CONFIG_STORAGE_KEY);
-        if (this.unsubscribeSnapshot) this.unsubscribeSnapshot();
-        this.db = null;
-        this.isInitialized = false;
-        this.updateBadge("local");
-        closeModal();
+        alert("Upload error: " + e.message);
+        if (btn) btn.textContent = "⬆️ Upload Local Plan to Cloud";
       }
     });
   }

@@ -6,7 +6,21 @@
 const STORAGE_KEY = "bigminds_service_project_plan_v1";
 
 // Global In-Memory State
-let planData = null;
+var planData = null;
+window.planData = null;
+
+// State accessors for multi-device sync
+window.getPlanData = function() {
+  return planData;
+};
+
+window.setPlanData = function(newData) {
+  planData = newData;
+  window.planData = newData;
+  if (typeof renderAll === "function") {
+    renderAll();
+  }
+};
 
 // Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
@@ -33,16 +47,19 @@ function loadPlanData() {
       planData = JSON.parse(JSON.stringify(INITIAL_PLANNER_DATA));
     }
   } else {
+    // Fresh device load: start with default template in memory without overwriting cloud
     planData = JSON.parse(JSON.stringify(INITIAL_PLANNER_DATA));
-    savePlanData();
   }
+  window.planData = planData;
 }
 
 function savePlanData() {
+  if (!planData) return;
   planData.projectMeta.lastUpdated = new Date().toISOString().split("T")[0];
+  window.planData = planData;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(planData));
 
-  // Sync to Firebase if configured & online, or show local indicator
+  // Sync to Firebase if configured, or show local indicator
   if (window.firebaseSync && window.firebaseSync.isConfigured()) {
     window.firebaseSync.pushPlan(planData);
   } else {
