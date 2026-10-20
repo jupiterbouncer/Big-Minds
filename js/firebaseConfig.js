@@ -9,9 +9,10 @@
 window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyAub5CXJIUR4OlV_HlhyPfgC3mx9VCBucQ",
   authDomain: "big-minds-3e686.firebaseapp.com",
-  databaseURL: "https://console.firebase.google.com/u/0/project/big-minds-3e686/database/big-minds-3e686-default-rtdb/data/~2F",
+  databaseURL: "https://big-minds-3e686-default-rtdb.firebaseio.com/",
   projectId: "big-minds-3e686",
   storageBucket: "big-minds-3e686.firebasestorage.app",
   messagingSenderId: "667333302269",
-  appId: "1:667333302269:web:1f02fd020774293da5eb94"
+  appId: "1:667333302269:web:1f02fd020774293da5eb94",
+  measurementId: "G-ZBQ7TJYSJY"
 };

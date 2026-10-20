@@ -1,6 +1,6 @@
 /**
- * Big Minds — Realtime Firebase Sync Handler
- * Supports cross-browser/device sync with live connection monitoring.
+ * Big Minds — Production Realtime Firebase Sync Engine
+ * Handles bi-directional synchronization, modal protection, and error diagnostics.
  */
 
 window.FirebaseSync = {
@@ -8,64 +8,75 @@ window.FirebaseSync = {
   isInitialized: false,
   isConnected: false,
   pendingRemoteData: null,
+  pushDebounceTimer: null,
 
   init() {
-    // Check for Firebase SDK and required databaseURL config
-    if (
-      typeof firebase === "undefined" ||
-      !window.FIREBASE_CONFIG ||
-      !window.FIREBASE_CONFIG.apiKey ||
-      !window.FIREBASE_CONFIG.databaseURL ||
-      window.FIREBASE_CONFIG.databaseURL.includes("YOUR_PROJECT_ID")
-    ) {
-      console.warn("⚠️ Firebase Realtime Database URL missing or default config detected. Running in LocalStorage mode.");
+    const config = window.FIREBASE_CONFIG;
+
+    if (typeof firebase === "undefined") {
+      console.warn("⚠️ Firebase SDK not loaded. Operating in LocalStorage mode.");
+      this.updateStatusUI("local", "🟠 Local Storage Only");
+      return;
+    }
+
+    if (!config || !config.apiKey || !config.databaseURL || config.apiKey.includes("YOUR_API_KEY")) {
+      console.warn("⚠️ Firebase Configuration incomplete or contains placeholders. Operating in LocalStorage mode.");
       this.updateStatusUI("local", "🟠 Local Storage Only");
       return;
     }
 
     try {
       if (!firebase.apps.length) {
-        firebase.initializeApp(window.FIREBASE_CONFIG);
+        firebase.initializeApp(config);
       }
       this.db = firebase.database();
       this.isInitialized = true;
 
-      // 1. Live Connection Monitor
+      // Monitor Realtime Connection State
       this.db.ref(".info/connected").on("value", (snap) => {
         if (snap.val() === true) {
           this.isConnected = true;
           this.updateStatusUI("connected", "🟢 Cloud Synced");
-          console.log("🔥 Connected to Firebase Realtime Database.");
+          console.log("🔥 Firebase Realtime Database connected successfully.");
         } else {
           this.isConnected = false;
           this.updateStatusUI("local", "🟠 Disconnected (Local Mode)");
         }
       });
 
-      // 2. Attach Listener for Remote Data
+      // Start Realtime Data Listener
       this.listenForRemoteUpdates();
 
     } catch (err) {
-      console.error("Firebase Sync Initialization Failed:", err);
-      this.updateStatusUI("error", "🔴 Cloud Sync Error");
+      console.error("💥 Firebase Initialization Error:", err);
+      this.updateStatusUI("error", "🔴 Cloud Init Error");
     }
   },
 
   syncToRemote(data) {
     if (!this.isInitialized || !this.db) return;
 
+    if (this.pushDebounceTimer) clearTimeout(this.pushDebounceTimer);
+
     this.updateStatusUI("syncing", "🟡 Syncing...");
 
-    this.db.ref("service_project_plan").set(data)
-      .then(() => {
-        if (this.isConnected) {
-          this.updateStatusUI("connected", "🟢 Cloud Synced");
-        }
-      })
-      .catch((err) => {
-        console.error("Firebase Remote Write Denied/Failed:", err);
-        this.updateStatusUI("error", "🔴 Permission / Sync Error");
-      });
+    this.pushDebounceTimer = setTimeout(() => {
+      this.db.ref("service_project_plan").set(data)
+        .then(() => {
+          if (this.isConnected) {
+            this.updateStatusUI("connected", "🟢 Cloud Synced");
+          }
+        })
+        .catch((err) => {
+          console.error("❌ Firebase Write Error:", err.message);
+          if (err.message && err.message.includes("PERMISSION_DENIED")) {
+            this.updateStatusUI("error", "🔴 RTDB Rules Locked");
+            console.error("👉 FIX: Go to Firebase Console -> Realtime Database -> Rules and set .read and .write to true for service_project_plan.");
+          } else {
+            this.updateStatusUI("error", "🔴 Sync Write Error");
+          }
+        });
+    }, 300);
   },
 
   listenForRemoteUpdates() {
@@ -75,12 +86,10 @@ window.FirebaseSync = {
       const remoteData = snapshot.val();
       if (!remoteData || typeof remoteData !== "object") return;
 
-      // Prevent overwriting if user is actively typing inside an open modal
       const modalOverlay = document.getElementById("planner-modal-overlay");
       const isModalOpen = modalOverlay && !modalOverlay.classList.contains("hidden");
 
       if (isModalOpen) {
-        // Queue data update until modal is closed
         this.pendingRemoteData = remoteData;
       } else if (typeof window.updatePlanDataFromRemote === "function") {
         window.updatePlanDataFromRemote(remoteData);
@@ -89,8 +98,13 @@ window.FirebaseSync = {
         }
       }
     }, (err) => {
-      console.error("Firebase Remote Listener Error:", err);
-      this.updateStatusUI("error", "🔴 Sync Read Error");
+      console.error("❌ Firebase Read Error:", err.message);
+      if (err.message && err.message.includes("PERMISSION_DENIED")) {
+        this.updateStatusUI("error", "🔴 RTDB Rules Locked");
+        console.error("👉 FIX: Go to Firebase Console -> Realtime Database -> Rules and enable .read/.write access.");
+      } else {
+        this.updateStatusUI("error", "🔴 Sync Read Error");
+      }
     });
   },
 
@@ -114,7 +128,6 @@ window.FirebaseSync = {
   }
 };
 
-// Initialize on DOM load
 document.addEventListener("DOMContentLoaded", () => {
   window.FirebaseSync.init();
 });

@@ -423,9 +423,9 @@ function openModal(title, contentHtml) {
 }
 
 function closeModal() {
-  document.getElementById("planner-modal-overlay").classList.add("hidden");
-  
-  // Apply any queued cloud updates that arrived while editing
+  const modal = document.getElementById("planner-modal-overlay");
+  if (modal) modal.classList.add("hidden");
+
   if (window.FirebaseSync && typeof window.FirebaseSync.applyPendingUpdate === "function") {
     window.FirebaseSync.applyPendingUpdate();
   }
