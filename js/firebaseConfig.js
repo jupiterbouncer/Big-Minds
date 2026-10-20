@@ -9,7 +9,7 @@
 window.DEFAULT_FIREBASE_CONFIG = {
   apiKey: "AIzaSyAub5CXJIUR4OlV_HlhyPfgC3mx9VCBucQ",
   authDomain: "big-minds-3e686.firebaseapp.com",
-  databaseURL: "https://big-minds-3e686-default-rtdb.firebaseio.com",
+  databaseURL: "https://console.firebase.google.com/u/0/project/big-minds-3e686/database/big-minds-3e686-default-rtdb/data/~2F",
   projectId: "big-minds-3e686",
   storageBucket: "big-minds-3e686.firebasestorage.app",
   messagingSenderId: "667333302269",
