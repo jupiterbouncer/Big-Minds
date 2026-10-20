@@ -555,3 +555,266 @@ body.planner-body {
   color: #991B1B;
   border-color: #EF4444;
 }
+
+/* ==========================================================================
+   BIG MINDS — SURVEYS, BADGES, CHARTS & PRINT CERTIFICATE STYLES
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BADGES & STUDENT PROFILE DRAWER
+   -------------------------------------------------------------------------- */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.badge-item {
+  background-color: #FFFFFF;
+  border: 2px solid #1E1B4B;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 2px 2px 0px #1E1B4B;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.badge-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0px #1E1B4B;
+}
+
+.badge-item.locked {
+  opacity: 0.5;
+  filter: grayscale(1);
+  background-color: #F3F4F6;
+  border-style: dashed;
+}
+
+.badge-icon {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.badge-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #1E1B4B;
+}
+
+/* --------------------------------------------------------------------------
+   2. SURVEY MODAL & EMOJI RATING SYSTEM
+   -------------------------------------------------------------------------- */
+.survey-card {
+  background: #FFFFFF;
+  border: 3px solid #1E1B4B;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 4px 4px 0px #1E1B4B;
+  margin-bottom: 16px;
+}
+
+.survey-question {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1E1B4B;
+  margin-bottom: 12px;
+}
+
+.emoji-rating-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.emoji-btn {
+  flex: 1;
+  background: #FDFBF7;
+  border: 2px solid #1E1B4B;
+  border-radius: 12px;
+  padding: 10px 4px;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 2px 2px 0px #1E1B4B;
+  transition: all 0.15s ease;
+}
+
+.emoji-btn:hover {
+  background: #FEF3C7;
+  transform: translateY(-2px);
+}
+
+.emoji-btn.selected {
+  background: #F59E0B;
+  color: #FFFFFF;
+  border-color: #1E1B4B;
+  box-shadow: 3px 3px 0px #1E1B4B;
+  transform: scale(1.05);
+}
+
+.emoji-btn .emoji {
+  font-size: 1.6rem;
+  display: block;
+}
+
+.emoji-btn .label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 4px;
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   3. SURVEY ANALYTICS CHARTS DASHBOARD
+   -------------------------------------------------------------------------- */
+.survey-analytics-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.chart-card {
+  background: #FFFFFF;
+  border: 3px solid #1E1B4B;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 4px 4px 0px #1E1B4B;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card h4 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  color: #1E1B4B;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-wrapper {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 240px;
+}
+
+/* --------------------------------------------------------------------------
+   4. PRINTABLE A4 EXPLORER CERTIFICATE
+   -------------------------------------------------------------------------- */
+.certificate-container {
+  background: #FFFDF9;
+  border: 6px double #1E1B4B;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 6px 6px 0px #1E1B4B;
+  position: relative;
+  margin: 0 auto;
+  max-width: 800px;
+}
+
+.certificate-header {
+  border-bottom: 2px solid #1E1B4B;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.certificate-header h2 {
+  font-size: 2rem;
+  text-transform: uppercase;
+  color: #1E1B4B;
+  letter-spacing: 1px;
+}
+
+.certificate-header p {
+  color: #D97706;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.certificate-student-name {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #1E1B4B;
+  text-decoration: underline;
+  margin: 16px 0;
+}
+
+.certificate-badges-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+
+.certificate-footer-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 40px;
+  border-top: 2px dashed #1E1B4B;
+  padding-top: 20px;
+}
+
+.signature-box {
+  text-align: center;
+  width: 220px;
+}
+
+.signature-line {
+  border-top: 2px solid #1E1B4B;
+  margin-top: 30px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   5. PRINT MEDIA FORMATTING (A4 LANDSCAPE/PORTRAIT CLEAN LAYOUT)
+   -------------------------------------------------------------------------- */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .planner-modal-overlay,
+  #certificate-modal-overlay,
+  #certificate-print-area,
+  #certificate-print-area * {
+    visibility: visible !important;
+  }
+
+  .planner-modal-overlay,
+  #certificate-modal-overlay {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #certificate-print-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 6px double #1E1B4B !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  .modal-actions,
+  .btn,
+  .planner-header,
+  .planner-tabs,
+  .planner-footer {
+    display: none !important;
+  }
+}

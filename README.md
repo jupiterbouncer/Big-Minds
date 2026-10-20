@@ -1,53 +1,69 @@
-# Big Minds — Interest & Pathway Exploration Platform
-## Leadership Seminar IV: Leadership as Service Project Integration
+# Big Minds — Interest Exploration & Service Project Planner
 
-Big Minds is an interactive learning and pathway discovery platform developed for Grade 5–6 students at Crown Prince Academy in Lapaz, Ghana.
-
-The project consists of two integrated components:
-1. **Student Discovery Explorer (`index.html`)**: An interactive 2D pathway map where students explore interests, complete micro-activities, and discover matching future archetypes.
-2. **Service Project Planner (`service-project.html`)**: A comprehensive facilitator dashboard created for the Ashesi team to plan, budget, execute, evaluate, and hand over the service project initiative.
+**Big Minds** is a child-friendly pathway exploration platform and service-project planning dashboard designed for Grade 5–6 students at Crown Prince Academy (Lapaz, Accra). Developed as part of Ashesi University’s Leadership Seminar IV, the platform combines interactive student career discovery with a robust facilitator management tool for project continuity, budget tracking, impact assessment, and school handover.
 
 ---
 
-### Key Features of the Service Project Planner
+## 🌟 Key Features
 
-1. **Mentorship Areas & Target Class Setup**:
-   * Editable configuration for 5 core workshops: Programming & Web, Graphic Design, Financial Literacy, Entrepreneurship, and Public Speaking.
-   * Target class tracking (~25 students default assumption for Crown Prince Academy).
-2. **Visit Schedule & Session Sequence**:
-   * 5-visit schedule tracking (Consultation, Tech & Design, Finance & Business, Public Speaking, Reflection & Handover).
-   * Supports dates, objectives, agenda, materials, and status progression (`Draft`, `Proposed`, `Confirmed`, `Completed`).
-3. **Lesson Plans & Team Responsibilities**:
-   * Complete structured workshop templates with objectives, relatable introductions, hands-on activities, required materials, and reflection questions.
-   * Team role assignment board with automated unassigned role warnings.
-4. **Budget & Resource Planning (GHS)**:
-   * Itemized budget calculator in Ghana Cedis (GHS) calculating line totals ($Qty \times UnitCost$) and grand totals.
-   * Priority flags for Essential vs. Optional spending.
-5. **Assessment, Sustainability & Handover**:
-   * Aggregate metric tracking for participation and pre/post skill awareness (no individual child personal data is collected).
-   * Handover checklist and optional Peer-Mentorship progression ladder.
-6. **Data Storage & Multi-Device Persistence**:
-   * **Local-First Reliability**: Instant client-side persistence using `localStorage` (`bigminds_service_project_plan_v1`), completely isolated from student explorer session state (`bigminds_student_session`).
-   * **Real-Time Cloud Sync (Firebase Firestore)**: Live synchronization across admin laptops and mobile devices with offline-first write caching.
-   * **One-Click JSON Export & Import**: Backup files for offline archival and version snapshots.
-   * **Print Stylesheet**: Generates clean formatted printouts for team meetings and school administration proposals.
+### 1. 🌐 Progressive Web App (PWA) & Offline Engine
+* **100% Offline Capability:** Operates seamlessly without active internet access using a Service Worker (`sw.js`) and Stale-While-Revalidate caching strategy.
+* **Classroom-Ready:** Students and facilitators can run pathway maps, quizzes, micro-activities, and survey logs in offline environments with spotty school Wi-Fi.
+* **Web App Manifest (`manifest.json`):** Allows installation on tablets, smartphones, and laptops as a standalone desktop/mobile app.
 
----
+### 2. 📊 Child-Friendly Pre/Post Surveys & Interactive Analytics
+* **Emoji Rating System:** 4-question interactive survey using child-friendly emoji scales (1–5 rating) to measure curiosity in tech, visual design confidence, budgeting literacy, and public speaking comfort.
+* **Chart.js Visual Analytics:** Tab 5 (*Outcome Assessment & Program Handover*) renders two live interactive charts:
+  * **Mentorship Interest Distribution (Pie Chart):** Breakdown of student engagement across Web Dev, Visual Design, Finance, Public Speaking, and Entrepreneurship.
+  * **Skill Confidence Growth (Bar Chart):** Direct comparison of baseline (Pre-Workshop) vs. final (Post-Workshop) skill growth.
+* **Dual-Layer Persistence:** Survey responses save locally to `localStorage` (`bigminds_survey_responses_v1`) and sync automatically to Firebase (`survey_responses/`) when online.
 
-### How to Run & Connect Across Devices
+### 3. 📜 Curiosity Badges & Printable A4 Explorer Certificate
+* **Dynamic Badges:** Earn digital badges (*Web Architect*, *Design Innovator*, *Money Smart*, *Public Speaker*, *Future Leader*) by completing pathway micro-activities and quizzes.
+* **A4 Print Layout:** One-click certificate generator with `@media print` CSS optimization that hides navigation controls and formats a clean, single-page landscape certificate complete with student alias, earned badges, date, and team signatures.
 
-1. Open `index.html` in any browser to access the Student Discovery Explorer.
-2. Click **📋 Facilitator Planner** in the top navigation bar (or navigate to `service-project.html`) to manage project planning.
-3. **To sync across multiple devices**:
-   * Click **☁️ Cloud Sync** in the top-right header of `service-project.html`.
-   * Paste your team's free Google Firebase configuration JSON (or configure `js/firebaseConfig.js`).
-   * Edits made on one device will automatically reflect in real-time across all team members' laptops and phones!
-4. Use the **Export Plan** button at any time to download an offline `.json` backup.
+### 4. 🔄 Real-Time Cross-Device Synchronization
+* **Firebase Realtime Database:** Bi-directional cloud synchronization across multiple facilitator devices using WebSockets.
+* **Live Status Badge:** Dynamic UI indicator in `service-project.html` displaying real-time connection state (`🟢 Cloud Synced`, `🟡 Syncing...`, `🟠 Disconnected / Local Mode`, `🔴 Error`).
+* **Modal Protection:** Queues remote incoming updates while a facilitator edits modal forms, preventing text collisions and input loss.
+
+### 5. 📋 5-Tab Service Project Planner
+1. **Strategic Overview:** Project background, rationale, SDG 4/8 alignment, and target demographics.
+2. **Implementation Schedule:** Interactive visit-by-visit milestone log and progress tracking.
+3. **Resource & Budget Manager:** Categorized itemized budget with automatic total calculations and variance indicators.
+4. **Curriculum Pathways:** Detailed lesson plans, micro-activities, and facilitation notes for all 5 visits.
+5. **Outcome Assessment & Handover:** Pre/post survey analytics, aggregate impact metrics, peer-mentorship progression ladder, and school handover checklist.
 
 ---
 
-### Outstanding Items for School Confirmation (Crown Prince Academy)
-* Final confirmed Grade 5 / Grade 6 classroom allocation and student list count.
-* Specific calendar visit dates and start/end time slots.
-* Availability of computer lab equipment or projector for Visit 2.
-* Confirmation of CPA Teacher Liaison for post-program club continuity.
+## 🛠️ Technology Stack
+
+* **Frontend:** Vanilla HTML5, CSS3 (Neo-Tactile Design System with bold borders, warm `#FDFBF7` palette, offset shadows `4px 4px 0px #1E1B4B`), ES6+ JavaScript.
+* **Database & Sync:** Firebase Realtime Database (Compatibility SDK v9.23.0).
+* **Analytics Engine:** Chart.js (v4 CDN with offline canvas fallback).
+* **PWA Engine:** HTML5 Service Worker API (`sw.js`) & Web App Manifest (`manifest.json`).
+* **Hosting:** Vercel Static Hosting.
+
+---
+
+## 📁 File Structure
+
+```text
+Big Minds/
+├── index.html               # Student 2D pathway exploration map
+├── quiz.html                # Interactive interest discovery quiz
+├── service-project.html     # Facilitator planner dashboard & analytics
+├── manifest.json            # PWA configuration manifest
+├── sw.js                    # PWA Service worker offline caching engine
+├── styles.css               # Neo-tactile design system, badge grids, charts & print rules
+├── favicon.svg              # Platform icon
+├── README.md                # Project documentation
+└── js/
+    ├── app.js               # Main application controller
+    ├── canvas.js            # 2D interactive pathway canvas renderer
+    ├── pathwaysData.js      # Curriculum pathways & activity dataset
+    ├── plannerData.js       # Service project initial state dataset
+    ├── firebaseConfig.js    # Client Firebase API credentials
+    ├── firebaseSync.js      # RTDB bi-directional cloud sync engine
+    ├── surveysAndBadges.js  # Pre/post surveys, badges, Chart.js & certificate generator
+    └── planner.js           # Planner UI tabs, modals, and event handling

@@ -229,51 +229,84 @@
     </div>
 
     <!-- TAB 5: ASSESSMENT & HANDOVER -->
-    <div id="tab-handover" class="tab-panel">
-      <div class="section-intro">
-        <h3>5. Outcome Assessment & Program Handover</h3>
-        <p>Track aggregate impact indicators and complete the handover checklist for long-term sustainability at Crown Prince Academy.</p>
+<div id="tab-handover" class="tab-panel">
+  <div class="section-intro">
+    <h3>5. Outcome Assessment & Program Handover</h3>
+    <p>Track aggregate impact indicators and complete the handover checklist for long-term sustainability at Crown Prince Academy.</p>
+  </div>
+
+  <div class="grid-2col">
+    <!-- Baseline & Outcome Indicators -->
+    <div class="neo-card">
+      <div class="card-header-flex">
+        <h4>📊 Aggregate Assessment Indicators</h4>
+        <button class="btn btn-sm btn-outline" id="btn-edit-assessment">✏️ Update Metrics</button>
+      </div>
+      <p class="text-muted text-sm">Stores aggregate counts only. No individual student data or personal details are collected.</p>
+      <div class="metrics-list" id="assessment-metrics-container">
+        <!-- Dynamically rendered indicators -->
+      </div>
+    </div>
+
+    <!-- Peer-Mentorship Model & Sustainability -->
+    <div class="neo-card">
+      <h4>🌱 Peer-Mentorship Progression Model</h4>
+      <p class="text-sm">Proposed long-term framework for student leadership continuity at Crown Prince Academy:</p>
+      
+      <div class="peer-ladder">
+        <div class="ladder-step"><strong>1. Ashesi Mentor</strong> ➔ Delivers initial interactive workshops</div>
+        <div class="ladder-step"><strong>2. CPA Student</strong> ➔ Participates in hands-on activities</div>
+        <div class="ladder-step"><strong>3. Experienced Student</strong> ➔ Masters micro-skills and digital tools</div>
+        <div class="ladder-step"><strong>4. Peer Supporter</strong> ➔ Assists younger Grade 5 students</div>
+        <div class="ladder-step"><strong>5. Sustainable Club</strong> ➔ School continues pathway activities</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pre/Post Survey Impact Analytics Card -->
+  <div class="neo-card margin-top-lg">
+    <div class="card-header-flex">
+      <h4>📊 Pre/Post Survey Impact Analytics</h4>
+      <div>
+        <button class="btn btn-sm btn-outline" id="btn-trigger-demo-pre">📝 Take Pre-Survey</button>
+        <button class="btn btn-sm btn-outline" id="btn-trigger-demo-post">📝 Take Post-Survey</button>
+        <button class="btn btn-sm btn-primary" id="btn-print-certificate-demo">📜 Preview Certificate</button>
+      </div>
+    </div>
+    <p class="text-sm text-muted margin-top-xs">
+      Real-time aggregate comparison of student interest distribution and skill confidence growth across mentorship visits.
+    </p>
+
+    <div class="survey-analytics-container">
+      <!-- Pie Chart: Interest Distribution -->
+      <div class="chart-card">
+        <h4>🎯 Mentorship Interest Distribution</h4>
+        <div class="chart-wrapper">
+          <canvas id="surveyPieChart"></canvas>
+        </div>
       </div>
 
-      <div class="grid-2col">
-        <!-- Baseline & Outcome Indicators -->
-        <div class="neo-card">
-          <div class="card-header-flex">
-            <h4>📊 Aggregate Assessment Indicators</h4>
-            <button class="btn btn-sm btn-outline" id="btn-edit-assessment">✏️ Update Metrics</button>
-          </div>
-          <p class="text-muted text-sm">Stores aggregate counts only. No individual student data or personal details are collected.</p>
-          <div class="metrics-list" id="assessment-metrics-container">
-            <!-- Dynamically rendered indicators -->
-          </div>
-        </div>
-
-        <!-- Peer-Mentorship Model & Sustainability -->
-        <div class="neo-card">
-          <h4>🌱 Peer-Mentorship Progression Model</h4>
-          <p class="text-sm">Proposed long-term framework for student leadership continuity at Crown Prince Academy:</p>
-          
-          <div class="peer-ladder">
-            <div class="ladder-step"><strong>1. Ashesi Mentor</strong> ➔ Delivers initial interactive workshops</div>
-            <div class="ladder-step"><strong>2. CPA Student</strong> ➔ Participates in hands-on activities</div>
-            <div class="ladder-step"><strong>3. Experienced Student</strong> ➔ Masters micro-skills and digital tools</div>
-            <div class="ladder-step"><strong>4. Peer Supporter</strong> ➔ Assists younger Grade 5 students</div>
-            <div class="ladder-step"><strong>5. Sustainable Club</strong> ➔ School continues pathway activities</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Handover Checklist Card -->
-      <div class="neo-card margin-top-lg">
-        <div class="card-header-flex">
-          <h4>📋 School Handover Checklist</h4>
-          <button class="btn btn-sm btn-outline" id="btn-edit-handover">✏️ Edit Handover Info</button>
-        </div>
-        <div class="checklist-grid" id="handover-checklist-container">
-          <!-- Dynamically populated -->
+      <!-- Bar Chart: Pre vs Post Skill Confidence -->
+      <div class="chart-card">
+        <h4>📈 Skill Confidence Growth (Pre vs Post)</h4>
+        <div class="chart-wrapper">
+          <canvas id="surveyBarChart"></canvas>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Handover Checklist Card -->
+  <div class="neo-card margin-top-lg">
+    <div class="card-header-flex">
+      <h4>📋 School Handover Checklist</h4>
+      <button class="btn btn-sm btn-outline" id="btn-edit-handover">✏️ Edit Handover Info</button>
+    </div>
+    <div class="checklist-grid" id="handover-checklist-container">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+</div>
 
   </main>
 
@@ -290,16 +323,29 @@
     </div>
   </div>
 
-    <!-- 1. Firebase Compatibility SDKs FIRST -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-    <!-- 2. Application Data & Config SECOND -->
-    <script src="js/plannerData.js"></script>
-    <script src="js/firebaseConfig.js"></script>
+  <!-- Chart.js CDN for Survey Visual Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- 3. Sync Engine & UI Logic LAST -->
-    <script src="js/firebaseSync.js"></script>
-    <script src="js/planner.js"></script>
+  <!-- Application Logic -->
+  <script src="js/plannerData.js"></script>
+  <script src="js/firebaseConfig.js"></script>
+  <script src="js/firebaseSync.js"></script>
+  <script src="js/surveysAndBadges.js"></script>
+  <script src="js/planner.js"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('⚡ PWA Service Worker registered:', reg.scope))
+          .catch((err) => console.warn('⚠️ Service Worker registration failed:', err));
+      });
+    }
+  </script>
   </body>
 </html>
