@@ -1,6 +1,6 @@
 /**
  * Big Minds — Production Realtime Firebase Sync Engine
- * Handles bi-directional synchronization, modal protection, and error diagnostics.
+ * Diagnostic edition with granular SDK & config validation.
  */
 
 window.FirebaseSync = {
@@ -13,17 +13,29 @@ window.FirebaseSync = {
   init() {
     const config = window.FIREBASE_CONFIG;
 
+    // 1. Check if core Firebase SDK loaded
     if (typeof firebase === "undefined") {
-      console.warn("⚠️ Firebase SDK not loaded. Operating in LocalStorage mode.");
+      console.warn("⚠️ Firebase Core SDK not loaded. Operating in LocalStorage mode.");
       this.updateStatusUI("local", "🟠 Local Storage Only");
       return;
     }
 
+    // 2. Check if Realtime Database SDK loaded
+    if (typeof firebase.database !== "function") {
+      console.error("❌ Firebase Database SDK missing. firebase-database-compat.js failed to load.");
+      this.updateStatusUI("error", "🔴 Database SDK Missing");
+      return;
+    }
+
+    // 3. Validate Configuration
     if (!config || !config.apiKey || !config.databaseURL || config.apiKey.includes("YOUR_API_KEY")) {
-      console.warn("⚠️ Firebase Configuration incomplete or contains placeholders. Operating in LocalStorage mode.");
+      console.warn("⚠️ Firebase Configuration incomplete. Operating in LocalStorage mode.");
       this.updateStatusUI("local", "🟠 Local Storage Only");
       return;
     }
+
+    // Sanitize databaseURL (strip whitespace)
+    config.databaseURL = String(config.databaseURL).trim();
 
     try {
       if (!firebase.apps.length) {
@@ -71,7 +83,6 @@ window.FirebaseSync = {
           console.error("❌ Firebase Write Error:", err.message);
           if (err.message && err.message.includes("PERMISSION_DENIED")) {
             this.updateStatusUI("error", "🔴 RTDB Rules Locked");
-            console.error("👉 FIX: Go to Firebase Console -> Realtime Database -> Rules and set .read and .write to true for service_project_plan.");
           } else {
             this.updateStatusUI("error", "🔴 Sync Write Error");
           }
@@ -101,7 +112,6 @@ window.FirebaseSync = {
       console.error("❌ Firebase Read Error:", err.message);
       if (err.message && err.message.includes("PERMISSION_DENIED")) {
         this.updateStatusUI("error", "🔴 RTDB Rules Locked");
-        console.error("👉 FIX: Go to Firebase Console -> Realtime Database -> Rules and enable .read/.write access.");
       } else {
         this.updateStatusUI("error", "🔴 Sync Read Error");
       }
