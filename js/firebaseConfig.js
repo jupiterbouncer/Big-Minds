@@ -6,7 +6,7 @@
  * the project; access control is enforced by Firestore Security Rules).
  */
 
-window.DEFAULT_FIREBASE_CONFIG = {
+window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyAub5CXJIUR4OlV_HlhyPfgC3mx9VCBucQ",
   authDomain: "big-minds-3e686.firebaseapp.com",
   databaseURL: "https://console.firebase.google.com/u/0/project/big-minds-3e686/database/big-minds-3e686-default-rtdb/data/~2F",
