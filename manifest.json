@@ -1,7 +1,7 @@
 {
   "name": "Big Minds — Exploration & Service Planner",
   "short_name": "Big Minds",
-  "description": "Child-friendly interest and pathway exploration platform for Grade 5–6 students at Crown Prince Academy.",
+  "description": "Child-friendly interest and pathway exploration platform for students at Golden Age International School.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FDFBF7",

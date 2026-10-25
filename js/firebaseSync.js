@@ -48,8 +48,8 @@ window.FirebaseSync = {
       this.db.ref(".info/connected").on("value", (snap) => {
         if (snap.val() === true) {
           this.isConnected = true;
-          this.updateStatusUI("connected", "🟢 Cloud Synced");
-          console.log("🔥 Firebase Realtime Database connected successfully.");
+          this.updateStatusUI("syncing", "🟡 Confirming cloud sync...");
+          console.log("🔥 Firebase Realtime Database connected; confirming listener access.");
         } else {
           this.isConnected = false;
           this.updateStatusUI("local", "🟠 Disconnected (Local Mode)");
@@ -95,6 +95,9 @@ window.FirebaseSync = {
 
     this.db.ref("service_project_plan").on("value", (snapshot) => {
       const remoteData = snapshot.val();
+      // Receiving this callback confirms that the active read listener is permitted,
+      // including for a currently empty remote plan.
+      if (this.isConnected) this.updateStatusUI("connected", "🟢 Cloud Synced");
       if (!remoteData || typeof remoteData !== "object") return;
 
       const modalOverlay = document.getElementById("planner-modal-overlay");
@@ -104,9 +107,6 @@ window.FirebaseSync = {
         this.pendingRemoteData = remoteData;
       } else if (typeof window.updatePlanDataFromRemote === "function") {
         window.updatePlanDataFromRemote(remoteData);
-        if (this.isConnected) {
-          this.updateStatusUI("connected", "🟢 Cloud Synced");
-        }
       }
     }, (err) => {
       console.error("❌ Firebase Read Error:", err.message);

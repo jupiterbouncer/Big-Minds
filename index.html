@@ -15,6 +15,7 @@
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="manifest" href="manifest.json" />
   
   <!-- Custom Neo-Tactile Styles -->
   <link rel="stylesheet" href="styles.css" />
@@ -34,9 +35,9 @@
           <div>
             <div class="flex items-center gap-1.5 md:gap-2">
               <h1 class="text-lg md:text-xl font-black tracking-tight text-slate-900">Big Minds</h1>
-              <span class="text-[9px] md:text-[10px] font-black uppercase bg-amber-300 text-slate-900 px-1.5 py-0.5 rounded border border-slate-900 sticker">Grade 5–6</span>
+              <span class="text-[9px] md:text-[10px] font-black uppercase bg-amber-300 text-slate-900 px-1.5 py-0.5 rounded border border-slate-900 sticker">Explorer</span>
             </div>
-            <p class="text-[11px] md:text-xs font-bold text-slate-500 truncate max-w-[220px] md:max-w-none">Crown Prince Academy • Pathway Explorer</p>
+            <p class="text-[11px] md:text-xs font-bold text-slate-500 truncate max-w-[220px] md:max-w-none">Golden Age International School • Pathway Explorer</p>
           </div>
         </div>
 
@@ -93,6 +94,9 @@
         <div id="interestBadges" class="flex flex-wrap gap-1.5 md:gap-2">
           <!-- Dynamically populated by app.js -->
         </div>
+        <div id="curiosityBadges" class="flex flex-wrap gap-1.5" aria-live="polite">
+          <!-- Earned and locked badges injected by app.js -->
+        </div>
       </div>
 
       <div class="flex items-center justify-between lg:justify-end gap-2 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-200">
@@ -144,7 +148,7 @@
 
   <!-- FOOTER -->
   <footer class="border-t border-slate-200 bg-white/60 px-4 py-2.5 text-center text-xs text-slate-500 font-semibold">
-    Big Minds Mentorship Project • Ashesi University Leadership IV • In Partnership with Crown Prince Academy, Lapaz
+    Big Minds • Golden Age International School • Pathway Explorer
   </footer>
 
   <!-- NODE DISCOVERY DRAWER -->
@@ -229,5 +233,10 @@
   <script src="js/pathwaysData.js"></script>
   <script src="js/canvas.js"></script>
   <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch((err) => console.warn('Service worker registration failed:', err)));
+    }
+  </script>
 </body>
 </html>

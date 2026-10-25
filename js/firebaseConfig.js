@@ -1,6 +1,6 @@
 /**
  * Big Minds — Firebase Cloud Configuration
- * Leadership IV Service Project: Crown Prince Academy
+ * Big Minds cloud configuration
  *
  * Firebase Web API keys are designed to be public (they identify
  * the project; access control is enforced by Firestore Security Rules).

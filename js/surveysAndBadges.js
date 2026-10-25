@@ -29,6 +29,7 @@ window.SurveysAndBadges = {
 
   init() {
     this.ensureStudentSession();
+    this.removeLegacySurveyAliases();
     this.setupEventListeners();
     this.renderAnalyticsCharts();
   },
@@ -37,24 +38,35 @@ window.SurveysAndBadges = {
      STUDENT SESSION & ANONYMOUS ALIAS
      ========================================================================== */
   ensureStudentSession() {
-    let session = localStorage.getItem(SESSION_KEY);
-    if (!session) {
+    let session;
+    try {
+      session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+    } catch (err) {
+      session = null;
+    }
+    if (!session || typeof session !== "object") {
       const randomNum = Math.floor(100 + Math.random() * 900);
       const prefixes = ["Explorer", "Coder", "Designer", "Innovator", "Scholar"];
       const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-      
-      session = JSON.stringify({
+      session = {
         alias: `${prefix} ${randomNum}`,
-        unlockedBadges: ["web-architect", "design-innovator"], // Default starter badges
+        unlockedBadges: [],
         createdDate: new Date().toISOString()
-      });
-      localStorage.setItem(SESSION_KEY, session);
+      };
     }
-    return JSON.parse(session);
+    if (!session.alias) {
+      const randomNum = Math.floor(100 + Math.random() * 900);
+      session.alias = `Explorer ${randomNum}`;
+    }
+    if (!Array.isArray(session.unlockedBadges)) session.unlockedBadges = [];
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    return session;
   },
 
   getStudentData() {
-    return JSON.parse(localStorage.getItem(SESSION_KEY)) || this.ensureStudentSession();
+    const student = JSON.parse(localStorage.getItem(SESSION_KEY)) || this.ensureStudentSession();
+    if (!Array.isArray(student.unlockedBadges)) student.unlockedBadges = [];
+    return student;
   },
 
   unlockBadge(badgeId) {
@@ -62,6 +74,23 @@ window.SurveysAndBadges = {
     if (!student.unlockedBadges.includes(badgeId)) {
       student.unlockedBadges.push(badgeId);
       localStorage.setItem(SESSION_KEY, JSON.stringify(student));
+    }
+  },
+
+  removeLegacySurveyAliases() {
+    try {
+      const surveys = JSON.parse(localStorage.getItem(SURVEY_STORAGE_KEY) || "[]");
+      if (!Array.isArray(surveys)) return;
+      const sanitized = surveys.map(({ id, type, answers, interests, timestamp }) => ({
+        id,
+        type,
+        answers,
+        interests: Array.isArray(interests) ? interests : [],
+        timestamp
+      }));
+      localStorage.setItem(SURVEY_STORAGE_KEY, JSON.stringify(sanitized));
+    } catch (err) {
+      console.warn("Unable to sanitize locally stored survey data", err);
     }
   },
 
@@ -139,14 +168,25 @@ window.SurveysAndBadges = {
   },
 
   saveSurveyResponse(type, answers) {
-    const student = this.getStudentData();
     const surveyData = JSON.parse(localStorage.getItem(SURVEY_STORAGE_KEY) || "[]");
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || "{}");
+    const interestMap = {
+      "Technology": ["Programming and Web"],
+      "AI & Data": ["Programming and Web"],
+      "Art & Design": ["Graphic Design"],
+      "Business": ["Financial Literacy", "Entrepreneurship"],
+      "Leadership": ["Public Speaking", "Entrepreneurship"]
+    };
+    const interestAreas = ["Programming and Web", "Graphic Design", "Financial Literacy", "Public Speaking", "Entrepreneurship"];
+    const interests = Array.from(new Set((Array.isArray(session.activeInterests) ? session.activeInterests : [])
+      .flatMap((interest) => interestMap[interest] || [interest])
+      .filter((interest) => interestAreas.includes(interest))));
 
     const newResponse = {
       id: "srv-" + Date.now(),
-      studentAlias: student.alias,
       type: type, // 'pre' or 'post'
       answers: answers,
+      interests,
       timestamp: new Date().toISOString()
     };
 
@@ -180,7 +220,7 @@ window.SurveysAndBadges = {
       <div id="certificate-print-area" class="certificate-container">
         <div class="certificate-header">
           <h2>Certificate of Exploration</h2>
-          <p>Crown Prince Academy — Big Minds Mentorship Program</p>
+          <p>Golden Age International School — Big Minds Programme</p>
         </div>
         <p>This is to certify that</p>
         <div class="certificate-student-name">${student.alias}</div>
@@ -194,8 +234,8 @@ window.SurveysAndBadges = {
             <div class="signature-line">Date of Award</div>
           </div>
           <div class="signature-box">
-            <p><strong>Ashesi Facilitators</strong></p>
-            <div class="signature-line">Leadership Seminar IV Team</div>
+            <p><strong>Big Minds Facilitators</strong></p>
+            <div class="signature-line">Programme Team</div>
           </div>
         </div>
       </div>
@@ -218,13 +258,12 @@ window.SurveysAndBadges = {
 
     const rawSurveys = JSON.parse(localStorage.getItem(SURVEY_STORAGE_KEY) || "[]");
 
-    // Fallback seed data if no surveys taken yet
     const preSurveys = rawSurveys.filter(s => s.type === "pre");
     const postSurveys = rawSurveys.filter(s => s.type === "post");
 
     // Calculate Averages for Bar Chart
     const getAvg = (list, qKey) => {
-      if (!list.length) return 2.5; // Default baseline
+      if (!list.length) return 0;
       const sum = list.reduce((acc, curr) => acc + (curr.answers[qKey] || 0), 0);
       return (sum / list.length).toFixed(1);
     };
@@ -237,11 +276,22 @@ window.SurveysAndBadges = {
     ];
 
     const postScores = [
-      getAvg(postSurveys, "q_tech") || 4.2,
-      getAvg(postSurveys, "q_design") || 4.5,
-      getAvg(postSurveys, "q_finance") || 3.9,
-      getAvg(postSurveys, "q_speaking") || 4.1
+      getAvg(postSurveys, "q_tech"),
+      getAvg(postSurveys, "q_design"),
+      getAvg(postSurveys, "q_finance"),
+      getAvg(postSurveys, "q_speaking")
     ];
+
+    const interestAreas = ["Programming and Web", "Graphic Design", "Financial Literacy", "Public Speaking", "Entrepreneurship"];
+    const legacyInterestMap = {
+      "Technology": ["Programming and Web"], "AI & Data": ["Programming and Web"],
+      "Art & Design": ["Graphic Design"], "Business": ["Financial Literacy", "Entrepreneurship"],
+      "Leadership": ["Public Speaking", "Entrepreneurship"]
+    };
+    const interestCounts = interestAreas.map(area => rawSurveys.reduce((count, survey) => {
+      const normalized = (Array.isArray(survey.interests) ? survey.interests : []).flatMap((interest) => legacyInterestMap[interest] || [interest]);
+      return count + (normalized.includes(area) ? 1 : 0);
+    }, 0));
 
     // Render Pie Chart (Interest Distribution)
     if (typeof Chart !== "undefined") {
@@ -251,7 +301,7 @@ window.SurveysAndBadges = {
         data: {
           labels: ["Web Dev", "Visual Design", "Finance", "Public Speaking", "Entrepreneurship"],
           datasets: [{
-            data: [30, 25, 20, 15, 10],
+            data: interestCounts,
             backgroundColor: ["#10B981", "#F59E0B", "#3B82F6", "#EC4899", "#8B5CF6"],
             borderWidth: 2,
             borderColor: "#1E1B4B"
@@ -260,7 +310,8 @@ window.SurveysAndBadges = {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { position: "bottom" } }
+          plugins: { legend: { position: "bottom" } },
+          accessibility: { description: "Aggregate interest selections from submitted surveys." }
         }
       });
 
@@ -291,9 +342,10 @@ window.SurveysAndBadges = {
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: { min: 1, max: 5, ticks: { stepSize: 1 } }
+            y: { min: 0, max: 5, ticks: { stepSize: 1 } }
           },
-          plugins: { legend: { position: "bottom" } }
+          plugins: { legend: { position: "bottom" } },
+          accessibility: { description: "Aggregate pre- and post-survey confidence scores on a scale from zero to five." }
         }
       });
     } else {

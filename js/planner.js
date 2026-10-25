@@ -25,6 +25,7 @@ function loadPlanData() {
   if (saved) {
     try {
       window.planData = JSON.parse(saved);
+      migrateLegacyDefaults(window.planData);
     } catch (e) {
       console.error("Error parsing saved plan data, reverting to defaults:", e);
       window.planData = JSON.parse(JSON.stringify(INITIAL_PLANNER_DATA));
@@ -32,6 +33,44 @@ function loadPlanData() {
   } else {
     window.planData = JSON.parse(JSON.stringify(INITIAL_PLANNER_DATA));
     savePlanData(false);
+  }
+}
+
+// Update only legacy template values so existing user-entered planning details are retained.
+function migrateLegacyDefaults(data) {
+  if (!data || typeof data !== "object") return;
+  if (data.projectMeta?.schoolName === "Crown Prince Academy") {
+    data.projectMeta.schoolName = "Golden Age International School";
+  }
+  if (data.targetClass?.targetGrade === "Grade 5 / Grade 6 (To Be Confirmed)") {
+    data.targetClass.targetGrade = "To Be Confirmed";
+  }
+  if (data.targetClass?.classIdentifier === "Provisional - Section A") data.targetClass.classIdentifier = "";
+  if (data.targetClass?.expectedStudents === 25) data.targetClass.expectedStudents = 0;
+  if (data.targetClass?.needsAssessmentNotes?.includes("typical CPA class sizes")) {
+    data.targetClass.needsAssessmentNotes = "Learner group, attendance, and schedule are to be confirmed with the school before delivery.";
+  }
+  (data.teamRoles || []).forEach((role) => {
+    if (role.title === "Crown Prince Academy Liaison") role.title = "School Liaison";
+  });
+  (data.visitSchedule || []).forEach((visit) => {
+    if (typeof visit.location === "string" && visit.location.startsWith("CPA ")) visit.location = "To be confirmed with the school";
+    if (typeof visit.notes === "string" && visit.notes.includes("CPA headteacher")) visit.notes = "Awaiting a confirmed meeting date with the school.";
+    if (typeof visit.activitiesAgenda === "string") {
+      visit.activitiesAgenda = visit.activitiesAgenda
+        .replace("Introduce Ashesi team & project scope.", "Introduce the programme scope.")
+        .replace("Review Grade 5/6 curriculum needs with teachers.", "Review learner needs with teachers.")
+        .replace("Official handover of Big Minds starter guide to CPA liaison teacher.", "Proposed handover of the Big Minds starter guide to a school liaison.");
+    }
+  });
+  (data.budgetItems || []).forEach((item) => {
+    if (item.description === "Transport to Crown Prince Academy (Lapaz) - 5 visits") item.description = "Transport for proposed school visits";
+  });
+  (data.handoverChecklist || []).forEach((item) => {
+    if (item.task === "Confirm CPA Teacher Representative for program continuation") item.task = "Confirm a school representative for programme continuation";
+  });
+  if (data.sustainability?.recommendations?.includes("Grade 6 peer leaders")) {
+    data.sustainability.recommendations = "1. Consider a recurring student curiosity club using the Big Minds digital map.\n2. Consider peer-support arrangements once the learner group is confirmed.";
   }
 }
 
@@ -59,7 +98,7 @@ function showSaveIndicator() {
   const badge = document.getElementById("save-indicator");
   if (badge) {
     badge.classList.add("saved-pulse");
-    badge.textContent = "✓ Saved";
+    if (!window.FirebaseSync?.isConnected) badge.textContent = "✓ Saved locally";
     setTimeout(() => badge.classList.remove("saved-pulse"), 1500);
   }
 }
@@ -132,6 +171,13 @@ function setupActionButtons() {
   document.getElementById("btn-add-expense")?.addEventListener("click", () => editExpenseModal(null));
   document.getElementById("btn-edit-assessment")?.addEventListener("click", editAssessmentModal);
   document.getElementById("btn-edit-handover")?.addEventListener("click", editHandoverModal);
+  document.getElementById("btn-cloud-sync")?.addEventListener("click", () => {
+    if (window.FirebaseSync?.isInitialized && window.FirebaseSync.db) {
+      savePlanData(true);
+    } else {
+      alert("Cloud sync is not available. Your plan is saved locally in this browser.");
+    }
+  });
 }
 
 /* ==========================================================================
@@ -156,7 +202,8 @@ function renderOverviewHeader() {
   document.getElementById("project-status-label").textContent = m.status;
   document.getElementById("stat-school-name").textContent = m.schoolName;
   document.getElementById("stat-target-class").textContent = window.planData.targetClass.targetGrade;
-  document.getElementById("stat-student-count").textContent = `Est. ~${window.planData.targetClass.expectedStudents} Students`;
+  const expectedStudents = window.planData.targetClass.expectedStudents;
+  document.getElementById("stat-student-count").textContent = expectedStudents > 0 ? `Est. ~${expectedStudents} Students` : "Student count to be confirmed";
 
   const totalVisits = window.planData.visitSchedule.length;
   const confirmedVisits = window.planData.visitSchedule.filter(v => v.status === "Confirmed" || v.status === "Completed").length;
@@ -180,9 +227,9 @@ function renderTargetClass() {
   const container = document.getElementById("target-class-display");
   if (!container) return;
   container.innerHTML = `
-    <div class="detail-row"><strong>Target Grade:</strong> <span>${escapeHtml(tc.targetGrade)}</span></div>
-    <div class="detail-row"><strong>Class Identifier:</strong> <span>${escapeHtml(tc.classIdentifier || "Not specified")}</span></div>
-    <div class="detail-row"><strong>Expected Students:</strong> <span>~${tc.expectedStudents} students</span></div>
+    <div class="detail-row"><strong>Learner Group:</strong> <span>${escapeHtml(tc.targetGrade)}</span></div>
+    <div class="detail-row"><strong>Group Identifier:</strong> <span>${escapeHtml(tc.classIdentifier || "Not specified")}</span></div>
+    <div class="detail-row"><strong>Expected Students:</strong> <span>${tc.expectedStudents > 0 ? `~${tc.expectedStudents} students` : "To be confirmed"}</span></div>
     <div class="detail-row"><strong>Confirmed Students:</strong> <span>${tc.confirmedStudents > 0 ? tc.confirmedStudents : "Awaiting Confirmation"}</span></div>
     <div class="detail-row"><strong>School Approval Status:</strong> <span class="badge badge-info">${escapeHtml(tc.approvalStatus)}</span></div>
     <div class="detail-row margin-top-sm"><strong>Needs-Assessment Notes:</strong><p class="text-sm text-muted">${escapeHtml(tc.needsAssessmentNotes)}</p></div>
@@ -253,7 +300,7 @@ function renderVisits() {
       <div class="visit-meta-grid text-sm margin-top-sm">
         <div><strong>Date:</strong> ${escapeHtml(visit.proposedDate || "Unscheduled")}</div>
         <div><strong>Time:</strong> ${escapeHtml(visit.startTime ? `${visit.startTime} -${visit.endTime}` : "TBC")}</div>
-        <div><strong>Location:</strong> ${escapeHtml(visit.location || "CPA Classroom")}</div>
+        <div><strong>Location:</strong> ${escapeHtml(visit.location || "To be confirmed with the school")}</div>
         <div><strong>Lead Facilitator:</strong> ${escapeHtml(visit.leadFacilitator || "Unassigned")}</div>
       </div>
       <div class="visit-body margin-top-sm text-sm">
@@ -472,16 +519,11 @@ window.editTargetClassModal = function() {
   const html = `
     <form id="form-edit-target-class">
       <div class="form-group">
-        <label>Target Grade</label>
-        <select id="tc-grade" class="form-control">
-          <option value="Grade 5" ${tc.targetGrade === 'Grade 5' ? 'selected' : ''}>Grade 5</option>
-          <option value="Grade 6" ${tc.targetGrade === 'Grade 6' ? 'selected' : ''}>Grade 6</option>
-          <option value="Grade 5 & 6 (Combined)" ${tc.targetGrade.includes('Combined') ? 'selected' : ''}>Grade 5 & 6 (Combined)</option>
-          <option value="Grade 5 / Grade 6 (To Be Confirmed)" ${tc.targetGrade.includes('To Be Confirmed') ? 'selected' : ''}>Grade 5 / Grade 6 (To Be Confirmed)</option>
-        </select>
+        <label>Learner Group</label>
+        <input type="text" id="tc-grade" class="form-control" value="${escapeHtml(tc.targetGrade)}" placeholder="To be confirmed">
       </div>
       <div class="form-group">
-        <label>Class Identifier / Section</label>
+        <label>Group Identifier / Section</label>
         <input type="text" id="tc-identifier" class="form-control" value="${escapeHtml(tc.classIdentifier)}">
       </div>
       <div class="form-group">
@@ -505,7 +547,7 @@ window.editTargetClassModal = function() {
       </div>
     </form>
   `;
-  openModal("Configure Target Class", html);
+  openModal("Configure Learner Group", html);
 
   document.getElementById("form-edit-target-class").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -621,7 +663,7 @@ window.editVisitModal = function(visitId) {
     proposedDate: "",
     startTime: "",
     endTime: "",
-    location: "CPA Classroom",
+    location: "To be confirmed with the school",
     mainObjective: "",
     activitiesAgenda: "",
     leadFacilitator: "",
@@ -986,7 +1028,7 @@ window.editHandoverModal = function() {
         <input type="date" id="sus-date" class="form-control" value="${s.targetHandoverDate}">
       </div>
       <div class="form-group">
-        <label>CPA Teacher Liaison</label>
+        <label>School Liaison</label>
         <input type="text" id="sus-teacher" class="form-control" value="${escapeHtml(s.cpaTeacherLiaison)}">
       </div>
       <div class="form-group">

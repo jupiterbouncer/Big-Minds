@@ -1,23 +1,23 @@
 /**
  * Big Minds — Service Project Planner Initial Data State
- * Leadership Seminar IV: Leadership as Service
+ * Proposed programme plan defaults
  */
 
 const INITIAL_PLANNER_DATA = {
   projectMeta: {
     status: "Draft — Awaiting School Confirmation",
-    schoolName: "Crown Prince Academy",
-    location: "Lapaz, Ghana",
+    schoolName: "Golden Age International School",
+    location: "",
     lastUpdated: new Date().toISOString().split('T')[0]
   },
 
   targetClass: {
-    targetGrade: "Grade 5 / Grade 6 (To Be Confirmed)",
-    classIdentifier: "Provisional - Section A",
-    expectedStudents: 25,
+    targetGrade: "To Be Confirmed",
+    classIdentifier: "",
+    expectedStudents: 0,
     confirmedStudents: 0,
     approvalStatus: "Draft - Pending School Consultation",
-    needsAssessmentNotes: "Initial assumption based on typical CPA class sizes (20–30 students). Final class allocation and schedule to be confirmed during Visit 1 with Crown Prince Academy management."
+    needsAssessmentNotes: "Learner group, attendance, and schedule are to be confirmed with the school before delivery."
   },
 
   mentorshipAreas: [
@@ -96,16 +96,16 @@ const INITIAL_PLANNER_DATA = {
       proposedDate: "",
       startTime: "",
       endTime: "",
-      location: "CPA Administration Office / Staff Room",
-      mainObjective: "Engage school leadership, confirm target class, conduct needs assessment, and establish baseline.",
-      activitiesAgenda: "1. Introduce Ashesi team & project scope.\n2. Review Grade 5/6 curriculum needs with teachers.\n3. Administer baseline curiosity & interest survey.\n4. Finalize session calendar.",
-      relatedAreas: ["Target Class Assessment"],
+      location: "To be confirmed with the school",
+      mainObjective: "Meet school leadership, confirm the learner group, conduct a needs assessment, and establish a baseline.",
+      activitiesAgenda: "1. Introduce the programme scope.\n2. Review learner needs with teachers.\n3. Administer an aggregate baseline curiosity survey.\n4. Agree a provisional session calendar.",
+      relatedAreas: ["Learner Group Assessment"],
       leadFacilitator: "",
       supportingMembers: "",
       requiredMaterials: "Printed proposal, baseline survey forms, notebook.",
       expectedOutputs: "Confirmed student count, approved visit schedule, teacher feedback.",
       status: "Draft",
-      notes: "Awaiting confirmed meeting date with CPA headteacher."
+      notes: "Awaiting a confirmed meeting date with the school."
     },
     {
       id: "visit-2",
@@ -114,7 +114,7 @@ const INITIAL_PLANNER_DATA = {
       proposedDate: "",
       startTime: "",
       endTime: "",
-      location: "CPA Computer Lab / Classroom",
+      location: "To be confirmed with the school",
       mainObjective: "Deliver introductory Programming & Web logic alongside Graphic Design principles.",
       activitiesAgenda: "1. Icebreaker & Big Minds digital map demo.\n2. Interactive Web coding activity.\n3. Poster layout & visual design task.\n4. Group showcase.",
       relatedAreas: ["Programming and Web", "Graphic Design"],
@@ -132,7 +132,7 @@ const INITIAL_PLANNER_DATA = {
       proposedDate: "",
       startTime: "",
       endTime: "",
-      location: "CPA Classroom",
+      location: "To be confirmed with the school",
       mainObjective: "Engage students in practical budgeting, savings goals, and mini business concepts.",
       activitiesAgenda: "1. Money story discussion.\n2. Needs vs Wants budget simulation game.\n3. Mini-business idea pitching in small groups.\n4. Cost/profit activity.",
       relatedAreas: ["Financial Literacy", "Entrepreneurship"],
@@ -150,7 +150,7 @@ const INITIAL_PLANNER_DATA = {
       proposedDate: "",
       startTime: "",
       endTime: "",
-      location: "CPA Assembly Hall / Main Classroom",
+      location: "To be confirmed with the school",
       mainObjective: "Develop communication skills and enable students to present their work confidently.",
       activitiesAgenda: "1. Public speaking tips & vocal warmups.\n2. 1-minute presentation preparation.\n3. Peer presentations of earlier designs/business ideas.\n4. Peer feedback & encouragement.",
       relatedAreas: ["Public Speaking"],
@@ -168,9 +168,9 @@ const INITIAL_PLANNER_DATA = {
       proposedDate: "",
       startTime: "",
       endTime: "",
-      location: "CPA Classroom",
+      location: "To be confirmed with the school",
       mainObjective: "Conduct final outcome assessment, celebrate student growth, and hand over reusable resources to teachers.",
-      activitiesAgenda: "1. Post-program student feedback survey.\n2. Pathway reflection session.\n3. Presentation of student participation certificates.\n4. Official handover of Big Minds starter guide to CPA liaison teacher.",
+      activitiesAgenda: "1. Post-program aggregate feedback survey.\n2. Pathway reflection session.\n3. Presentation of student participation certificates.\n4. Proposed handover of the Big Minds starter guide to a school liaison.",
       relatedAreas: ["All Mentorship Areas"],
       leadFacilitator: "",
       supportingMembers: "",
@@ -246,7 +246,7 @@ const INITIAL_PLANNER_DATA = {
 
   teamRoles: [
     { id: "role-1", title: "Overall Project Coordinator", assignedTo: "", status: "Unassigned" },
-    { id: "role-2", title: "Crown Prince Academy Liaison", assignedTo: "", status: "Unassigned" },
+    { id: "role-2", title: "School Liaison", assignedTo: "", status: "Unassigned" },
     { id: "role-3", title: "Lead Facilitator: Programming & Web", assignedTo: "", status: "Unassigned" },
     { id: "role-4", title: "Lead Facilitator: Graphic Design", assignedTo: "", status: "Unassigned" },
     { id: "role-5", title: "Lead Facilitator: Financial Literacy", assignedTo: "", status: "Unassigned" },
@@ -261,7 +261,7 @@ const INITIAL_PLANNER_DATA = {
   budgetItems: [
     {
       id: "bg-1",
-      description: "Transport to Crown Prince Academy (Lapaz) - 5 visits",
+      description: "Transport for proposed school visits",
       category: "Transportation",
       quantity: 5,
       unitCostGHS: 0,
@@ -279,7 +279,7 @@ const INITIAL_PLANNER_DATA = {
       essential: true,
       source: "Local printing shop rate",
       status: "Estimated",
-      notes: "Worksheets for ~25 students across 5 visits."
+      notes: "Quantity to be confirmed after learner-group and visit planning."
     },
     {
       id: "bg-3",
@@ -333,7 +333,7 @@ const INITIAL_PLANNER_DATA = {
     { id: "hk-1", task: "Compile reusable lesson plans & activity guides", completed: false, notes: "Ready in digital planner" },
     { id: "hk-2", task: "Inventory required physical materials & supplier list", completed: false, notes: "" },
     { id: "hk-3", task: "Prepare teacher facilitator reference guide", completed: false, notes: "" },
-    { id: "hk-4", task: "Confirm CPA Teacher Representative for program continuation", completed: false, notes: "To confirm on Visit 1" },
+    { id: "hk-4", task: "Confirm a school representative for programme continuation", completed: false, notes: "To confirm during initial consultation" },
     { id: "hk-5", task: "Deliver certificate bundle & printed starter package", completed: false, notes: "Scheduled for Visit 5" }
   ],
 
@@ -341,6 +341,6 @@ const INITIAL_PLANNER_DATA = {
     targetHandoverDate: "",
     handoverStatus: "In Progress",
     cpaTeacherLiaison: "To Be Confirmed",
-    recommendations: "1. Establish a bi-weekly student curiosity club using Big Minds digital map.\n2. Encourage Grade 6 peer leaders to assist Grade 5 students."
+    recommendations: "1. Consider a recurring student curiosity club using the Big Minds digital map.\n2. Consider peer-support arrangements once the learner group is confirmed."
   }
 };

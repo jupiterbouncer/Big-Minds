@@ -3,7 +3,7 @@
  * Offline Caching & Stale-While-Revalidate Engine
  */
 
-const CACHE_NAME = 'bigminds-cache-v2';
+const CACHE_NAME = 'bigminds-cache-v3';
 
 const STATIC_ASSETS = [
   './',
@@ -20,10 +20,7 @@ const STATIC_ASSETS = [
   './js/firebaseConfig.js',
   './js/firebaseSync.js',
   './js/planner.js',
-  './js/surveysAndBadges.js',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js'
+  './js/surveysAndBadges.js'
 ];
 
 // 1. Install Event — Pre-cache Static Assets

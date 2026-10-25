@@ -6,6 +6,7 @@
   <title>Big Minds — Service Project Planner</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.json">
 </head>
 <body class="planner-body">
 
@@ -14,8 +15,8 @@
     <div class="planner-header-container">
       <div class="brand-group">
         <a href="index.html" class="back-link">← Student Explorer</a>
-        <h1 class="planner-title">Big Minds <span>Service Project Planner</span></h1>
-        <p class="planner-subtitle">Leadership Seminar IV: Leadership as Service | Crown Prince Academy, Lapaz</p>
+        <h1 class="planner-title">Big Minds <span>Programme Planner</span></h1>
+        <p class="planner-subtitle">Golden Age International School • Proposed programme plan</p>
       </div>
 
       <div class="header-actions">
@@ -44,13 +45,13 @@
       <div class="status-stats-grid">
         <div class="stat-card">
           <span class="stat-label">Target School</span>
-          <strong class="stat-value" id="stat-school-name">Crown Prince Academy</strong>
-          <span class="stat-sub">Lapaz, Ghana</span>
+          <strong class="stat-value" id="stat-school-name">Golden Age International School</strong>
+          <span class="stat-sub">Proposed partner school</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Target Class</span>
-          <strong class="stat-value" id="stat-target-class">Grade 5 / 6 (TBC)</strong>
-          <span class="stat-sub" id="stat-student-count">Est. ~25 Students</span>
+          <span class="stat-label">Learner Group</span>
+          <strong class="stat-value" id="stat-target-class">To be confirmed</strong>
+          <span class="stat-sub" id="stat-student-count">Student count to be confirmed</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Visits Planned</span>
@@ -72,26 +73,26 @@
 
     <!-- SECTION NAVIGATION TABS -->
     <nav class="planner-tabs">
-      <button class="tab-btn active" data-tab="tab-areas">1. Areas & Target Class</button>
+      <button class="tab-btn active" data-tab="tab-areas">1. Areas & Learner Group</button>
       <button class="tab-btn" data-tab="tab-schedule">2. Visit Schedule</button>
       <button class="tab-btn" data-tab="tab-workshops">3. Workshops & Team</button>
       <button class="tab-btn" data-tab="tab-budget">4. Budget (GHS)</button>
       <button class="tab-btn" data-tab="tab-handover">5. Assessment & Handover</button>
     </nav>
 
-    <!-- TAB 1: MENTORSHIP AREAS & TARGET CLASS -->
+    <!-- TAB 1: MENTORSHIP AREAS & LEARNER GROUP -->
     <div id="tab-areas" class="tab-panel active">
       <div class="section-intro">
-        <h3>1. Mentorship Areas & Target Class Setup</h3>
-        <p>Define the core workshop topics aligned with student needs and configure target class details for Crown Prince Academy.</p>
+        <h3>1. Mentorship Areas & Learner Group Setup</h3>
+        <p>Define proposed workshop topics and record learner-group details once they are confirmed with Golden Age International School.</p>
       </div>
 
       <div class="grid-2col">
-        <!-- Target Class Configuration Card -->
+        <!-- Learner Group Configuration Card -->
         <div class="neo-card">
           <div class="card-header-flex">
-            <h4>🏫 Target Class Configuration</h4>
-            <button class="btn btn-sm btn-outline" id="btn-edit-target-class">✏️ Edit Class Details</button>
+            <h4>🏫 Learner Group Configuration</h4>
+            <button class="btn btn-sm btn-outline" id="btn-edit-target-class">✏️ Edit Group Details</button>
           </div>
           <div class="details-list" id="target-class-display">
             <!-- Dynamically populated -->
@@ -126,7 +127,7 @@
     <div id="tab-schedule" class="tab-panel">
       <div class="section-intro">
         <h3>2. Visit Schedule & Session Sequence</h3>
-        <p>Plan and track the proposed 5 school visits to Crown Prince Academy. Dates remain provisional until confirmed with school management.</p>
+        <p>Plan and track proposed school visits. Dates remain provisional until confirmed with Golden Age International School.</p>
       </div>
 
       <div class="card-header-flex">
@@ -232,7 +233,7 @@
 <div id="tab-handover" class="tab-panel">
   <div class="section-intro">
     <h3>5. Outcome Assessment & Program Handover</h3>
-    <p>Track aggregate impact indicators and complete the handover checklist for long-term sustainability at Crown Prince Academy.</p>
+    <p>Track aggregate impact indicators and complete the school handover checklist for long-term sustainability.</p>
   </div>
 
   <div class="grid-2col">
@@ -251,13 +252,13 @@
     <!-- Peer-Mentorship Model & Sustainability -->
     <div class="neo-card">
       <h4>🌱 Peer-Mentorship Progression Model</h4>
-      <p class="text-sm">Proposed long-term framework for student leadership continuity at Crown Prince Academy:</p>
+      <p class="text-sm">Proposed long-term framework for student leadership continuity:</p>
       
       <div class="peer-ladder">
-        <div class="ladder-step"><strong>1. Ashesi Mentor</strong> ➔ Delivers initial interactive workshops</div>
-        <div class="ladder-step"><strong>2. CPA Student</strong> ➔ Participates in hands-on activities</div>
+        <div class="ladder-step"><strong>1. Facilitator</strong> ➔ Delivers initial interactive workshops</div>
+        <div class="ladder-step"><strong>2. Student Explorer</strong> ➔ Participates in hands-on activities</div>
         <div class="ladder-step"><strong>3. Experienced Student</strong> ➔ Masters micro-skills and digital tools</div>
-        <div class="ladder-step"><strong>4. Peer Supporter</strong> ➔ Assists younger Grade 5 students</div>
+        <div class="ladder-step"><strong>4. Peer Supporter</strong> ➔ Supports fellow student explorers</div>
         <div class="ladder-step"><strong>5. Sustainable Club</strong> ➔ School continues pathway activities</div>
       </div>
     </div>

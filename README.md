@@ -1,14 +1,14 @@
 # Big Minds — Interest Exploration & Service Project Planner
 
-**Big Minds** is a child-friendly pathway exploration platform and service-project planning dashboard designed for Grade 5–6 students at Crown Prince Academy (Lapaz, Accra). Developed as part of Ashesi University’s Leadership Seminar IV, the platform combines interactive student career discovery with a robust facilitator management tool for project continuity, budget tracking, impact assessment, and school handover.
+**Big Minds** is a child-friendly pathway exploration platform and programme-planning dashboard for student explorers at Golden Age International School. It combines interactive career discovery with a facilitator tool for proposed activities, budget tracking, aggregate impact assessment, and school handover.
 
 ---
 
 ## 🌟 Key Features
 
 ### 1. 🌐 Progressive Web App (PWA) & Offline Engine
-* **100% Offline Capability:** Operates seamlessly without active internet access using a Service Worker (`sw.js`) and Stale-While-Revalidate caching strategy.
-* **Classroom-Ready:** Students and facilitators can run pathway maps, quizzes, micro-activities, and survey logs in offline environments with spotty school Wi-Fi.
+* **Offline support after a first online visit:** A Service Worker (`sw.js`) precaches the local application shell and selected third-party scripts using a stale-while-revalidate strategy.
+* **Local-first operation:** Student sessions, surveys, and facilitator plans remain available in browser storage when a cloud connection is unavailable. External fonts and uncached third-party assets may limit a first offline load.
 * **Web App Manifest (`manifest.json`):** Allows installation on tablets, smartphones, and laptops as a standalone desktop/mobile app.
 
 ### 2. 📊 Child-Friendly Pre/Post Surveys & Interactive Analytics
@@ -16,7 +16,7 @@
 * **Chart.js Visual Analytics:** Tab 5 (*Outcome Assessment & Program Handover*) renders two live interactive charts:
   * **Mentorship Interest Distribution (Pie Chart):** Breakdown of student engagement across Web Dev, Visual Design, Finance, Public Speaking, and Entrepreneurship.
   * **Skill Confidence Growth (Bar Chart):** Direct comparison of baseline (Pre-Workshop) vs. final (Post-Workshop) skill growth.
-* **Dual-Layer Persistence:** Survey responses save locally to `localStorage` (`bigminds_survey_responses_v1`) and sync automatically to Firebase (`survey_responses/`) when online.
+* **Aggregate-only survey storage:** Survey responses save locally to `localStorage` (`bigminds_survey_responses_v1`) without student names or aliases and may sync to Firebase (`survey_responses/`) when its connection is available.
 
 ### 3. 📜 Curiosity Badges & Printable A4 Explorer Certificate
 * **Dynamic Badges:** Earn digital badges (*Web Architect*, *Design Innovator*, *Money Smart*, *Public Speaker*, *Future Leader*) by completing pathway micro-activities and quizzes.

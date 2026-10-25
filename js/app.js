@@ -1,6 +1,6 @@
 /**
  * Big Minds — Interactive Interest & Pathway Explorer
- * Leadership IV Service Project for Crown Prince Academy, Lapaz
+ * Student pathway explorer for Golden Age International School
  * 
  * Main Application Controller (BigMindsApp)
  */
@@ -15,6 +15,8 @@ class BigMindsApp {
       exploredIds: [],
       selectedNodeId: null,
       studentName: 'Explorer',
+      alias: '',
+      unlockedBadges: [],
       avatarOutfit: '🔬',
       avatarVibe: '⭐'
     };
@@ -33,6 +35,7 @@ class BigMindsApp {
     // Cache DOM Elements
     this.dom = {
       interestBadges: document.getElementById('interestBadges'),
+      curiosityBadges: document.getElementById('curiosityBadges'),
       exploredCount: document.getElementById('exploredCount'),
       totalNodesCount: document.getElementById('totalNodesCount'),
       progressPercent: document.getElementById('progressPercent'),
@@ -72,6 +75,7 @@ class BigMindsApp {
     // Attach Event Listeners & Boot
     this.initEventListeners();
     this.renderInterestBadges();
+    this.renderCuriosityBadges();
     this.updateProgress();
     this.refreshCanvas();
 
@@ -97,6 +101,14 @@ class BigMindsApp {
     } catch (e) {
       console.warn('Unable to load from localStorage', e);
     }
+    if (!this.state.alias) this.state.alias = this.createAnonymousAlias();
+    if (!Array.isArray(this.state.unlockedBadges)) this.state.unlockedBadges = [];
+    this.state.studentName = this.state.alias;
+  }
+
+  createAnonymousAlias() {
+    const prefixes = ['Explorer', 'Coder', 'Designer', 'Innovator', 'Scholar'];
+    return `${prefixes[Math.floor(Math.random() * prefixes.length)]} ${Math.floor(100 + Math.random() * 900)}`;
   }
 
   saveState() {
@@ -105,6 +117,8 @@ class BigMindsApp {
         activeInterests: this.state.activeInterests,
         exploredIds: this.state.exploredIds,
         studentName: this.state.studentName,
+        alias: this.state.alias,
+        unlockedBadges: this.state.unlockedBadges,
         avatarOutfit: this.state.avatarOutfit,
         avatarVibe: this.state.avatarVibe
       }));
@@ -124,10 +138,14 @@ class BigMindsApp {
     this.state.selectedNodeId = null;
     this.state.avatarOutfit = '🔬';
     this.state.avatarVibe = '⭐';
+    this.state.alias = this.createAnonymousAlias();
+    this.state.studentName = this.state.alias;
+    this.state.unlockedBadges = [];
     
     this.saveState();
     this.closeDrawer();
     this.renderInterestBadges();
+    this.renderCuriosityBadges();
     this.updateProgress();
     this.canvasEngine.resetView();
     this.refreshCanvas();
@@ -322,13 +340,44 @@ class BigMindsApp {
       this.state.exploredIds.splice(idx, 1);
     } else {
       this.state.exploredIds.push(id);
+      this.unlockBadgesForNode(id);
       this.showToast('🎉 Awesome! Pathway marked as explored!');
     }
 
     this.saveState();
     this.updateProgress();
+    this.renderCuriosityBadges();
     this.updateDrawerExploredBtn();
     this.refreshCanvas();
+  }
+
+  unlockBadgesForNode(nodeId) {
+    const badgeByNode = {
+      scratch: 'web-architect',
+      programming: 'web-architect',
+      'graphic-design': 'design-innovator',
+      animation: 'design-innovator',
+      entrepreneurs: 'money-smart'
+    };
+    const badge = badgeByNode[nodeId];
+    if (badge && !this.state.unlockedBadges.includes(badge)) this.state.unlockedBadges.push(badge);
+    if (this.state.exploredIds.length >= 3 && !this.state.unlockedBadges.includes('future-entrepreneur')) {
+      this.state.unlockedBadges.push('future-entrepreneur');
+    }
+  }
+
+  renderCuriosityBadges() {
+    if (!this.dom.curiosityBadges) return;
+    const badges = [
+      { id: 'web-architect', icon: '🌐', title: 'Web Architect' },
+      { id: 'design-innovator', icon: '🎨', title: 'Design Innovator' },
+      { id: 'money-smart', icon: '💰', title: 'Money Smart' },
+      { id: 'future-entrepreneur', icon: '🚀', title: 'Future Leader' }
+    ];
+    this.dom.curiosityBadges.innerHTML = badges.map((badge) => {
+      const earned = this.state.unlockedBadges.includes(badge.id);
+      return `<span class="text-[10px] font-black px-2 py-1 rounded-lg border ${earned ? 'bg-emerald-100 text-emerald-900 border-emerald-500' : 'bg-slate-100 text-slate-500 border-slate-300'}" title="${earned ? 'Earned' : 'Keep exploring to earn this badge'}">${earned ? badge.icon : '🔒'} ${badge.title}</span>`;
+    }).join('');
   }
 
   updateDrawerExploredBtn() {
@@ -671,7 +720,7 @@ class BigMindsApp {
         </div>
         <input id="pulseRange" type="range" min="40" max="160" value="72" class="w-full mb-2" />
         <div id="pulseOutput" class="text-xs font-black p-2 rounded-lg border border-slate-200 bg-emerald-50 text-emerald-800">
-          💓 Normal resting heart rate for Grade 5–6 students (65–105 BPM).
+          💓 A typical resting heart rate for young learners is often 65–105 BPM.
         </div>
       `;
 
