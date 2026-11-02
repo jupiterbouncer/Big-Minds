@@ -1,9 +1,9 @@
 /**
- * Big Minds — Progressive Web App Service Worker
- * Offline Caching & Stale-While-Revalidate Engine
+ * Big Minds 2.0 — Progressive Web App Service Worker
+ * Offline Caching & Stale-While-Revalidate Engine (v4)
  */
 
-const CACHE_NAME = 'bigminds-cache-v3';
+const CACHE_NAME = 'bigminds-cache-v4';
 
 const STATIC_ASSETS = [
   './',
@@ -13,6 +13,7 @@ const STATIC_ASSETS = [
   './styles.css',
   './favicon.svg',
   './manifest.json',
+  './js/currencyHelper.js',
   './js/app.js',
   './js/canvas.js',
   './js/pathwaysData.js',
@@ -51,10 +52,7 @@ self.addEventListener('activate', (event) => {
 
 // 3. Fetch Event — Stale-While-Revalidate Strategy
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
-
-  // Ignore browser extensions or non-HTTP schemas
   if (!event.request.url.startsWith('http')) return;
 
   event.respondWith(
@@ -67,10 +65,7 @@ self.addEventListener('fetch', (event) => {
             }
             return networkResponse;
           })
-          .catch(() => {
-            // Network failed, fallback gracefully to cache
-            return cachedResponse;
-          });
+          .catch(() => cachedResponse);
 
         return cachedResponse || fetchPromise;
       });

@@ -3,12 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Big Minds — Service Project Planner</title>
+  <title>Big Minds — Programme Administration & Evaluation Planner</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
 </head>
 <body class="planner-body">
+
+  <!-- ADMIN AUTHENTICATION GATE OVERLAY -->
+  <div id="admin-auth-overlay" class="admin-auth-overlay hidden">
+    <div class="admin-auth-card neo-card">
+      <div class="auth-header">
+        <span class="auth-icon">🔐</span>
+        <h2>Programme Administrator Access</h2>
+        <p class="text-xs text-muted">
+          This area is restricted to Big Minds programme coordinators and facilitators. Enter the administrator passkey to manage curriculum, budget, and participant records.
+        </p>
+      </div>
+
+      <form id="admin-auth-form" class="auth-form margin-top-md">
+        <div class="form-group">
+          <label for="admin-passkey-input" class="text-xs font-bold">Admin Passkey:</label>
+          <input
+            type="password"
+            id="admin-passkey-input"
+            class="form-control"
+            placeholder="Enter passkey (default: bigminds2026)"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+        <div id="admin-auth-error" class="text-danger text-xs margin-top-xs hidden">
+          Incorrect passkey. Please verify and retry.
+        </div>
+
+        <div class="form-actions margin-top-md flex-between">
+          <a href="index.html" class="btn btn-secondary btn-sm">← Back to Student Map</a>
+          <button type="submit" class="btn btn-primary">Unlock Dashboard</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- TOP HEADER & NAV -->
   <header class="planner-header">
@@ -16,16 +51,27 @@
       <div class="brand-group">
         <a href="index.html" class="back-link">← Student Explorer</a>
         <h1 class="planner-title">Big Minds <span>Programme Planner</span></h1>
-        <p class="planner-subtitle">Golden Age International School • Proposed programme plan</p>
+        <p class="planner-subtitle" id="planner-header-subtitle">
+          <span id="headerSchoolName">Partner Institution</span> • Programme Administration & Evaluation
+        </p>
       </div>
 
       <div class="header-actions">
-        <span id="save-indicator" class="save-status-badge" style="cursor: pointer;" title="Click to view Cloud Sync status">✓ Saved to browser</span>
+        <!-- Budget Currency Selector -->
+        <div class="currency-header-widget" title="Select currency for project budget and financial models">
+          <span class="text-xs font-bold mr-1">Currency:</span>
+          <span id="plannerCurrencySelector"></span>
+        </div>
+
+        <span id="save-indicator" class="save-status-badge" style="cursor: pointer;" title="Click to view Cloud Sync status">
+          ✓ Saved locally
+        </span>
         <button id="btn-cloud-sync" class="btn btn-secondary">☁️ Cloud Sync</button>
         <button id="btn-export-json" class="btn btn-secondary">📥 Export Plan</button>
         <button id="btn-import-trigger" class="btn btn-secondary">📤 Import Plan</button>
         <input type="file" id="import-file-input" accept=".json" style="display:none;">
         <button id="btn-print-plan" class="btn btn-primary">🖨️ Print Summary</button>
+        <button id="btn-admin-lock" class="btn btn-outline btn-sm" title="Lock administration dashboard">🔒 Lock</button>
       </div>
     </div>
   </header>
@@ -36,22 +82,22 @@
     <section class="status-banner neo-card">
       <div class="status-banner-header">
         <div>
-          <span class="status-pill status-draft" id="project-status-label">Draft — Awaiting School Confirmation</span>
+          <span class="status-pill status-draft" id="project-status-label">Draft — Awaiting Partner Confirmation</span>
           <h2>Mentorship Initiative Overview</h2>
         </div>
-        <button class="btn btn-sm btn-outline" id="btn-edit-status">✏️ Edit Status & Info</button>
+        <button class="btn btn-sm btn-outline" id="btn-edit-status">✏️ Edit Status & Partner Info</button>
       </div>
 
       <div class="status-stats-grid">
         <div class="stat-card">
-          <span class="stat-label">Target School</span>
-          <strong class="stat-value" id="stat-school-name">Golden Age International School</strong>
-          <span class="stat-sub">Proposed partner school</span>
+          <span class="stat-label">Target School / Cohort</span>
+          <strong class="stat-value" id="stat-school-name">Partner Institution</strong>
+          <span class="stat-sub">Configurable partner</span>
         </div>
         <div class="stat-card">
-          <span class="stat-label">Learner Group</span>
-          <strong class="stat-value" id="stat-target-class">To be confirmed</strong>
-          <span class="stat-sub" id="stat-student-count">Student count to be confirmed</span>
+          <span class="stat-label">Learner Cohort</span>
+          <strong class="stat-value" id="stat-target-class">Senior Secondary (SS3)</strong>
+          <span class="stat-sub" id="stat-student-count">30 Students</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Visits Planned</span>
@@ -60,8 +106,8 @@
         </div>
         <div class="stat-card">
           <span class="stat-label">Est. Budget Total</span>
-          <strong class="stat-value" id="stat-budget-total">GHS 0.00</strong>
-          <span class="stat-sub" id="stat-budget-confirmed">GHS 0.00 Confirmed</span>
+          <strong class="stat-value" id="stat-budget-total">0.00</strong>
+          <span class="stat-sub" id="stat-budget-confirmed">0.00 Confirmed</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Unassigned Roles</span>
@@ -76,15 +122,15 @@
       <button class="tab-btn active" data-tab="tab-areas">1. Areas & Learner Group</button>
       <button class="tab-btn" data-tab="tab-schedule">2. Visit Schedule</button>
       <button class="tab-btn" data-tab="tab-workshops">3. Workshops & Team</button>
-      <button class="tab-btn" data-tab="tab-budget">4. Budget (GHS)</button>
-      <button class="tab-btn" data-tab="tab-handover">5. Assessment & Handover</button>
+      <button class="tab-btn" data-tab="tab-budget">4. Resource Budget</button>
+      <button class="tab-btn" data-tab="tab-handover">5. Evaluation & Participants</button>
     </nav>
 
     <!-- TAB 1: MENTORSHIP AREAS & LEARNER GROUP -->
     <div id="tab-areas" class="tab-panel active">
       <div class="section-intro">
-        <h3>1. Mentorship Areas & Learner Group Setup</h3>
-        <p>Define proposed workshop topics and record learner-group details once they are confirmed with Golden Age International School.</p>
+        <h3>1. Mentorship Areas & Learner Cohort Setup</h3>
+        <p>Define proposed workshop topics and record learner-group details confirmed with the partner school or cohort.</p>
       </div>
 
       <div class="grid-2col">
@@ -102,19 +148,19 @@
         <!-- Integration Note Card -->
         <div class="neo-card bg-cream-accent">
           <h4>🔗 Integration with Student Discovery Map</h4>
-          <p>Workshop topics map directly to Big Minds digital pathway nodes. Students explore concepts digitally on the interactive map and practice hands-on skills during team school visits.</p>
+          <p>Workshop topics map directly to the 5 Big Minds mentorship areas. Students explore concepts digitally on the interactive map and practice hands-on challenges during workshops.</p>
           <ul class="integration-bullets">
-            <li><strong>Programming & Web:</strong> Connected to Node #1 (Coding & Logic)</li>
-            <li><strong>Graphic Design:</strong> Connected to Node #2 (Visual Arts & Design)</li>
-            <li><strong>Financial Literacy:</strong> Connected to Node #4 (Money & Markets)</li>
-            <li><strong>Entrepreneurship:</strong> Connected to Node #3 (Innovation & Business)</li>
-            <li><strong>Public Speaking:</strong> Connected to Node #5 (Public Speaking)</li>
+            <li><strong>Programming & Web:</strong> Connected to Node #1 (Web Foundations) & Node #2 (Software Engineering)</li>
+            <li><strong>Graphic Design:</strong> Connected to Node #3 (Visual Branding) & Node #4 (UI/UX Design)</li>
+            <li><strong>Financial Literacy:</strong> Connected to Node #5 (Student Budgeting) & Node #6 (Venture Economics)</li>
+            <li><strong>Public Speaking:</strong> Connected to Node #7 (Persuasive Speaking) & Node #8 (Professional Comm)</li>
+            <li><strong>Entrepreneurship:</strong> Connected to Node #9 (Problem Discovery) & Node #10 (MVP Building)</li>
           </ul>
         </div>
       </div>
 
       <div class="card-header-flex margin-top-lg">
-        <h4>📚 Proposed Mentorship Areas</h4>
+        <h4>📚 Proposed Mentorship Curriculum Areas</h4>
         <button class="btn btn-primary btn-sm" id="btn-add-area">+ Add Mentorship Area</button>
       </div>
 
@@ -127,7 +173,7 @@
     <div id="tab-schedule" class="tab-panel">
       <div class="section-intro">
         <h3>2. Visit Schedule & Session Sequence</h3>
-        <p>Plan and track proposed school visits. Dates remain provisional until confirmed with Golden Age International School.</p>
+        <p>Plan and track proposed facilitation sessions. Dates remain provisional until confirmed with partner leadership.</p>
       </div>
 
       <div class="card-header-flex">
@@ -176,22 +222,22 @@
     <!-- TAB 4: BUDGET & RESOURCE PLANNING -->
     <div id="tab-budget" class="tab-panel">
       <div class="section-intro">
-        <h3>4. Project Budget & Resource Planning (GHS)</h3>
-        <p>Itemized project expenses in Ghana Cedis (GHS). Automatically calculates line totals and grand totals.</p>
+        <h3>4. Project Budget & Resource Planning</h3>
+        <p>Itemized project expenses. Automatically calculates line totals and grand totals in the selected project currency.</p>
       </div>
 
       <div class="budget-stats-grid margin-bottom-md">
         <div class="neo-card bg-white">
           <span class="stat-label">Grand Total Estimated</span>
-          <h3 class="stat-number" id="budget-grand-total">GHS 0.00</h3>
+          <h3 class="stat-number" id="budget-grand-total">0.00</h3>
         </div>
         <div class="neo-card bg-white">
           <span class="stat-label">Confirmed Expenses</span>
-          <h3 class="stat-number text-success" id="budget-confirmed-total">GHS 0.00</h3>
+          <h3 class="stat-number text-success" id="budget-confirmed-total">0.00</h3>
         </div>
         <div class="neo-card bg-white">
           <span class="stat-label">Essential Core Costs</span>
-          <h3 class="stat-number text-primary" id="budget-essential-total">GHS 0.00</h3>
+          <h3 class="stat-number text-primary" id="budget-essential-total">0.00</h3>
         </div>
       </div>
 
@@ -208,8 +254,8 @@
                 <th>Description</th>
                 <th>Category</th>
                 <th>Qty</th>
-                <th>Unit Cost (GHS)</th>
-                <th>Total (GHS)</th>
+                <th>Unit Cost</th>
+                <th>Total</th>
                 <th>Priority</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -221,7 +267,7 @@
             <tfoot>
               <tr class="table-total-row">
                 <td colspan="4" class="text-right"><strong>Calculated Project Total:</strong></td>
-                <td colspan="4"><strong id="budget-footer-total">GHS 0.00</strong></td>
+                <td colspan="4"><strong id="budget-footer-total">0.00</strong></td>
               </tr>
             </tfoot>
           </table>
@@ -229,85 +275,148 @@
       </div>
     </div>
 
-    <!-- TAB 5: ASSESSMENT & HANDOVER -->
-<div id="tab-handover" class="tab-panel">
-  <div class="section-intro">
-    <h3>5. Outcome Assessment & Program Handover</h3>
-    <p>Track aggregate impact indicators and complete the school handover checklist for long-term sustainability.</p>
-  </div>
-
-  <div class="grid-2col">
-    <!-- Baseline & Outcome Indicators -->
-    <div class="neo-card">
-      <div class="card-header-flex">
-        <h4>📊 Aggregate Assessment Indicators</h4>
-        <button class="btn btn-sm btn-outline" id="btn-edit-assessment">✏️ Update Metrics</button>
+    <!-- TAB 5: ASSESSMENT, PARTICIPANTS & HANDOVER -->
+    <div id="tab-handover" class="tab-panel">
+      <div class="section-intro">
+        <h3>5. Outcome Assessment, Live Participants & Handover</h3>
+        <p>Monitor real-time participant engagement, evaluate pre/post survey growth, inspect individual submissions, and track school handover.</p>
       </div>
-      <p class="text-muted text-sm">Stores aggregate counts only. No individual student data or personal details are collected.</p>
-      <div class="metrics-list" id="assessment-metrics-container">
-        <!-- Dynamically rendered indicators -->
-      </div>
-    </div>
 
-    <!-- Peer-Mentorship Model & Sustainability -->
-    <div class="neo-card">
-      <h4>🌱 Peer-Mentorship Progression Model</h4>
-      <p class="text-sm">Proposed long-term framework for student leadership continuity:</p>
-      
-      <div class="peer-ladder">
-        <div class="ladder-step"><strong>1. Facilitator</strong> ➔ Delivers initial interactive workshops</div>
-        <div class="ladder-step"><strong>2. Student Explorer</strong> ➔ Participates in hands-on activities</div>
-        <div class="ladder-step"><strong>3. Experienced Student</strong> ➔ Masters micro-skills and digital tools</div>
-        <div class="ladder-step"><strong>4. Peer Supporter</strong> ➔ Supports fellow student explorers</div>
-        <div class="ladder-step"><strong>5. Sustainable Club</strong> ➔ School continues pathway activities</div>
-      </div>
-    </div>
-  </div>
+      <!-- LIVE FIREBASE PARTICIPANTS OVERVIEW -->
+      <div class="neo-card margin-bottom-lg">
+        <div class="card-header-flex">
+          <div>
+            <h4>👥 Live Participant Directory (Firebase RTDB)</h4>
+            <p class="text-xs text-muted">Real-time synchronized participant submissions from the public student platform.</p>
+          </div>
+          <div class="flex gap-2">
+            <button id="btn-refresh-participants" class="btn btn-sm btn-outline">🔄 Refresh</button>
+            <button id="btn-export-participants-csv" class="btn btn-sm btn-secondary">📥 Export CSV</button>
+          </div>
+        </div>
 
-  <!-- Pre/Post Survey Impact Analytics Card -->
-  <div class="neo-card margin-top-lg">
-    <div class="card-header-flex">
-      <h4>📊 Pre/Post Survey Impact Analytics</h4>
-      <div>
-        <button class="btn btn-sm btn-outline" id="btn-trigger-demo-pre">📝 Take Pre-Survey</button>
-        <button class="btn btn-sm btn-outline" id="btn-trigger-demo-post">📝 Take Post-Survey</button>
-        <button class="btn btn-sm btn-primary" id="btn-print-certificate-demo">📜 Preview Certificate</button>
-      </div>
-    </div>
-    <p class="text-sm text-muted margin-top-xs">
-      Real-time aggregate comparison of student interest distribution and skill confidence growth across mentorship visits.
-    </p>
+        <!-- KPI Cards -->
+        <div class="status-stats-grid margin-top-md margin-bottom-md">
+          <div class="stat-card">
+            <span class="stat-label">Total Participants</span>
+            <strong class="stat-value" id="kpi-total-participants">0</strong>
+            <span class="stat-sub">Registered sessions</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Quizzes Completed</span>
+            <strong class="stat-value text-primary" id="kpi-total-quizzes">0</strong>
+            <span class="stat-sub">Curiosity matches</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Pre-Surveys</span>
+            <strong class="stat-value" id="kpi-total-presurveys">0</strong>
+            <span class="stat-sub">Baseline evaluations</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Post-Surveys</span>
+            <strong class="stat-value text-success" id="kpi-total-postsurveys">0</strong>
+            <span class="stat-sub">Final evaluations</span>
+          </div>
+        </div>
 
-    <div class="survey-analytics-container">
-      <!-- Pie Chart: Interest Distribution -->
-      <div class="chart-card">
-        <h4>🎯 Mentorship Interest Distribution</h4>
-        <div class="chart-wrapper">
-          <canvas id="surveyPieChart"></canvas>
+        <!-- Participants Table -->
+        <div class="table-responsive">
+          <table class="budget-table">
+            <thead>
+              <tr>
+                <th>Participant ID</th>
+                <th>Display Name</th>
+                <th>Currency</th>
+                <th>Quiz Status</th>
+                <th>Pre-Survey</th>
+                <th>Post-Survey</th>
+                <th>Explored Nodes</th>
+                <th>Registered</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-participants-table-body">
+              <tr>
+                <td colspan="9" class="text-center text-muted py-4">
+                  Connecting to Firebase Realtime Database...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- Bar Chart: Pre vs Post Skill Confidence -->
-      <div class="chart-card">
-        <h4>📈 Skill Confidence Growth (Pre vs Post)</h4>
-        <div class="chart-wrapper">
-          <canvas id="surveyBarChart"></canvas>
+      <!-- Pre/Post Survey Impact Analytics Card -->
+      <div class="neo-card margin-bottom-lg">
+        <div class="card-header-flex">
+          <h4>📊 Real Survey Impact Analytics</h4>
+          <div>
+            <button class="btn btn-sm btn-outline" id="btn-trigger-demo-pre">📝 Take Pre-Survey</button>
+            <button class="btn btn-sm btn-outline" id="btn-trigger-demo-post">📝 Take Post-Survey</button>
+            <button class="btn btn-sm btn-primary" id="btn-print-certificate-demo">📜 Preview Certificate</button>
+          </div>
+        </div>
+        <p class="text-sm text-muted margin-top-xs">
+          Visual aggregate comparison of student interest distribution and skill confidence growth across the 5 mentorship areas.
+        </p>
+
+        <div class="survey-analytics-container">
+          <!-- Doughnut Chart: Interest Distribution -->
+          <div class="chart-card">
+            <h4>🎯 Mentorship Interest Distribution</h4>
+            <div class="chart-wrapper">
+              <canvas id="surveyPieChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Bar Chart: Pre vs Post Skill Confidence -->
+          <div class="chart-card">
+            <h4>📈 Skill Confidence Growth (Pre vs Post)</h4>
+            <div class="chart-wrapper">
+              <canvas id="surveyBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Baseline & Outcome Indicators -->
+        <div class="neo-card">
+          <div class="card-header-flex">
+            <h4>📊 Aggregate Programme Indicators</h4>
+            <button class="btn btn-sm btn-outline" id="btn-edit-assessment">✏️ Update Metrics</button>
+          </div>
+          <div class="metrics-list" id="assessment-metrics-container">
+            <!-- Dynamically rendered indicators -->
+          </div>
+        </div>
+
+        <!-- Peer-Mentorship Model & Sustainability -->
+        <div class="neo-card">
+          <h4>🌱 Peer-Mentorship Progression Model</h4>
+          <p class="text-sm">Long-term framework for student leadership continuity:</p>
+
+          <div class="peer-ladder">
+            <div class="ladder-step"><strong>1. Facilitator</strong> ➔ Delivers initial interactive workshops</div>
+            <div class="ladder-step"><strong>2. Student Explorer</strong> ➔ Participates in hands-on activities</div>
+            <div class="ladder-step"><strong>3. Experienced Student</strong> ➔ Masters micro-skills and digital tools</div>
+            <div class="ladder-step"><strong>4. Peer Supporter</strong> ➔ Supports fellow student explorers</div>
+            <div class="ladder-step"><strong>5. Sustainable Club</strong> ➔ School continues pathway activities</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Handover Checklist Card -->
+      <div class="neo-card margin-top-lg">
+        <div class="card-header-flex">
+          <h4>📋 Institutional Handover Checklist</h4>
+          <button class="btn btn-sm btn-outline" id="btn-edit-handover">✏️ Edit Handover Info</button>
+        </div>
+        <div class="checklist-grid" id="handover-checklist-container">
+          <!-- Dynamically populated -->
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Handover Checklist Card -->
-  <div class="neo-card margin-top-lg">
-    <div class="card-header-flex">
-      <h4>📋 School Handover Checklist</h4>
-      <button class="btn btn-sm btn-outline" id="btn-edit-handover">✏️ Edit Handover Info</button>
-    </div>
-    <div class="checklist-grid" id="handover-checklist-container">
-      <!-- Dynamically populated -->
-    </div>
-  </div>
-</div>
 
   </main>
 
@@ -326,15 +435,17 @@
 
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <!-- Chart.js CDN for Survey Visual Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Application Logic -->
-  <script src="js/plannerData.js"></script>
   <script src="js/firebaseConfig.js"></script>
+  <script src="js/currencyHelper.js"></script>
   <script src="js/firebaseSync.js"></script>
+  <script src="js/plannerData.js"></script>
   <script src="js/surveysAndBadges.js"></script>
   <script src="js/planner.js"></script>
 
@@ -348,5 +459,5 @@
       });
     }
   </script>
-  </body>
+</body>
 </html>

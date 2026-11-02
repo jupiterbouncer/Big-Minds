@@ -1,48 +1,61 @@
-# Big Minds — Interest Exploration & Service Project Planner
+# Big Minds 2.0 — Student Pathways, Curiosity Exploration & Programme Planner
 
-**Big Minds** is a child-friendly pathway exploration platform and programme-planning dashboard for student explorers at Golden Age International School. It combines interactive career discovery with a facilitator tool for proposed activities, budget tracking, aggregate impact assessment, and school handover.
+**Discover your interests. Explore your possibilities. Build your next step.**
+
+**Big Minds** is a school-independent, publicly accessible student interest-exploration and mentorship platform. It combines an interactive 2D pathway canvas for senior secondary students with a secure administrative dashboard for programme coordinators to manage curriculum, budgets, and participant evaluation outcomes.
 
 ---
 
 ## 🌟 Key Features
 
-### 1. 🌐 Progressive Web App (PWA) & Offline Engine
-* **Offline support after a first online visit:** A Service Worker (`sw.js`) precaches the local application shell and selected third-party scripts using a stale-while-revalidate strategy.
-* **Local-first operation:** Student sessions, surveys, and facilitator plans remain available in browser storage when a cloud connection is unavailable. External fonts and uncached third-party assets may limit a first offline load.
-* **Web App Manifest (`manifest.json`):** Allows installation on tablets, smartphones, and laptops as a standalone desktop/mobile app.
+### 1. 🧭 Public Student Experience
+* **Self-Directed Onboarding:** Students register their preferred display name and choose a currency without disclosing sensitive personal data.
+* **Anonymous Participant Identity:** Unique participant IDs (e.g., `bm_part_...`) are automatically generated and linked to all quiz submissions, survey evaluations, and progress.
+* **Session Persistence:** State persists across reloads via browser storage and Firebase Realtime Database.
+* **Non-Destructive Session Switching:** Shared laptops can launch a new participant session without erasing or overwriting previous records.
 
-### 2. 📊 Child-Friendly Pre/Post Surveys & Interactive Analytics
-* **Emoji Rating System:** 4-question interactive survey using child-friendly emoji scales (1–5 rating) to measure curiosity in tech, visual design confidence, budgeting literacy, and public speaking comfort.
-* **Chart.js Visual Analytics:** Tab 5 (*Outcome Assessment & Program Handover*) renders two live interactive charts:
-  * **Mentorship Interest Distribution (Pie Chart):** Breakdown of student engagement across Web Dev, Visual Design, Finance, Public Speaking, and Entrepreneurship.
-  * **Skill Confidence Growth (Bar Chart):** Direct comparison of baseline (Pre-Workshop) vs. final (Post-Workshop) skill growth.
-* **Aggregate-only survey storage:** Survey responses save locally to `localStorage` (`bigminds_survey_responses_v1`) without student names or aliases and may sync to Firebase (`survey_responses/`) when its connection is available.
+### 2. 🗺️ Mature Secondary School Pathway Canvas
+Ten structured nodes across the **5 core mentorship disciplines**:
+1. **Programming & Web Development:**
+   - *Web Dev & Digital Architecture:* HTML5, CSS layout, JavaScript interaction.
+   - *Software Engineering & Algorithms:* Algorithmic logic, API data handling, automated validation.
+2. **Graphic Design:**
+   - *Visual Communication & Branding:* Color theory, typography hierarchy, brand identity.
+   - *UI/UX Design & Product Strategy:* User flows, wireframing, component design systems.
+3. **Financial Literacy:**
+   - *Personal Finance & Student Budgeting:* Tertiary living costs, needs vs. wants, emergency cushions.
+   - *Venture Economics & Cost Modeling:* Unit economics, gross margins, breakeven analysis.
+4. **Public Speaking:**
+   - *Persuasive Speaking & Pitching:* Hook-Problem-Solution-Call to Action structure, 60s pitch timer.
+   - *Professional Communication & Interviews:* The STAR method for scholarships and admissions.
+5. **Entrepreneurship:**
+   - *Problem Discovery & Market Empathy:* The "5 Whys" root-cause analyzer, customer interviews.
+   - *MVP Building & Venture Launch:* Scoping lean MVPs, value propositions, rapid feedback loops.
 
-### 3. 📜 Curiosity Badges & Printable A4 Explorer Certificate
-* **Dynamic Badges:** Earn digital badges (*Web Architect*, *Design Innovator*, *Money Smart*, *Public Speaker*, *Future Leader*) by completing pathway micro-activities and quizzes.
-* **A4 Print Layout:** One-click certificate generator with `@media print` CSS optimization that hides navigation controls and formats a clean, single-page landscape certificate complete with student alias, earned badges, date, and team signatures.
+### 3. 📝 Integrated Pre & Post Programme Surveys
+* Direct access on the student interface through a milestone tracker.
+* 1–5 confidence rating scales across the 5 mentorship areas plus qualitative reflections.
+* Real-time persistence to Firebase under `participants/{id}/preSurvey` and `participants/{id}/postSurvey`.
 
-### 4. 🔄 Real-Time Cross-Device Synchronization
-* **Firebase Realtime Database:** Bi-directional cloud synchronization across multiple facilitator devices using WebSockets.
-* **Live Status Badge:** Dynamic UI indicator in `service-project.html` displaying real-time connection state (`🟢 Cloud Synced`, `🟡 Syncing...`, `🟠 Disconnected / Local Mode`, `🔴 Error`).
-* **Modal Protection:** Queues remote incoming updates while a facilitator edits modal forms, preventing text collisions and input loss.
+### 4. 💱 Multi-Currency Architecture
+* Reusable currency selector (`js/currencyHelper.js`) supporting 15 major currencies (NGN default, GHS, USD, GBP, EUR, CAD, ZAR, KES, etc.).
+* Formatted using `Intl.NumberFormat`.
+* Dynamically drives student budgeting sandboxes and the administrative budget manager.
 
-### 5. 📋 5-Tab Service Project Planner
-1. **Strategic Overview:** Project background, rationale, SDG 4/8 alignment, and target demographics.
-2. **Implementation Schedule:** Interactive visit-by-visit milestone log and progress tracking.
-3. **Resource & Budget Manager:** Categorized itemized budget with automatic total calculations and variance indicators.
-4. **Curriculum Pathways:** Detailed lesson plans, micro-activities, and facilitation notes for all 5 visits.
-5. **Outcome Assessment & Handover:** Pre/post survey analytics, aggregate impact metrics, peer-mentorship progression ladder, and school handover checklist.
+### 5. 🔒 Private Administrative Dashboard (`service-project.html`)
+* **Access Passkey Gate:** Blocks unauthenticated access to participant records and planning tools (default passkey: `bigminds2026`).
+* **Live Participant Management:** Real-time directory subscribed to Firebase RTDB with drill-down modal inspection.
+* **Survey Impact Analytics:** Chart.js doughnut chart (interest distribution) and comparative bar chart (pre vs. post growth).
+* **Export Capabilities:** Export full participant data as CSV or download complete project plans as JSON.
 
 ---
 
 ## 🛠️ Technology Stack
 
 * **Frontend:** Vanilla HTML5, CSS3 (Neo-Tactile Design System with bold borders, warm `#FDFBF7` palette, offset shadows `4px 4px 0px #1E1B4B`), ES6+ JavaScript.
-* **Database & Sync:** Firebase Realtime Database (Compatibility SDK v9.23.0).
-* **Analytics Engine:** Chart.js (v4 CDN with offline canvas fallback).
-* **PWA Engine:** HTML5 Service Worker API (`sw.js`) & Web App Manifest (`manifest.json`).
-* **Hosting:** Vercel Static Hosting.
+* **Database & Auth:** Firebase Realtime Database & Firebase Anonymous Auth (SDK v9.23.0 compat).
+* **Analytics:** Chart.js v4 CDN with native accessible canvas/HTML fallback.
+* **PWA:** Service Worker (`sw.js` v4) & Web App Manifest (`manifest.json`).
 
 ---
 
@@ -50,20 +63,22 @@
 
 ```text
 Big Minds/
-├── index.html               # Student 2D pathway exploration map
-├── quiz.html                # Interactive interest discovery quiz
-├── service-project.html     # Facilitator planner dashboard & analytics
+├── index.html               # Public student 2D pathway exploration map
+├── quiz.html                # Curiosity discovery quiz
+├── service-project.html     # Protected facilitator & evaluation dashboard
 ├── manifest.json            # PWA configuration manifest
-├── sw.js                    # PWA Service worker offline caching engine
-├── styles.css               # Neo-tactile design system, badge grids, charts & print rules
+├── sw.js                    # PWA Service worker offline engine (v4)
+├── styles.css               # Neo-tactile design system & responsive styling
 ├── favicon.svg              # Platform icon
 ├── README.md                # Project documentation
 └── js/
-    ├── app.js               # Main application controller
+    ├── app.js               # Student application controller & micro-activities
     ├── canvas.js            # 2D interactive pathway canvas renderer
-    ├── pathwaysData.js      # Curriculum pathways & activity dataset
-    ├── plannerData.js       # Service project initial state dataset
+    ├── currencyHelper.js    # Multi-currency catalog & Intl.NumberFormat helper
+    ├── pathwaysData.js      # Pathway curriculum nodes & quiz questions
+    ├── plannerData.js       # Administrative plan default dataset
     ├── firebaseConfig.js    # Client Firebase API credentials
-    ├── firebaseSync.js      # RTDB bi-directional cloud sync engine
-    ├── surveysAndBadges.js  # Pre/post surveys, badges, Chart.js & certificate generator
-    └── planner.js           # Planner UI tabs, modals, and event handling
+    ├── firebaseSync.js      # RTDB bi-directional cloud sync & participant persistence
+    ├── surveysAndBadges.js  # Pre/post surveys, curiosity badges & Chart.js engine
+    └── planner.js           # Admin passkey gate, planner tabs & participant directory
+```

@@ -1,7 +1,7 @@
 {
-  "name": "Big Minds — Exploration & Service Planner",
+  "name": "Big Minds — Student Pathways & Future Skills",
   "short_name": "Big Minds",
-  "description": "Child-friendly interest and pathway exploration platform for students at Golden Age International School.",
+  "description": "Interactive student interest exploration, career pathways, and future skills platform.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FDFBF7",

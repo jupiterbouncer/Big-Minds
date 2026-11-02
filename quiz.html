@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Curiosity Quiz | Big Minds</title>
-  
+  <title>Curiosity Discovery Quiz | Big Minds</title>
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
-  
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
@@ -33,23 +33,23 @@
       </a>
 
       <a href="index.html" class="text-xs font-black text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 px-3 py-1.5 rounded-xl transition-all shadow-[2px_2px_0px_#0F172A]">
-        ← Back to Map
+        ← Back to Pathway Map
       </a>
     </div>
   </header>
 
   <!-- MAIN QUIZ CONTENT -->
   <main class="max-w-3xl w-full mx-auto px-4 py-6 flex-1 flex flex-col justify-center">
-    
+
     <!-- Hero / Progress Header -->
     <div class="bg-white rounded-3xl border-2 border-slate-900 p-5 md:p-7 shadow-[4px_4px_0px_#0F172A] mb-5">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
         <div>
           <h1 class="text-2xl md:text-3xl font-black text-slate-900 font-heading">Discover Your Curiosities ✨</h1>
-          <p class="text-xs md:text-sm text-slate-600 font-bold mt-1">Answer 6 quick questions to see which pathway leads you toward 2042.</p>
+          <p class="text-xs md:text-sm text-slate-600 font-bold mt-1">Answer 6 focused questions to explore which mentorship pathways best match your strengths.</p>
         </div>
         <div class="flex items-center gap-2 self-start md:self-auto bg-amber-50 border border-amber-300 px-3 py-1.5 rounded-xl text-xs font-black text-amber-900">
-          <span>⏱️ Takes ~30 secs</span>
+          <span>⏱️ Takes ~45 secs</span>
         </div>
       </div>
       <p id="quizProgress" class="text-xs font-black text-indigo-700 mb-3" aria-live="polite"></p>
@@ -67,8 +67,8 @@
           </button>
           <div class="flex w-full sm:w-auto gap-2">
             <button type="button" id="previousQuestionBtn" class="hidden flex-1 sm:flex-none text-xs font-black text-slate-700 bg-slate-100 border-2 border-slate-900 px-4 py-3 rounded-xl">← Previous</button>
-            <button type="button" id="nextQuestionBtn" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">Next →</button>
-            <button type="submit" id="submitStandaloneQuiz" class="hidden flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">🚀 Explore My Matched Pathways</button>
+            <button type="button" id="nextQuestionBtn" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">Next Question →</button>
+            <button type="submit" id="submitStandaloneQuiz" class="hidden flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">🚀 Reveal Matched Pathways</button>
           </div>
         </div>
       </form>
@@ -77,10 +77,21 @@
   </main>
 
   <footer class="border-t border-slate-200 bg-white/70 px-4 py-3 text-center text-xs text-slate-500 font-semibold">
-    Big Minds • Golden Age International School • Pathway Explorer
+    Big Minds • Student Interest Exploration & Future Pathways Platform
   </footer>
 
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- Application Logic -->
+  <script src="js/firebaseConfig.js"></script>
+  <script src="js/currencyHelper.js"></script>
+  <script src="js/firebaseSync.js"></script>
+  <script src="js/surveysAndBadges.js"></script>
   <script src="js/pathwaysData.js"></script>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('quizQuestionsContainer');
@@ -124,7 +135,7 @@
 
       function requireAnswer() {
         if (answers[QUIZ_QUESTIONS[currentQuestion].id] !== undefined) return true;
-        alert('Choose an answer before continuing.');
+        alert('Choose an answer before continuing to the next question.');
         return false;
       }
 
@@ -142,12 +153,14 @@
         e.preventDefault();
 
         if (!requireAnswer() || Object.keys(answers).length !== QUIZ_QUESTIONS.length) {
-          alert('Please answer all six questions before viewing your matches.');
+          alert('Please answer all questions before submitting.');
           return;
         }
+
         const tagScores = {};
         QUIZ_QUESTIONS.forEach((q, qIndex) => {
-          const tags = QUIZ_QUESTIONS[qIndex]?.options[answers[q.id]]?.tags || [];
+          const selectedIdx = answers[q.id];
+          const tags = QUIZ_QUESTIONS[qIndex]?.options[selectedIdx]?.tags || [];
           tags.forEach(t => {
             tagScores[t] = (tagScores[t] || 0) + 1;
           });
@@ -156,18 +169,38 @@
         const sorted = Object.entries(tagScores).sort((a, b) => b[1] - a[1]);
         const topInterests = sorted.slice(0, 3).map(entry => entry[0]);
 
-        // Save into bigminds_student_session
+        // Load existing session or generate
         let session = {};
         try {
           const saved = localStorage.getItem('bigminds_student_session');
           if (saved) session = JSON.parse(saved);
         } catch (err) {}
 
+        if (!session.participantId) {
+          session.participantId = 'bm_part_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 5);
+        }
+
         session.activeInterests = topInterests;
+        if (!Array.isArray(session.unlockedBadges)) session.unlockedBadges = [];
+        if (!session.unlockedBadges.includes('curiosity-pioneer')) {
+          session.unlockedBadges.push('curiosity-pioneer');
+        }
+
         localStorage.setItem('bigminds_student_session', JSON.stringify(session));
 
-        // Redirect back to explore map
-        window.location.href = 'index.html?fromQuiz=true';
+        // Persist to Firebase RTDB
+        if (window.FirebaseSync && typeof window.FirebaseSync.saveQuizSubmission === 'function') {
+          window.FirebaseSync.saveQuizSubmission(session.participantId, {
+            answers: answers,
+            scores: tagScores,
+            preferredAreas: topInterests,
+            quizVersion: '2.0'
+          }).finally(() => {
+            window.location.href = 'index.html?fromQuiz=true';
+          });
+        } else {
+          window.location.href = 'index.html?fromQuiz=true';
+        }
       });
     });
   </script>

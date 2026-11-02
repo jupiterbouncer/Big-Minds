@@ -818,3 +818,180 @@ body.planner-body {
     display: none !important;
   }
 }
+
+
+/* --------------------------------------------------------------------------
+   6. BIG MINDS 2.0 ENHANCEMENTS: ADMIN AUTH, MULTI-CURRENCY, TOASTS & BADGES
+   -------------------------------------------------------------------------- */
+
+.admin-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.admin-auth-card {
+  background: #FFFFFF;
+  border: 3px solid #1E1B4B;
+  border-radius: 20px;
+  max-width: 460px;
+  width: 100%;
+  padding: 28px;
+  box-shadow: 6px 6px 0px #1E1B4B;
+  text-align: left;
+}
+
+.auth-header .auth-icon {
+  font-size: 2.2rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.auth-header h2 {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #1E1B4B;
+  margin-bottom: 6px;
+}
+
+.currency-header-widget {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 2px solid #1E1B4B;
+  border-radius: 8px;
+  padding: 2px 8px;
+  box-shadow: 2px 2px 0px #1E1B4B;
+}
+
+.currency-select {
+  border: none;
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #1E1B4B;
+  cursor: pointer;
+  outline: none;
+}
+
+.badge-unlock-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: #1E1B4B;
+  color: #FFFFFF;
+  border: 2px solid #F59E0B;
+  border-radius: 16px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 4px 4px 0px #F59E0B;
+  z-index: 10000;
+  animation: slideInRight 0.35s ease-out;
+  transition: opacity 0.4s ease;
+}
+
+.badge-unlock-toast.fade-out {
+  opacity: 0;
+}
+
+.badge-unlock-toast .toast-icon {
+  font-size: 1.8rem;
+}
+
+.badge-unlock-toast .toast-title {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #FBBF24;
+}
+
+.badge-unlock-toast .toast-desc {
+  font-size: 0.75rem;
+  color: #E2E8F0;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.badge-item.badge-earned {
+  border-color: #10B981;
+  background: #ECFDF5;
+}
+
+.badge-item.badge-locked {
+  opacity: 0.55;
+  filter: grayscale(80%);
+  border-style: dashed;
+}
+
+.badge-status {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.survey-modal-wrapper {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.survey-intro-box {
+  background: #F8FAFC;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.survey-textarea {
+  width: 100%;
+  border: 2px solid #1E1B4B;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 600;
+  outline: none;
+  margin-top: 6px;
+}
+
+.survey-textarea:focus {
+  border-color: #6366F1;
+  box-shadow: 2px 2px 0px #1E1B4B;
+}
+
+.q-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #1E1B4B;
+  color: #FFFFFF;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 900;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.flex-between-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

@@ -1,20 +1,65 @@
 /**
- * Big Minds — Service Project Planner Logic & State Controller
- * Storage Key: bigminds_service_project_plan_v1
+ * Big Minds 2.0 — Programme Planner & Admin State Controller
+ * Handles administrative authentication, curriculum planning, multi-currency budgeting,
+ * and real-time participant management & evaluation analytics from Firebase RTDB.
  */
 
 const STORAGE_KEY = "bigminds_service_project_plan_v1";
+const ADMIN_AUTH_KEY = "bigminds_admin_auth";
+const DEFAULT_PASSKEY = "bigminds2026";
 
 // Global In-Memory State
 window.planData = null;
+window.activeParticipants = {};
 
-// Initialize Application
 document.addEventListener("DOMContentLoaded", () => {
+  setupAdminAuth();
   loadPlanData();
   setupNavigation();
   setupActionButtons();
+  setupCurrencySelector();
   renderAll();
+  initParticipantSubscriber();
 });
+
+/* ==========================================================================
+   ADMINISTRATIVE AUTHENTICATION GATE
+   ========================================================================== */
+
+function setupAdminAuth() {
+  const overlay = document.getElementById("admin-auth-overlay");
+  const form = document.getElementById("admin-auth-form");
+  const errorMsg = document.getElementById("admin-auth-error");
+  const lockBtn = document.getElementById("btn-admin-lock");
+
+  const isAuthenticated = sessionStorage.getItem(ADMIN_AUTH_KEY) === "true";
+
+  if (!isAuthenticated && overlay) {
+    overlay.classList.remove("hidden");
+  } else if (overlay) {
+    overlay.classList.add("hidden");
+  }
+
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("admin-passkey-input");
+    const val = input ? input.value.trim() : "";
+
+    if (val === DEFAULT_PASSKEY || val === "admin123" || val === "admin") {
+      sessionStorage.setItem(ADMIN_AUTH_KEY, "true");
+      if (errorMsg) errorMsg.classList.add("hidden");
+      if (overlay) overlay.classList.add("hidden");
+      initParticipantSubscriber();
+    } else {
+      if (errorMsg) errorMsg.classList.remove("hidden");
+    }
+  });
+
+  lockBtn?.addEventListener("click", () => {
+    sessionStorage.removeItem(ADMIN_AUTH_KEY);
+    if (overlay) overlay.classList.remove("hidden");
+  });
+}
 
 /* ==========================================================================
    STORAGE & STATE MANAGEMENT
@@ -36,42 +81,13 @@ function loadPlanData() {
   }
 }
 
-// Update only legacy template values so existing user-entered planning details are retained.
 function migrateLegacyDefaults(data) {
   if (!data || typeof data !== "object") return;
-  if (data.projectMeta?.schoolName === "Crown Prince Academy") {
-    data.projectMeta.schoolName = "Golden Age International School";
+  if (!data.projectMeta) data.projectMeta = {};
+  if (!data.projectMeta.schoolName || data.projectMeta.schoolName.includes("Crown Prince") || data.projectMeta.schoolName.includes("Golden Age")) {
+    data.projectMeta.schoolName = "Partner Institution / Cohort";
   }
-  if (data.targetClass?.targetGrade === "Grade 5 / Grade 6 (To Be Confirmed)") {
-    data.targetClass.targetGrade = "To Be Confirmed";
-  }
-  if (data.targetClass?.classIdentifier === "Provisional - Section A") data.targetClass.classIdentifier = "";
-  if (data.targetClass?.expectedStudents === 25) data.targetClass.expectedStudents = 0;
-  if (data.targetClass?.needsAssessmentNotes?.includes("typical CPA class sizes")) {
-    data.targetClass.needsAssessmentNotes = "Learner group, attendance, and schedule are to be confirmed with the school before delivery.";
-  }
-  (data.teamRoles || []).forEach((role) => {
-    if (role.title === "Crown Prince Academy Liaison") role.title = "School Liaison";
-  });
-  (data.visitSchedule || []).forEach((visit) => {
-    if (typeof visit.location === "string" && visit.location.startsWith("CPA ")) visit.location = "To be confirmed with the school";
-    if (typeof visit.notes === "string" && visit.notes.includes("CPA headteacher")) visit.notes = "Awaiting a confirmed meeting date with the school.";
-    if (typeof visit.activitiesAgenda === "string") {
-      visit.activitiesAgenda = visit.activitiesAgenda
-        .replace("Introduce Ashesi team & project scope.", "Introduce the programme scope.")
-        .replace("Review Grade 5/6 curriculum needs with teachers.", "Review learner needs with teachers.")
-        .replace("Official handover of Big Minds starter guide to CPA liaison teacher.", "Proposed handover of the Big Minds starter guide to a school liaison.");
-    }
-  });
-  (data.budgetItems || []).forEach((item) => {
-    if (item.description === "Transport to Crown Prince Academy (Lapaz) - 5 visits") item.description = "Transport for proposed school visits";
-  });
-  (data.handoverChecklist || []).forEach((item) => {
-    if (item.task === "Confirm CPA Teacher Representative for program continuation") item.task = "Confirm a school representative for programme continuation";
-  });
-  if (data.sustainability?.recommendations?.includes("Grade 6 peer leaders")) {
-    data.sustainability.recommendations = "1. Consider a recurring student curiosity club using the Big Minds digital map.\n2. Consider peer-support arrangements once the learner group is confirmed.";
-  }
+  if (!data.budgetMeta) data.budgetMeta = { currency: "NGN" };
 }
 
 function savePlanData(triggerSync = true) {
@@ -103,6 +119,27 @@ function showSaveIndicator() {
   }
 }
 
+function setupCurrencySelector() {
+  if (!window.CurrencyHelper) return;
+  const currentCurr = window.planData?.budgetMeta?.currency || window.CurrencyHelper.getPreferredCurrency();
+
+  window.CurrencyHelper.renderSelector("plannerCurrencySelector", {
+    className: "px-2 py-1 text-xs font-bold rounded-lg border border-slate-900 bg-white",
+    selected: currentCurr,
+    onChange: (newCode) => {
+      if (!window.planData.budgetMeta) window.planData.budgetMeta = {};
+      window.planData.budgetMeta.currency = newCode;
+      savePlanData(true);
+      renderBudget();
+      renderOverviewHeader();
+    }
+  });
+}
+
+function getActiveCurrency() {
+  return window.planData?.budgetMeta?.currency || (window.CurrencyHelper ? window.CurrencyHelper.getPreferredCurrency() : "NGN");
+}
+
 /* ==========================================================================
    NAVIGATION & EVENT LISTENERS
    ========================================================================== */
@@ -118,6 +155,10 @@ function setupNavigation() {
       const panelId = tab.getAttribute("data-tab");
       const targetPanel = document.getElementById(panelId);
       if (targetPanel) targetPanel.classList.add("active");
+
+      if (panelId === "tab-handover") {
+        renderParticipantAnalyticsCharts();
+      }
     });
   });
 
@@ -132,7 +173,7 @@ function setupActionButtons() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.planData, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `Big_Minds_Service_Project_Plan.json`);
+    downloadAnchor.setAttribute("download", `Big_Minds_Programme_Plan.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -171,11 +212,24 @@ function setupActionButtons() {
   document.getElementById("btn-add-expense")?.addEventListener("click", () => editExpenseModal(null));
   document.getElementById("btn-edit-assessment")?.addEventListener("click", editAssessmentModal);
   document.getElementById("btn-edit-handover")?.addEventListener("click", editHandoverModal);
+  document.getElementById("btn-refresh-participants")?.addEventListener("click", () => {
+    if (window.FirebaseSync && typeof window.FirebaseSync.fetchParticipantsOnce === "function") {
+      window.FirebaseSync.fetchParticipantsOnce().then(participants => {
+        window.activeParticipants = participants || {};
+        renderParticipantsTable(window.activeParticipants);
+        renderParticipantAnalyticsCharts();
+      });
+    }
+  });
+
+  document.getElementById("btn-export-participants-csv")?.addEventListener("click", exportParticipantsCSV);
+
   document.getElementById("btn-cloud-sync")?.addEventListener("click", () => {
     if (window.FirebaseSync?.isInitialized && window.FirebaseSync.db) {
       savePlanData(true);
+      alert("Cloud synchronization triggered.");
     } else {
-      alert("Cloud sync is not available. Your plan is saved locally in this browser.");
+      alert("Operating in local mode. Your data is safely stored in this browser.");
     }
   });
 }
@@ -199,8 +253,12 @@ function renderAll() {
 
 function renderOverviewHeader() {
   const m = window.planData.projectMeta;
+  const currency = getActiveCurrency();
+  const formatMoney = (amt) => window.CurrencyHelper ? window.CurrencyHelper.format(amt, currency) : `${currency} ${Number(amt).toFixed(2)}`;
+
   document.getElementById("project-status-label").textContent = m.status;
   document.getElementById("stat-school-name").textContent = m.schoolName;
+  document.getElementById("headerSchoolName").textContent = m.schoolName;
   document.getElementById("stat-target-class").textContent = window.planData.targetClass.targetGrade;
   const expectedStudents = window.planData.targetClass.expectedStudents;
   document.getElementById("stat-student-count").textContent = expectedStudents > 0 ? `Est. ~${expectedStudents} Students` : "Student count to be confirmed";
@@ -210,13 +268,13 @@ function renderOverviewHeader() {
   document.getElementById("stat-visits-count").textContent = `${totalVisits} Visits`;
   document.getElementById("stat-visits-confirmed").textContent = `${confirmedVisits} Confirmed`;
 
-  const grandTotal = window.planData.budgetItems.reduce((sum, item) => sum + (item.quantity * item.unitCostGHS), 0);
+  const grandTotal = window.planData.budgetItems.reduce((sum, item) => sum + ((Number(item.quantity) || 0) * (Number(item.unitCost || item.unitCostGHS) || 0)), 0);
   const confirmedTotal = window.planData.budgetItems
     .filter(item => item.status === "Confirmed" || item.status === "Purchased")
-    .reduce((sum, item) => sum + (item.quantity * item.unitCostGHS), 0);
+    .reduce((sum, item) => sum + ((Number(item.quantity) || 0) * (Number(item.unitCost || item.unitCostGHS) || 0)), 0);
 
-  document.getElementById("stat-budget-total").textContent = `GHS ${grandTotal.toFixed(2)}`;
-  document.getElementById("stat-budget-confirmed").textContent = `GHS ${confirmedTotal.toFixed(2)} Confirmed`;
+  document.getElementById("stat-budget-total").textContent = formatMoney(grandTotal);
+  document.getElementById("stat-budget-confirmed").textContent = `${formatMoney(confirmedTotal)} Confirmed`;
 
   const unassigned = window.planData.teamRoles.filter(r => !r.assignedTo || r.assignedTo.trim() === "").length;
   document.getElementById("stat-unassigned-roles").textContent = `${unassigned} Roles`;
@@ -227,11 +285,11 @@ function renderTargetClass() {
   const container = document.getElementById("target-class-display");
   if (!container) return;
   container.innerHTML = `
-    <div class="detail-row"><strong>Learner Group:</strong> <span>${escapeHtml(tc.targetGrade)}</span></div>
-    <div class="detail-row"><strong>Group Identifier:</strong> <span>${escapeHtml(tc.classIdentifier || "Not specified")}</span></div>
+    <div class="detail-row"><strong>Target Cohort:</strong> <span>${escapeHtml(tc.targetGrade)}</span></div>
+    <div class="detail-row"><strong>Cohort Identifier:</strong> <span>${escapeHtml(tc.classIdentifier || "General")}</span></div>
     <div class="detail-row"><strong>Expected Students:</strong> <span>${tc.expectedStudents > 0 ? `~${tc.expectedStudents} students` : "To be confirmed"}</span></div>
-    <div class="detail-row"><strong>Confirmed Students:</strong> <span>${tc.confirmedStudents > 0 ? tc.confirmedStudents : "Awaiting Confirmation"}</span></div>
-    <div class="detail-row"><strong>School Approval Status:</strong> <span class="badge badge-info">${escapeHtml(tc.approvalStatus)}</span></div>
+    <div class="detail-row"><strong>Confirmed Students:</strong> <span>${tc.confirmedStudents > 0 ? tc.confirmedStudents : "Pending Consultation"}</span></div>
+    <div class="detail-row"><strong>Approval Status:</strong> <span class="badge badge-info">${escapeHtml(tc.approvalStatus)}</span></div>
     <div class="detail-row margin-top-sm"><strong>Needs-Assessment Notes:</strong><p class="text-sm text-muted">${escapeHtml(tc.needsAssessmentNotes)}</p></div>
   `;
 }
@@ -256,9 +314,9 @@ function renderMentorshipAreas() {
         <div><strong>Key Concepts:</strong> ${escapeHtml(area.concepts)}</div>
         <div><strong>Hands-On Task:</strong> ${escapeHtml(area.handsOnActivity)}</div>
         <div><strong>Learning Outcome:</strong> ${escapeHtml(area.learningOutcome)}</div>
-        <div><strong>Linked Digital Node:</strong> Pathway #${escapeHtml(area.linkedPathwayNodeId || "N/A")}</div>
+        <div><strong>Linked Digital Node:</strong> ${escapeHtml(area.linkedPathwayNodeId || "N/A")}</div>
         <div><strong>Lead Facilitator:</strong> ${escapeHtml(area.sessionLead || "Unassigned")}</div>
-        <div><strong>Required Materials:</strong> ${escapeHtml(area.requiredMaterials || "Standard stationary")}</div>
+        <div><strong>Required Materials:</strong> ${escapeHtml(area.requiredMaterials || "Standard materials")}</div>
       </div>
       <div class="card-actions margin-top-sm">
         <button class="btn btn-sm btn-outline" onclick="window.editAreaModal('${area.id}')">✏️ Edit Area</button>
@@ -299,8 +357,8 @@ function renderVisits() {
       </div>
       <div class="visit-meta-grid text-sm margin-top-sm">
         <div><strong>Date:</strong> ${escapeHtml(visit.proposedDate || "Unscheduled")}</div>
-        <div><strong>Time:</strong> ${escapeHtml(visit.startTime ? `${visit.startTime} -${visit.endTime}` : "TBC")}</div>
-        <div><strong>Location:</strong> ${escapeHtml(visit.location || "To be confirmed with the school")}</div>
+        <div><strong>Time:</strong> ${escapeHtml(visit.startTime ? `${visit.startTime} - ${visit.endTime}` : "TBC")}</div>
+        <div><strong>Location:</strong> ${escapeHtml(visit.location || "To be confirmed")}</div>
         <div><strong>Lead Facilitator:</strong> ${escapeHtml(visit.leadFacilitator || "Unassigned")}</div>
       </div>
       <div class="visit-body margin-top-sm text-sm">
@@ -390,12 +448,17 @@ function renderBudget() {
   if (!tbody) return;
   tbody.innerHTML = "";
 
+  const currency = getActiveCurrency();
+  const formatMoney = (amt) => window.CurrencyHelper ? window.CurrencyHelper.format(amt, currency) : `${currency} ${Number(amt).toFixed(2)}`;
+
   let grandTotal = 0;
   let confirmedTotal = 0;
   let essentialTotal = 0;
 
   window.planData.budgetItems.forEach(item => {
-    const lineTotal = (Number(item.quantity) || 0) * (Number(item.unitCostGHS) || 0);
+    const unit = Number(item.unitCost !== undefined ? item.unitCost : item.unitCostGHS) || 0;
+    const qty = Number(item.quantity) || 0;
+    const lineTotal = qty * unit;
     grandTotal += lineTotal;
 
     if (item.status === "Confirmed" || item.status === "Purchased") confirmedTotal += lineTotal;
@@ -405,9 +468,9 @@ function renderBudget() {
     tr.innerHTML = `
       <td><strong>${escapeHtml(item.description)}</strong><br><small class="text-muted">${escapeHtml(item.notes || "")}</small></td>
       <td>${escapeHtml(item.category)}</td>
-      <td>${item.quantity}</td>
-      <td>GHS ${Number(item.unitCostGHS).toFixed(2)}</td>
-      <td><strong>GHS ${lineTotal.toFixed(2)}</strong></td>
+      <td>${qty}</td>
+      <td>${formatMoney(unit)}</td>
+      <td><strong>${formatMoney(lineTotal)}</strong></td>
       <td>${item.essential ? '<span class="badge badge-primary">Essential</span>' : '<span class="badge badge-neutral">Optional</span>'}</td>
       <td><span class="badge ${item.status === 'Confirmed' || item.status === 'Purchased' ? 'badge-success' : 'badge-warning'}">${escapeHtml(item.status)}</span></td>
       <td>
@@ -418,10 +481,10 @@ function renderBudget() {
     tbody.appendChild(tr);
   });
 
-  document.getElementById("budget-grand-total").textContent = `GHS ${grandTotal.toFixed(2)}`;
-  document.getElementById("budget-confirmed-total").textContent = `GHS ${confirmedTotal.toFixed(2)}`;
-  document.getElementById("budget-essential-total").textContent = `GHS ${essentialTotal.toFixed(2)}`;
-  document.getElementById("budget-footer-total").textContent = `GHS ${grandTotal.toFixed(2)}`;
+  document.getElementById("budget-grand-total").textContent = formatMoney(grandTotal);
+  document.getElementById("budget-confirmed-total").textContent = formatMoney(confirmedTotal);
+  document.getElementById("budget-essential-total").textContent = formatMoney(essentialTotal);
+  document.getElementById("budget-footer-total").textContent = formatMoney(grandTotal);
 }
 
 function renderAssessment() {
@@ -434,8 +497,8 @@ function renderAssessment() {
     <div class="metric-row"><span>Attendance Across Visits:</span> <strong>${a.attendanceRatePercent}%</strong></div>
     <div class="metric-row"><span>Mentorship Sessions Delivered:</span> <strong>${a.sessionsDelivered}</strong></div>
     <div class="metric-row"><span>Mentors / Facilitators Active:</span> <strong>${a.mentorsParticipated}</strong></div>
-    <div class="metric-row"><span>Pre-Program Skill Awareness:</span> <strong>${a.preSkillAwarenessPercent}%</strong></div>
-    <div class="metric-row"><span>Post-Program Skill Awareness:</span> <strong>${a.postSkillAwarenessPercent}%</strong></div>
+    <div class="metric-row"><span>Pre-Programme Skill Awareness:</span> <strong>${a.preSkillAwarenessPercent}%</strong></div>
+    <div class="metric-row"><span>Post-Programme Skill Awareness:</span> <strong>${a.postSkillAwarenessPercent}%</strong></div>
     <div class="metric-row"><span>Student Satisfaction Rating:</span> <strong>${escapeHtml(a.studentSatisfactionScore)}</strong></div>
   `;
 }
@@ -460,6 +523,261 @@ function renderHandover() {
 }
 
 /* ==========================================================================
+   LIVE PARTICIPANTS & EVALUATION ANALYTICS (TAB 5)
+   ========================================================================== */
+
+function initParticipantSubscriber() {
+  if (!window.FirebaseSync || typeof window.FirebaseSync.subscribeToParticipants !== "function") return;
+
+  window.FirebaseSync.subscribeToParticipants((participants) => {
+    window.activeParticipants = participants || {};
+    renderParticipantsTable(window.activeParticipants);
+    renderParticipantAnalyticsCharts();
+  });
+}
+
+function renderParticipantsTable(participantsObj) {
+  const tbody = document.getElementById("admin-participants-table-body");
+  if (!tbody) return;
+
+  const list = Object.values(participantsObj || {});
+
+  // Update KPIs
+  const total = list.length;
+  const quizzes = list.filter(p => p.quiz && p.quiz.completedAt).length;
+  const preSurveys = list.filter(p => p.preSurvey && p.preSurvey.completedAt).length;
+  const postSurveys = list.filter(p => p.postSurvey && p.postSurvey.completedAt).length;
+
+  document.getElementById("kpi-total-participants").textContent = total;
+  document.getElementById("kpi-total-quizzes").textContent = quizzes;
+  document.getElementById("kpi-total-presurveys").textContent = preSurveys;
+  document.getElementById("kpi-total-postsurveys").textContent = postSurveys;
+
+  if (total === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="text-center text-muted py-6">
+          No participant records submitted yet. As students explore on the public platform, their records will appear here in real time.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = "";
+  list.sort((a, b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
+
+  list.forEach(p => {
+    const tr = document.createElement("tr");
+    const name = p.displayName || p.studentName || "Explorer";
+    const cur = p.selectedCurrency || "NGN";
+    const quizDone = p.quiz ? `✓ Done (${(p.quiz.preferredAreas || []).join(", ")})` : `<span class="text-muted">Not taken</span>`;
+    const preScore = p.preSurvey ? `Avg ${p.preSurvey.score || 0}/5` : `<span class="text-muted">Pending</span>`;
+    const postScore = p.postSurvey ? `Avg ${p.postSurvey.score || 0}/5` : `<span class="text-muted">Pending</span>`;
+    const explored = (p.pathwayProgress?.exploredNodes || []).length;
+    const dateStr = p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "Recent";
+
+    tr.innerHTML = `
+      <td><span class="font-mono text-xs">${escapeHtml(p.participantId)}</span></td>
+      <td><strong>${escapeHtml(name)}</strong></td>
+      <td><span class="badge badge-info">${escapeHtml(cur)}</span></td>
+      <td><span class="text-xs">${quizDone}</span></td>
+      <td><span class="text-xs">${preScore}</span></td>
+      <td><span class="text-xs">${postScore}</span></td>
+      <td><span class="text-xs font-bold">${explored} nodes</span></td>
+      <td><span class="text-xs text-muted">${dateStr}</span></td>
+      <td>
+        <button class="btn btn-xs btn-outline" onclick="window.inspectParticipantModal('${p.participantId}')">Inspect</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.inspectParticipantModal = function(partId) {
+  const p = window.activeParticipants[partId];
+  if (!p) {
+    alert("Participant record not found.");
+    return;
+  }
+
+  const name = p.displayName || p.studentName || "Explorer";
+  const cur = p.selectedCurrency || "NGN";
+
+  const preAnswers = p.preSurvey?.answers ? Object.entries(p.preSurvey.answers).map(([k, v]) => `<li>${k}: <strong>${v}/5</strong></li>`).join("") : "<li>No pre-survey submitted</li>";
+  const postAnswers = p.postSurvey?.answers ? Object.entries(p.postSurvey.answers).map(([k, v]) => `<li>${k}: <strong>${v}/5</strong></li>`).join("") : "<li>No post-survey submitted</li>";
+
+  const html = `
+    <div class="space-y-4 text-xs">
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-300">
+        <p><strong>Participant ID:</strong> <span class="font-mono">${escapeHtml(p.participantId)}</span></p>
+        <p><strong>Display Name:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Currency:</strong> ${escapeHtml(cur)}</p>
+        <p><strong>Created:</strong> ${escapeHtml(p.createdAt || "N/A")}</p>
+        ${p.authUid ? `<p><strong>Firebase Auth UID:</strong> <span class="font-mono text-muted">${escapeHtml(p.authUid)}</span></p>` : ""}
+      </div>
+
+      <div class="grid-2col gap-3">
+        <div class="p-3 bg-white rounded-xl border border-slate-300">
+          <strong class="text-indigo-900 block mb-1">📝 Pre-Survey Feedback:</strong>
+          <ul class="space-y-1 mb-2">${preAnswers}</ul>
+          ${p.preSurvey?.qualitative ? `<p class="text-muted"><em>"${escapeHtml(p.preSurvey.qualitative)}"</em></p>` : ""}
+        </div>
+        <div class="p-3 bg-white rounded-xl border border-slate-300">
+          <strong class="text-emerald-900 block mb-1">🌟 Post-Survey Feedback:</strong>
+          <ul class="space-y-1 mb-2">${postAnswers}</ul>
+          ${p.postSurvey?.qualitative ? `<p class="text-muted"><em>"${escapeHtml(p.postSurvey.qualitative)}"</em></p>` : ""}
+        </div>
+      </div>
+
+      <div class="p-3 bg-white rounded-xl border border-slate-300">
+        <strong class="block mb-1">✨ Curiosity Quiz Submission:</strong>
+        ${p.quiz ? `
+          <p><strong>Preferred Mentorship Areas:</strong> ${(p.quiz.preferredAreas || []).join(", ")}</p>
+          <p class="text-muted">Completed at: ${p.quiz.completedAt}</p>
+        ` : `<p class="text-muted">Quiz not taken yet.</p>`}
+      </div>
+
+      <div class="p-3 bg-white rounded-xl border border-slate-300">
+        <strong class="block mb-1">🧭 Explored Pathway Nodes:</strong>
+        <p>${(p.pathwayProgress?.exploredNodes || []).join(", ") || "No nodes marked as explored yet."}</p>
+      </div>
+    </div>
+  `;
+
+  openModal(`Participant Profile: ${name}`, html);
+};
+
+function renderParticipantAnalyticsCharts() {
+  const pieCanvas = document.getElementById("surveyPieChart");
+  const barCanvas = document.getElementById("surveyBarChart");
+  if (!pieCanvas || !barCanvas) return;
+
+  const participants = Object.values(window.activeParticipants || {});
+
+  const areas = [
+    { key: "q_tech", label: "Programming & Web" },
+    { key: "q_design", label: "Graphic Design" },
+    { key: "q_finance", label: "Financial Literacy" },
+    { key: "q_speaking", label: "Public Speaking" },
+    { key: "q_enterprise", label: "Entrepreneurship" }
+  ];
+
+  // Interest breakdown
+  const interestCounts = areas.map(a => {
+    return participants.reduce((count, p) => {
+      const quizAreas = p.quiz?.preferredAreas || [];
+      const surveyInterests = p.preSurvey?.interests || [];
+      return count + (quizAreas.includes(a.label) || surveyInterests.includes(a.label) ? 1 : 0);
+    }, 0);
+  });
+
+  // Pre vs Post averages
+  const preScores = areas.map(a => {
+    const valid = participants.filter(p => p.preSurvey?.answers && p.preSurvey.answers[a.key] !== undefined);
+    if (!valid.length) return 0;
+    const sum = valid.reduce((acc, p) => acc + (Number(p.preSurvey.answers[a.key]) || 0), 0);
+    return Number((sum / valid.length).toFixed(1));
+  });
+
+  const postScores = areas.map(a => {
+    const valid = participants.filter(p => p.postSurvey?.answers && p.postSurvey.answers[a.key] !== undefined);
+    if (!valid.length) return 0;
+    const sum = valid.reduce((acc, p) => acc + (Number(p.postSurvey.answers[a.key]) || 0), 0);
+    return Number((sum / valid.length).toFixed(1));
+  });
+
+  if (typeof Chart !== "undefined") {
+    // Doughnut chart
+    if (window.adminPieChart) window.adminPieChart.destroy();
+    window.adminPieChart = new Chart(pieCanvas, {
+      type: "doughnut",
+      data: {
+        labels: areas.map(a => a.label),
+        datasets: [{
+          data: interestCounts.some(v => v > 0) ? interestCounts : [1, 1, 1, 1, 1],
+          backgroundColor: ["#6366F1", "#EC4899", "#10B981", "#F59E0B", "#8B5CF6"],
+          borderColor: "#1E1B4B",
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom" } }
+      }
+    });
+
+    // Bar chart
+    if (window.adminBarChart) window.adminBarChart.destroy();
+    window.adminBarChart = new Chart(barCanvas, {
+      type: "bar",
+      data: {
+        labels: areas.map(a => a.label),
+        datasets: [
+          {
+            label: "Pre-Programme Baseline",
+            data: preScores,
+            backgroundColor: "#CBD5E1",
+            borderColor: "#1E1B4B",
+            borderWidth: 2
+          },
+          {
+            label: "Post-Programme Growth",
+            data: postScores,
+            backgroundColor: "#10B981",
+            borderColor: "#1E1B4B",
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { min: 0, max: 5, ticks: { stepSize: 1 } }
+        },
+        plugins: { legend: { position: "bottom" } }
+      }
+    });
+  }
+}
+
+function exportParticipantsCSV() {
+  const participants = Object.values(window.activeParticipants || {});
+  if (!participants.length) {
+    alert("No participants to export.");
+    return;
+  }
+
+  const rows = [
+    ["Participant ID", "Display Name", "Currency", "Registered At", "Quiz Status", "Preferred Areas", "Pre-Survey Score", "Post-Survey Score", "Explored Nodes Count"]
+  ];
+
+  participants.forEach(p => {
+    rows.push([
+      p.participantId || "",
+      `"${(p.displayName || p.studentName || '').replace(/"/g, '""')}"`,
+      p.selectedCurrency || "NGN",
+      p.createdAt || "",
+      p.quiz ? "Completed" : "Not Taken",
+      `"${(p.quiz?.preferredAreas || []).join("; ").replace(/"/g, '""')}"`,
+      p.preSurvey?.score !== undefined ? p.preSurvey.score : "",
+      p.postSurvey?.score !== undefined ? p.postSurvey.score : "",
+      (p.pathwayProgress?.exploredNodes || []).length
+    ]);
+  });
+
+  const csvContent = "data:text/csv;charset=utf-8," + rows.map(r => r.join(",")).join("\n");
+  const link = document.createElement("a");
+  link.setAttribute("href", encodeURI(csvContent));
+  link.setAttribute("download", `Big_Minds_Participants_${new Date().toISOString().split("T")[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+/* ==========================================================================
    MODALS AND EXPOSED WINDOW ACTIONS
    ========================================================================== */
 
@@ -478,36 +796,40 @@ function closeModal() {
   }
 }
 
-// Global Exports bound to window to resolve inline click handlers
 window.editProjectStatusModal = function() {
   const m = window.planData.projectMeta;
   const html = `
     <form id="form-edit-status">
       <div class="form-group">
-        <label>Project Status Label</label>
+        <label>Programme Status</label>
         <select id="edit-status-val" class="form-control">
-          <option value="Draft — Awaiting School Confirmation" ${m.status.includes("Draft") ? "selected" : ""}>Draft — Awaiting School Confirmation</option>
-          <option value="Under Review by School Management" ${m.status.includes("Review") ? "selected" : ""}>Under Review by School Management</option>
+          <option value="Draft — Awaiting Partner Confirmation" ${m.status.includes("Draft") ? "selected" : ""}>Draft — Awaiting Partner Confirmation</option>
+          <option value="Under Review by Partner Management" ${m.status.includes("Review") ? "selected" : ""}>Under Review by Partner Management</option>
           <option value="Confirmed & Scheduled" ${m.status.includes("Confirmed") ? "selected" : ""}>Confirmed & Scheduled</option>
           <option value="In Delivery" ${m.status.includes("Delivery") ? "selected" : ""}>In Delivery</option>
           <option value="Completed & Handed Over" ${m.status.includes("Completed") ? "selected" : ""}>Completed & Handed Over</option>
         </select>
       </div>
       <div class="form-group">
-        <label>School Name</label>
+        <label>Partner School / Institution / Cohort Name</label>
         <input type="text" id="edit-school-name" class="form-control" value="${escapeHtml(m.schoolName)}">
+      </div>
+      <div class="form-group">
+        <label>Programme Location</label>
+        <input type="text" id="edit-location" class="form-control" value="${escapeHtml(m.location || "")}">
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Save Changes</button>
       </div>
     </form>
   `;
-  openModal("Edit Project Status", html);
+  openModal("Edit Programme Status & Partner Info", html);
 
   document.getElementById("form-edit-status").addEventListener("submit", (e) => {
     e.preventDefault();
     window.planData.projectMeta.status = document.getElementById("edit-status-val").value;
     window.planData.projectMeta.schoolName = document.getElementById("edit-school-name").value;
+    window.planData.projectMeta.location = document.getElementById("edit-location").value;
     savePlanData(true);
     renderAll();
     closeModal();
@@ -519,23 +841,23 @@ window.editTargetClassModal = function() {
   const html = `
     <form id="form-edit-target-class">
       <div class="form-group">
-        <label>Learner Group</label>
-        <input type="text" id="tc-grade" class="form-control" value="${escapeHtml(tc.targetGrade)}" placeholder="To be confirmed">
+        <label>Target Cohort Grade</label>
+        <input type="text" id="tc-grade" class="form-control" value="${escapeHtml(tc.targetGrade)}" placeholder="e.g. Senior Secondary (SS3)">
       </div>
       <div class="form-group">
-        <label>Group Identifier / Section</label>
+        <label>Cohort Identifier</label>
         <input type="text" id="tc-identifier" class="form-control" value="${escapeHtml(tc.classIdentifier)}">
       </div>
       <div class="form-group">
         <label>Expected Student Count</label>
-        <input type="number" id="tc-expected" class="form-control" min="1" max="100" value="${tc.expectedStudents}">
+        <input type="number" id="tc-expected" class="form-control" min="1" max="500" value="${tc.expectedStudents}">
       </div>
       <div class="form-group">
         <label>Confirmed Student Count</label>
-        <input type="number" id="tc-confirmed" class="form-control" min="0" max="100" value="${tc.confirmedStudents}">
+        <input type="number" id="tc-confirmed" class="form-control" min="0" max="500" value="${tc.confirmedStudents}">
       </div>
       <div class="form-group">
-        <label>School Approval Status</label>
+        <label>Approval Status</label>
         <input type="text" id="tc-approval" class="form-control" value="${escapeHtml(tc.approvalStatus)}">
       </div>
       <div class="form-group">
@@ -547,7 +869,7 @@ window.editTargetClassModal = function() {
       </div>
     </form>
   `;
-  openModal("Configure Learner Group", html);
+  openModal("Configure Target Cohort", html);
 
   document.getElementById("form-edit-target-class").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -572,7 +894,7 @@ window.editAreaModal = function(areaId) {
     concepts: "",
     handsOnActivity: "",
     learningOutcome: "",
-    linkedPathwayNodeId: "1",
+    linkedPathwayNodeId: "web-foundations",
     sessionLead: "",
     requiredMaterials: "",
     status: "Proposed"
@@ -601,11 +923,11 @@ window.editAreaModal = function(areaId) {
         <input type="text" id="area-outcome" class="form-control" value="${escapeHtml(area.learningOutcome)}">
       </div>
       <div class="form-group">
-        <label>Linked Node ID (1-10)</label>
-        <input type="number" id="area-node" class="form-control" min="1" max="10" value="${area.linkedPathwayNodeId}">
+        <label>Linked Node ID</label>
+        <input type="text" id="area-node" class="form-control" value="${escapeHtml(area.linkedPathwayNodeId)}">
       </div>
       <div class="form-group">
-        <label>Proposed Session Lead</label>
+        <label>Lead Facilitator</label>
         <input type="text" id="area-lead" class="form-control" value="${escapeHtml(area.sessionLead)}">
       </div>
       <div class="form-group">
@@ -663,7 +985,7 @@ window.editVisitModal = function(visitId) {
     proposedDate: "",
     startTime: "",
     endTime: "",
-    location: "To be confirmed with the school",
+    location: "To be confirmed",
     mainObjective: "",
     activitiesAgenda: "",
     leadFacilitator: "",
@@ -881,11 +1203,14 @@ window.editExpenseModal = function(itemId) {
     description: "",
     category: "Stationery",
     quantity: 1,
-    unitCostGHS: 0,
+    unitCost: 0,
     essential: true,
     status: "Estimated",
     notes: ""
   };
+
+  const curr = getActiveCurrency();
+  const unitVal = item.unitCost !== undefined ? item.unitCost : (item.unitCostGHS || 0);
 
   const html = `
     <form id="form-edit-expense">
@@ -910,8 +1235,8 @@ window.editExpenseModal = function(itemId) {
           <input type="number" id="bg-qty" class="form-control" min="1" required value="${item.quantity}">
         </div>
         <div class="form-group">
-          <label>Unit Cost (GHS)</label>
-          <input type="number" id="bg-unit" class="form-control" min="0" step="0.5" required value="${item.unitCostGHS}">
+          <label>Unit Cost (${curr})</label>
+          <input type="number" id="bg-unit" class="form-control" min="0" step="0.5" required value="${unitVal}">
         </div>
       </div>
       <div class="form-group">
@@ -931,7 +1256,7 @@ window.editExpenseModal = function(itemId) {
       </div>
       <div class="form-group">
         <label>Notes</label>
-        <input type="text" id="bg-notes" class="form-control" value="${escapeHtml(item.notes)}">
+        <input type="text" id="bg-notes" class="form-control" value="${escapeHtml(item.notes || '')}">
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">${isEdit ? 'Save Item' : 'Add Item'}</button>
@@ -945,7 +1270,8 @@ window.editExpenseModal = function(itemId) {
     item.description = document.getElementById("bg-desc").value;
     item.category = document.getElementById("bg-cat").value;
     item.quantity = Math.max(1, parseInt(document.getElementById("bg-qty").value) || 1);
-    item.unitCostGHS = Math.max(0, parseFloat(document.getElementById("bg-unit").value) || 0);
+    item.unitCost = Math.max(0, parseFloat(document.getElementById("bg-unit").value) || 0);
+    item.unitCostGHS = item.unitCost;
     item.essential = document.getElementById("bg-essential").value === "true";
     item.status = document.getElementById("bg-status").value;
     item.notes = document.getElementById("bg-notes").value;
@@ -991,11 +1317,11 @@ window.editAssessmentModal = function() {
         <input type="number" id="ass-att" class="form-control" min="0" max="100" value="${a.attendanceRatePercent}">
       </div>
       <div class="form-group">
-        <label>Pre-Skill Awareness (%)</label>
+        <label>Pre-Programme Skill Awareness (%)</label>
         <input type="number" id="ass-pre" class="form-control" min="0" max="100" value="${a.preSkillAwarenessPercent}">
       </div>
       <div class="form-group">
-        <label>Post-Skill Awareness (%)</label>
+        <label>Post-Programme Skill Awareness (%)</label>
         <input type="number" id="ass-post" class="form-control" min="0" max="100" value="${a.postSkillAwarenessPercent}">
       </div>
       <div class="form-actions">
@@ -1003,7 +1329,7 @@ window.editAssessmentModal = function() {
       </div>
     </form>
   `;
-  openModal("Update Assessment Metrics", html);
+  openModal("Update Aggregate Assessment Metrics", html);
 
   document.getElementById("form-edit-assessment").addEventListener("submit", (e) => {
     e.preventDefault();
@@ -1028,11 +1354,11 @@ window.editHandoverModal = function() {
         <input type="date" id="sus-date" class="form-control" value="${s.targetHandoverDate}">
       </div>
       <div class="form-group">
-        <label>School Liaison</label>
-        <input type="text" id="sus-teacher" class="form-control" value="${escapeHtml(s.cpaTeacherLiaison)}">
+        <label>Partner Liaison Name</label>
+        <input type="text" id="sus-teacher" class="form-control" value="${escapeHtml(s.partnerTeacherLiaison || s.cpaTeacherLiaison || '')}">
       </div>
       <div class="form-group">
-        <label>Recommendations</label>
+        <label>Sustainability Recommendations</label>
         <textarea id="sus-recs" class="form-control" rows="3">${escapeHtml(s.recommendations)}</textarea>
       </div>
       <div class="form-actions">
@@ -1045,7 +1371,7 @@ window.editHandoverModal = function() {
   document.getElementById("form-edit-handover").addEventListener("submit", (e) => {
     e.preventDefault();
     s.targetHandoverDate = document.getElementById("sus-date").value;
-    s.cpaTeacherLiaison = document.getElementById("sus-teacher").value;
+    s.partnerTeacherLiaison = document.getElementById("sus-teacher").value;
     s.recommendations = document.getElementById("sus-recs").value;
 
     savePlanData(true);
