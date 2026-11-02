@@ -11,7 +11,7 @@
 <body class="planner-body">
 
   <!-- ADMIN AUTHENTICATION GATE OVERLAY -->
-  <div id="admin-auth-overlay" class="admin-auth-overlay hidden">
+  <div id="admin-auth-overlay" class="admin-auth-overlay" style="display: flex;">
     <div class="admin-auth-card neo-card">
       <div class="auth-header">
         <span class="auth-icon">🔐</span>
@@ -28,7 +28,7 @@
             type="password"
             id="admin-passkey-input"
             class="form-control"
-            placeholder="Enter passkey (default: bigminds2026)"
+            placeholder="Enter administrator passkey"
             required
             autocomplete="current-password"
           />
@@ -71,6 +71,7 @@
         <button id="btn-import-trigger" class="btn btn-secondary">📤 Import Plan</button>
         <input type="file" id="import-file-input" accept=".json" style="display:none;">
         <button id="btn-print-plan" class="btn btn-primary">🖨️ Print Summary</button>
+        <button id="btn-change-passkey" class="btn btn-secondary btn-sm" title="Change Administrator Passkey">🔑 Change Passkey</button>
         <button id="btn-admin-lock" class="btn btn-outline btn-sm" title="Lock administration dashboard">🔒 Lock</button>
       </div>
     </div>

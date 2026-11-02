@@ -179,21 +179,20 @@ class BigMindsApp {
     if (!overlay) {
       overlay = document.createElement('div');
       overlay.id = 'onboardingModalOverlay';
-      overlay.className = 'planner-modal-overlay';
+      overlay.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm planner-modal-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(15,23,42,0.8);backdrop-filter:blur(6px);padding:1rem;box-sizing:border-box;';
       overlay.innerHTML = `
-        <div class="planner-modal-card max-w-md">
-          <div class="modal-header">
-            <div class="flex items-center gap-2">
-              <span class="text-2xl">💡</span>
-              <h3 class="text-xl font-black text-slate-900">Welcome to Big Minds</h3>
+        <div class="bg-white border-2 border-slate-900 rounded-2xl shadow-[6px_6px_0px_#0F172A] w-full max-w-md p-6 relative planner-modal-card" style="margin:auto;max-width:480px;width:100%;box-sizing:border-box;">
+          <div class="flex items-center gap-2.5 pb-3 border-b-2 border-slate-200 mb-4">
+            <span class="text-3xl">💡</span>
+            <div>
+              <h3 class="text-xl font-black text-slate-900 leading-tight">Welcome to Big Minds</h3>
+              <p class="text-[11px] font-bold text-slate-500">Student Pathways &amp; Skills Explorer</p>
             </div>
           </div>
-          <div class="modal-body p-5">
-            <p class="text-sm text-slate-700 font-bold mb-3">
-              Discover your interests. Explore your possibilities. Build your next step.
-            </p>
-            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-              Explore career pathways, try real hands-on challenges, and discover skills you can start developing today. What should we call you?
+          <div class="space-y-4">
+            <p class="text-xs text-slate-600 font-medium leading-relaxed">
+              Explore real-world pathways, try hands-on skills challenges, and discover what sparks your curiosity. Enter your preferred display name to begin:
             </p>
 
             <form id="onboardingForm" class="space-y-4">
@@ -204,7 +203,7 @@ class BigMindsApp {
                 <input
                   type="text"
                   id="onboardingNameInput"
-                  class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-900 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-[2px_2px_0px_#0F172A]"
+                  class="w-full px-4 py-3 rounded-xl border-2 border-slate-900 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-[2px_2px_0px_#0F172A] bg-amber-50/30"
                   placeholder="e.g. Subair, Amara, Tobi"
                   required
                   autofocus
@@ -218,8 +217,8 @@ class BigMindsApp {
                 <div id="onboardingCurrencyWrap"></div>
               </div>
 
-              <div class="pt-2 text-right">
-                <button type="submit" class="w-full py-3.5 rounded-2xl font-black text-sm bg-indigo-600 hover:bg-indigo-700 text-white border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 transition-all">
+              <div class="pt-2">
+                <button type="submit" class="w-full py-3.5 rounded-xl font-black text-sm bg-indigo-600 hover:bg-indigo-700 text-white border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer">
                   Begin Exploring →
                 </button>
               </div>
@@ -251,6 +250,7 @@ class BigMindsApp {
         }
         this.saveState();
         overlay.classList.add('hidden');
+        overlay.style.display = 'none';
         this.renderHeaderIdentity();
         this.showToast(`🎉 Welcome to Big Minds, ${name}!`);
 
@@ -264,6 +264,7 @@ class BigMindsApp {
     }
 
     overlay.classList.remove('hidden');
+    overlay.style.display = 'flex';
   }
 
   renderHeaderIdentity() {

@@ -6,11 +6,28 @@
 
 const STORAGE_KEY = "bigminds_service_project_plan_v1";
 const ADMIN_AUTH_KEY = "bigminds_admin_auth";
+const PASSKEY_STORAGE_KEY = "bigminds_admin_passkey_custom";
 const DEFAULT_PASSKEY = "bigminds2026";
 
 // Global In-Memory State
 window.planData = null;
 window.activeParticipants = {};
+
+function getAdminPasskey() {
+  const custom = localStorage.getItem(PASSKEY_STORAGE_KEY);
+  if (custom) return custom;
+  if (window.planData?.projectMeta?.adminPasskey) return window.planData.projectMeta.adminPasskey;
+  return DEFAULT_PASSKEY;
+}
+
+function setAdminPasskey(newKey) {
+  if (!newKey) return;
+  localStorage.setItem(PASSKEY_STORAGE_KEY, newKey);
+  if (!window.planData) window.planData = {};
+  if (!window.planData.projectMeta) window.planData.projectMeta = {};
+  window.planData.projectMeta.adminPasskey = newKey;
+  savePlanData(true);
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   setupAdminAuth();
@@ -36,19 +53,25 @@ function setupAdminAuth() {
 
   if (!isAuthenticated && overlay) {
     overlay.classList.remove("hidden");
+    overlay.style.display = "flex";
   } else if (overlay) {
     overlay.classList.add("hidden");
+    overlay.style.display = "none";
   }
 
   form?.addEventListener("submit", (e) => {
     e.preventDefault();
     const input = document.getElementById("admin-passkey-input");
     const val = input ? input.value.trim() : "";
+    const activePasskey = getAdminPasskey();
 
-    if (val === DEFAULT_PASSKEY || val === "admin123" || val === "admin") {
+    if (val && val === activePasskey) {
       sessionStorage.setItem(ADMIN_AUTH_KEY, "true");
       if (errorMsg) errorMsg.classList.add("hidden");
-      if (overlay) overlay.classList.add("hidden");
+      if (overlay) {
+        overlay.classList.add("hidden");
+        overlay.style.display = "none";
+      }
       initParticipantSubscriber();
     } else {
       if (errorMsg) errorMsg.classList.remove("hidden");
@@ -57,7 +80,15 @@ function setupAdminAuth() {
 
   lockBtn?.addEventListener("click", () => {
     sessionStorage.removeItem(ADMIN_AUTH_KEY);
-    if (overlay) overlay.classList.remove("hidden");
+    if (overlay) {
+      overlay.classList.remove("hidden");
+      overlay.style.display = "flex";
+      const input = document.getElementById("admin-passkey-input");
+      if (input) {
+        input.value = "";
+        input.focus();
+      }
+    }
   });
 }
 
@@ -204,6 +235,7 @@ function setupActionButtons() {
   });
 
   document.getElementById("btn-print-plan")?.addEventListener("click", () => window.print());
+  document.getElementById("btn-change-passkey")?.addEventListener("click", openChangePasskeyModal);
   document.getElementById("btn-edit-status")?.addEventListener("click", editProjectStatusModal);
   document.getElementById("btn-edit-target-class")?.addEventListener("click", editTargetClassModal);
   document.getElementById("btn-add-area")?.addEventListener("click", () => editAreaModal(null));
@@ -782,19 +814,93 @@ function exportParticipantsCSV() {
    ========================================================================== */
 
 function openModal(title, contentHtml) {
+  const modal = document.getElementById("planner-modal-overlay");
   document.getElementById("modal-title").textContent = title;
   document.getElementById("modal-body").innerHTML = contentHtml;
-  document.getElementById("planner-modal-overlay").classList.remove("hidden");
+  if (modal) {
+    modal.classList.remove("hidden");
+    modal.style.display = "flex";
+  }
 }
 
 function closeModal() {
   const modal = document.getElementById("planner-modal-overlay");
-  if (modal) modal.classList.add("hidden");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "none";
+  }
 
   if (window.FirebaseSync && typeof window.FirebaseSync.applyPendingUpdate === "function") {
     window.FirebaseSync.applyPendingUpdate();
   }
 }
+
+window.openChangePasskeyModal = function() {
+  const html = `
+    <form id="form-change-passkey" class="space-y-4">
+      <div class="form-group margin-top-xs">
+        <label class="text-xs font-bold">Current Administrator Passkey:</label>
+        <input type="password" id="current-passkey-input" class="form-control" required placeholder="Enter current passkey" autocomplete="current-password">
+      </div>
+      <div class="form-group margin-top-xs">
+        <label class="text-xs font-bold">New Passkey:</label>
+        <input type="password" id="new-passkey-input" class="form-control" required placeholder="Enter new passkey (at least 6 characters)" minlength="6" autocomplete="new-password">
+      </div>
+      <div class="form-group margin-top-xs">
+        <label class="text-xs font-bold">Confirm New Passkey:</label>
+        <input type="password" id="confirm-passkey-input" class="form-control" required placeholder="Confirm new passkey" minlength="6" autocomplete="new-password">
+      </div>
+      <div id="change-passkey-feedback" class="text-danger text-xs margin-top-xs hidden"></div>
+      <div class="modal-actions margin-top-md flex-between">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save New Passkey</button>
+      </div>
+    </form>
+  `;
+  openModal("🔑 Change Administrator Passkey", html);
+
+  const form = document.getElementById("form-change-passkey");
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const currentInput = document.getElementById("current-passkey-input");
+    const newInput = document.getElementById("new-passkey-input");
+    const confirmInput = document.getElementById("confirm-passkey-input");
+    const feedback = document.getElementById("change-passkey-feedback");
+
+    const currentVal = currentInput ? currentInput.value.trim() : "";
+    const newVal = newInput ? newInput.value.trim() : "";
+    const confirmVal = confirmInput ? confirmInput.value.trim() : "";
+
+    const activePasskey = getAdminPasskey();
+    if (currentVal !== activePasskey) {
+      if (feedback) {
+        feedback.textContent = "Current passkey is incorrect. Please retry.";
+        feedback.classList.remove("hidden");
+      }
+      return;
+    }
+
+    if (newVal.length < 6) {
+      if (feedback) {
+        feedback.textContent = "New passkey must be at least 6 characters long.";
+        feedback.classList.remove("hidden");
+      }
+      return;
+    }
+
+    if (newVal !== confirmVal) {
+      if (feedback) {
+        feedback.textContent = "New passkeys do not match.";
+        feedback.classList.remove("hidden");
+      }
+      return;
+    }
+
+    setAdminPasskey(newVal);
+    closeModal();
+    alert("✓ Administrator passkey updated successfully!");
+  });
+};
 
 window.editProjectStatusModal = function() {
   const m = window.planData.projectMeta;
