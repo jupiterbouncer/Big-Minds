@@ -333,19 +333,19 @@
       const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
       const studentName = student.displayName || student.alias || 'Explorer';
 
-      const unlockedBadgesHtml = this.BADGES.map(b => {
-        const isUnlocked = student.unlockedBadges.includes(b.id);
-        return `
-          <div class="badge-item ${isUnlocked ? 'badge-earned' : 'badge-locked'}">
-            <span class="badge-icon">${b.icon}</span>
-            <div class="badge-title">${b.title}</div>
-            <div class="badge-status">${isUnlocked ? 'Earned' : 'Locked'}</div>
-          </div>
-        `;
-      }).join('');
+      const earnedBadges = this.BADGES.filter(b => student.unlockedBadges.includes(b.id));
+      const unlockedBadgesHtml = earnedBadges.length
+    ? earnedBadges.map(b => `
+        <div class="badge-item badge-earned">
+          <span class="badge-icon">${b.icon}</span>
+          <div class="badge-title">${b.title}</div>
+          <div class="badge-status">Earned</div>
+        </div>
+      `).join('')
+    : `<p class="cert-text" style="font-style:italic;">Keep exploring pathways to earn your first badge — it'll show up here!</p>`;
 
       const certHtml = `
-        <div id="certificate-print-area" class="certificate-container">
+          <div id="certificate-print-area" class="certificate-container">
           <div class="certificate-header">
             <div class="cert-logo-mark">💡</div>
             <h2>Certificate of Exploration & Readiness</h2>
