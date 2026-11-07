@@ -1279,44 +1279,122 @@ body.planner-body {
    PRINT MEDIA RULES
    ========================================================================== */
 
+/* ==========================================================================
+   CERTIFICATE EXPORT & PRINT RULES
+   ========================================================================== */
+
+.certificate-export-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.certificate-export-actions button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.certificate-export-status {
+  flex-basis: 100%;
+  min-height: 1em;
+  margin: 0;
+  color: #64748B;
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+/* Standardise browser printing to A4 landscape. */
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
 @media print {
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   body * {
     visibility: hidden !important;
   }
 
-  .planner-modal-overlay,
   #certificate-modal-overlay,
-  #certificate-print-area,
-  #certificate-print-area * {
+  #certificate-modal-overlay * {
     visibility: visible !important;
   }
 
-  .planner-modal-overlay,
   #certificate-modal-overlay {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
+    position: static !important;
+    display: block !important;
     width: 100% !important;
     height: auto !important;
-    background: transparent !important;
-    box-shadow: none !important;
+    min-height: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #certificate-modal-overlay .planner-modal-card {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  #certificate-modal-overlay .modal-header,
+  #certificate-modal-overlay .modal-actions {
+    display: none !important;
+  }
+
+  #certificate-modal-overlay #cert-modal-body {
+    width: 100% !important;
+    max-height: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
   }
 
   #certificate-print-area {
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    background: #FFFDF9 !important;
     border: 6px double #1E1B4B !important;
     box-shadow: none !important;
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
-  .modal-actions,
-  .btn,
-  .planner-header,
-  .planner-tabs,
-  .planner-footer {
-    display: none !important;
+  /* Preserve the desktop certificate arrangement when printing. */
+  .certificate-student-name {
+    font-size: 2rem !important;
+  }
+
+  .certificate-footer-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+  }
+
+  .signature-box {
+    width: 180px !important;
   }
 }

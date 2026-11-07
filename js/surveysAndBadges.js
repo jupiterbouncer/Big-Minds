@@ -376,13 +376,304 @@
           </div>
         </div>
 
-        <div class="modal-actions margin-top-md text-right">
-          <button class="btn btn-secondary" onclick="window.SurveysAndBadges.closeModal()">Close</button>
-          <button class="btn btn-primary" onclick="window.print()">🖨️ Print A4 Certificate</button>
+          <div class="modal-actions margin-top-md certificate-export-actions">
+          <button class="btn btn-secondary"
+            type="button"
+            onclick="window.SurveysAndBadges.closeModal()">
+            Close
+          </button>
+
+          <button class="btn btn-secondary"
+            type="button"
+            data-certificate-export="png"
+            onclick="window.SurveysAndBadges.exportCertificate('png', this)">
+            🖼️ Download PNG
+          </button>
+
+          <button class="btn btn-primary"
+            type="button"
+            data-certificate-export="pdf"
+            onclick="window.SurveysAndBadges.exportCertificate('pdf', this)">
+            📄 Download PDF
+          </button>
+
+          <button class="btn btn-outline"
+            type="button"
+            onclick="window.print()">
+            🖨️ Print
+          </button>
+
+          <p id="certificate-export-status"
+             class="certificate-export-status"
+             role="status"
+             aria-live="polite">
+          </p>
         </div>
       `;
 
       this.showModal('📜 Explorer Certificate', certHtml);
+    },
+
+        /* ==========================================================================
+       CERTIFICATE EXPORTS — HIGH-RESOLUTION PNG & A4 LANDSCAPE PDF
+       ========================================================================== */
+
+    getCertificateFileBaseName() {
+      const student = this.getStudentData();
+      const rawName = student.displayName || student.alias || 'Explorer';
+
+      const safeName = String(rawName)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/gi, '-')
+        .replace(/^-+|-+$/g, '') || 'Explorer';
+
+      const now = new Date();
+      const datePart = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, '0'),
+        String(now.getDate()).padStart(2, '0')
+      ].join('-');
+
+      return `BigMinds_Certificate_${safeName}_${datePart}`;
+    },
+
+    downloadCertificateBlob(blob, filename) {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 10000);
+    },
+
+    async renderCertificateCanvas() {
+      const certificate = document.getElementById('certificate-print-area');
+
+      if (!certificate) {
+        throw new Error('Certificate preview not found.');
+      }
+
+      if (typeof window.html2canvas !== 'function') {
+        throw new Error('Image export library has not loaded.');
+      }
+
+      // Wait for fonts to finish loading before rendering.
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+
+      return window.html2canvas(certificate, {
+        scale: 3,
+        backgroundColor: '#FFFDF9',
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+        windowWidth: 1024,
+        imageTimeout: 15000,
+
+        // Prepare the modal's certificate container for a full-width export.
+        // This affects only the cloned export document, not the actual preview.
+        onclone: (clonedDocument) => {
+          const overlay = clonedDocument.getElementById(
+            'certificate-modal-overlay'
+          );
+
+          const card = overlay?.querySelector('.planner-modal-card');
+
+          const body = clonedDocument.getElementById('cert-modal-body');
+
+          const clonedCertificate = clonedDocument.getElementById(
+            'certificate-print-area'
+          );
+
+          if (overlay) {
+            overlay.style.setProperty('display', 'block', 'important');
+            overlay.style.position = 'static';
+            overlay.style.width = '1000px';
+            overlay.style.height = 'auto';
+            overlay.style.padding = '0';
+            overlay.style.margin = '0 auto';
+            overlay.style.overflow = 'visible';
+            overlay.style.background = 'transparent';
+          }
+
+          if (card) {
+            card.style.width = '1000px';
+            card.style.maxWidth = '1000px';
+            card.style.maxHeight = 'none';
+            card.style.padding = '0';
+            card.style.margin = '0 auto';
+            card.style.border = '0';
+            card.style.borderRadius = '0';
+            card.style.boxShadow = 'none';
+            card.style.overflow = 'visible';
+            card.style.background = 'transparent';
+          }
+
+          if (body) {
+            body.style.width = '100%';
+            body.style.maxHeight = 'none';
+            body.style.padding = '0';
+            body.style.margin = '0';
+            body.style.overflow = 'visible';
+          }
+
+          if (clonedCertificate) {
+            clonedCertificate.style.width = '960px';
+            clonedCertificate.style.maxWidth = '960px';
+            clonedCertificate.style.margin = '0 auto';
+            clonedCertificate.style.boxShadow = 'none';
+            clonedCertificate.style.overflow = 'visible';
+          }
+        }
+      });
+    },
+
+    async exportCertificate(format, triggerButton) {
+      const exportFormat = String(format || 'pdf').toLowerCase();
+
+      if (!['pdf', 'png'].includes(exportFormat)) {
+        return;
+      }
+
+      const status = document.getElementById(
+        'certificate-export-status'
+      );
+
+      const exportButtons = document.querySelectorAll(
+        '[data-certificate-export]'
+      );
+
+      const originalLabel = triggerButton
+        ? triggerButton.innerHTML
+        : '';
+
+      // Prevent multiple simultaneous exports.
+      exportButtons.forEach(button => {
+        button.disabled = true;
+      });
+
+      if (triggerButton) {
+        triggerButton.textContent =
+          exportFormat === 'pdf'
+            ? 'Preparing PDF...'
+            : 'Preparing PNG...';
+      }
+
+      if (status) {
+        status.textContent = 'Preparing your certificate...';
+      }
+
+      try {
+        if (
+          exportFormat === 'pdf' &&
+          !(window.jspdf && window.jspdf.jsPDF)
+        ) {
+          throw new Error('PDF export library has not loaded.');
+        }
+
+        // Both formats use the same high-resolution certificate image.
+        const canvas = await this.renderCertificateCanvas();
+
+        const filename = this.getCertificateFileBaseName();
+
+        if (exportFormat === 'png') {
+          const blob = await new Promise(resolve => {
+            canvas.toBlob(resolve, 'image/png');
+          });
+
+          if (!blob) {
+            throw new Error('Could not generate PNG file.');
+          }
+
+          this.downloadCertificateBlob(
+            blob,
+            `${filename}.png`
+          );
+        }
+
+        if (exportFormat === 'pdf') {
+          const jsPDF = window.jspdf.jsPDF;
+
+          const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+          });
+
+          const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
+
+          const margin = 12;
+
+          // Maintain the original certificate proportions.
+          const scale = Math.min(
+            (pageWidth - margin * 2) / canvas.width,
+            (pageHeight - margin * 2) / canvas.height
+          );
+
+          const imageWidth = canvas.width * scale;
+          const imageHeight = canvas.height * scale;
+
+          const x = (pageWidth - imageWidth) / 2;
+          const y = (pageHeight - imageHeight) / 2;
+
+          pdf.setProperties({
+            title: `Big Minds Certificate - ${this.getStudentData().displayName || 'Explorer'}`,
+            subject: 'Certificate of Exploration & Readiness',
+            author: 'Big Minds',
+            creator: 'Big Minds Student Pathways Platform'
+          });
+
+          pdf.addImage(
+            canvas.toDataURL('image/png'),
+            'PNG',
+            x,
+            y,
+            imageWidth,
+            imageHeight,
+            undefined,
+            'FAST'
+          );
+
+          pdf.save(`${filename}.pdf`);
+        }
+
+        if (status) {
+          status.textContent =
+            `Your ${exportFormat.toUpperCase()} certificate has been downloaded.`;
+        }
+
+      } catch (error) {
+        console.error(
+          '[Big Minds] Certificate export failed:',
+          error
+        );
+
+        if (status) {
+          status.textContent =
+            'Export failed. Please check your connection or use Print.';
+        }
+
+      } finally {
+        exportButtons.forEach(button => {
+          button.disabled = false;
+        });
+
+        if (triggerButton) {
+          triggerButton.innerHTML = originalLabel;
+        }
+      }
     },
 
     /* ==========================================================================
