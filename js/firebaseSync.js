@@ -224,6 +224,40 @@
     },
 
     /**
+     * Saves six-stage mentorship module progress & reflections safely
+     */
+    saveModuleProgress(participantId, moduleProgress) {
+      if (!participantId || !moduleProgress) return Promise.resolve({});
+
+      const sanitized = {};
+      Object.entries(moduleProgress).forEach(([slug, state]) => {
+        if (!state || typeof state !== 'object') return;
+        sanitized[slug] = {
+          completedStages: Array.isArray(state.completedStages) ? state.completedStages : [],
+          practiceCompleted: Boolean(state.practiceCompleted),
+          practiceNote: String(state.practiceNote || '').slice(0, 1000),
+          reflectionNote: String(state.reflectionNote || '').slice(0, 1000),
+          confidenceRating: state.confidenceRating || null,
+          lastStage: state.lastStage || 'discover',
+          updatedAt: new Date().toISOString()
+        };
+      });
+
+      if (!this.isInitialized || !this.db) {
+        return Promise.resolve(sanitized);
+      }
+
+      return this.db.ref(`${PARTICIPANTS_PATH}/${participantId}/moduleProgress`).set(sanitized)
+        .then(() => {
+          this.db.ref(`${PARTICIPANTS_PATH}/${participantId}/updatedAt`).set(new Date().toISOString());
+          return sanitized;
+        })
+        .catch((err) => {
+          console.error('❌ Failed to save module progress:', err.message);
+        });
+    },
+
+    /**
      * Updates currency preference
      */
     saveCurrencyPreference(participantId, currencyCode) {

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>My Progress &amp; Achievements | Big Minds</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-[#FDFBF7] text-[#1E1B4B] antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <header id="siteHeader"></header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- STUDENT IDENTITY & CERTIFICATE SUMMARY -->
+    <section class="bg-white rounded-3xl border-2 border-[#1E1B4B] p-6 sm:p-8 shadow-[5px_5px_0px_#1E1B4B]">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 space-y-3">
+          <span class="inline-flex items-center gap-1.5 text-xs font-black uppercase bg-emerald-100 text-[#1E1B4B] px-3 py-1 rounded-full border border-[#1E1B4B]">
+            <span>🏆</span>
+            <span>No Account Required • Saved Locally &amp; Synced</span>
+          </span>
+          <h1 id="progressStudentTitle" class="text-2xl sm:text-3xl font-black text-[#1E1B4B] font-heading">
+            Your Learning Progress
+          </h1>
+          <p class="text-sm text-slate-600 font-medium leading-relaxed">
+            Track the mentorship modules, pathway nodes, reflections, surveys, and Curiosity Badges you have explored—and download your Explorer Certificate anytime.
+          </p>
+
+          <div class="flex flex-wrap gap-2.5 pt-1">
+            <button type="button" id="progressCertificateBtn"
+              class="px-5 py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-[#1E1B4B] font-black text-xs sm:text-sm border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#1E1B4B] cursor-pointer">
+              📜 View &amp; Download Certificate
+            </button>
+            <button type="button" id="progressEditProfileBtn"
+              class="px-4 py-3 rounded-xl bg-[#FDFBF7] hover:bg-slate-100 text-[#1E1B4B] font-black text-xs sm:text-sm border-2 border-[#1E1B4B] shadow-[2px_2px_0px_#1E1B4B] cursor-pointer">
+              ✏️ Edit Name / Session
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 grid grid-cols-2 gap-3" id="progressKpiCards">
+          <!-- KPI cards injected dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- MENTORSHIP MODULES BREAKDOWN -->
+    <section class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-[#1E1B4B] font-heading">📚 Mentorship Module Progress</h2>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium">Jump back into any stage across the five mentorship areas.</p>
+        </div>
+        <a href="mentorship.html" class="text-xs font-black text-indigo-700 hover:underline">Explore All Modules →</a>
+      </div>
+
+      <div id="progressModulesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+
+    <!-- CURIOSITY BADGES & SURVEYS -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Curiosity Badges -->
+      <div class="lg:col-span-7 bg-white rounded-3xl border-2 border-[#1E1B4B] p-6 shadow-[4px_4px_0px_#1E1B4B] space-y-4">
+        <div>
+          <h2 class="text-xl font-black text-[#1E1B4B] font-heading">🎖️ Curiosity Badges</h2>
+          <p class="text-xs text-slate-600 font-medium mt-0.5">
+            Earn badges by completing practical challenges, exploring pathway nodes, taking the Curiosity Quiz, or finishing your Post-Survey.
+          </p>
+        </div>
+        <div id="progressBadgesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Badges injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Pre / Post Surveys & Quiz -->
+      <div class="lg:col-span-5 bg-white rounded-3xl border-2 border-[#1E1B4B] p-6 shadow-[4px_4px_0px_#1E1B4B] space-y-4">
+        <div>
+          <h2 class="text-xl font-black text-[#1E1B4B] font-heading">📝 Surveys &amp; Reflections</h2>
+          <p class="text-xs text-slate-600 font-medium mt-0.5">
+            Compare how your confidence grows from starting out to exploring practical activities.
+          </p>
+        </div>
+
+        <div id="progressSurveyCards" class="space-y-3">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer id="siteFooter"></footer>
+
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- Certificate Export Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+
+  <script src="js/firebaseConfig.js"></script>
+  <script src="js/currencyHelper.js"></script>
+  <script src="js/firebaseSync.js"></script>
+  <script src="js/surveysAndBadges.js"></script>
+  <script src="js/pathwaysData.js"></script>
+  <script src="js/mentorshipData.js"></script>
+  <script src="js/layout.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.BigMindsUI.renderHeader({ activeRoute: 'progress' });
+      window.BigMindsUI.renderFooter();
+
+      function renderProgressDashboard() {
+        const session = window.BigMindsSession.get();
+        const stats = window.BigMindsSession.getOverallModuleStats();
+        const totalNodes = Array.isArray(window.PATHWAY_NODES) ? window.PATHWAY_NODES.length : 10;
+        const exploredNodesCount = (session.exploredIds || []).length;
+        const earnedBadgesCount = (session.unlockedBadges || []).length;
+        const allBadges = window.SurveysAndBadges ? window.SurveysAndBadges.BADGES : [];
+
+        const titleEl = document.getElementById('progressStudentTitle');
+        if (titleEl) {
+          titleEl.textContent = session.displayName
+            ? `${session.displayName}’s Learning Progress`
+            : 'Your Learning Progress';
+        }
+
+        // KPI Cards
+        document.getElementById('progressKpiCards').innerHTML = `
+          <div class="bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-4">
+            <span class="text-[11px] font-black uppercase text-slate-500 block">Module Stages</span>
+            <strong class="text-2xl font-black text-[#1E1B4B]">${stats.totalCompletedStages}/${stats.totalPossible}</strong>
+            <span class="text-[11px] font-bold text-indigo-700 block mt-0.5">${stats.percent}% explored</span>
+          </div>
+          <div class="bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-4">
+            <span class="text-[11px] font-black uppercase text-slate-500 block">Map Pathways</span>
+            <strong class="text-2xl font-black text-[#1E1B4B]">${exploredNodesCount}/${totalNodes}</strong>
+            <span class="text-[11px] font-bold text-slate-600 block mt-0.5"><a href="explore.html" class="hover:underline">Open Map →</a></span>
+          </div>
+          <div class="bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-4">
+            <span class="text-[11px] font-black uppercase text-slate-500 block">Badges Earned</span>
+            <strong class="text-2xl font-black text-emerald-700">${earnedBadgesCount}/${allBadges.length}</strong>
+            <span class="text-[11px] font-bold text-slate-600 block mt-0.5">Curiosity milestones</span>
+          </div>
+          <div class="bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-4">
+            <span class="text-[11px] font-black uppercase text-slate-500 block">Quiz Matches</span>
+            <strong class="text-2xl font-black text-[#1E1B4B]">${(session.activeInterests || []).length || '—'}</strong>
+            <span class="text-[11px] font-bold text-slate-600 block mt-0.5"><a href="quiz.html" class="hover:underline">${(session.activeInterests || []).length ? 'Retake Quiz' : 'Take Quiz →'}</a></span>
+          </div>
+        `;
+
+        // Module Progress Cards
+        const modulesGrid = document.getElementById('progressModulesGrid');
+        modulesGrid.innerHTML = (window.MENTORSHIP_MODULES || []).map((mod) => {
+          const modState = session.moduleProgress?.[mod.slug] || {};
+          const doneStages = Array.isArray(modState.completedStages) ? modState.completedStages : [];
+          const pct = Math.round((doneStages.length / 6) * 100);
+          return `
+            <article class="bg-white rounded-2xl border-2 border-[#1E1B4B] p-5 shadow-[3px_3px_0px_#1E1B4B] flex flex-col justify-between gap-4">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-10 h-10 rounded-xl ${mod.theme.badgeBg} border-2 border-[#1E1B4B] flex items-center justify-center text-xl">${mod.icon}</span>
+                    <div>
+                      <h3 class="text-sm font-black text-[#1E1B4B]">${mod.title}</h3>
+                      <span class="text-[11px] font-bold text-slate-500">${doneStages.length} of 6 stages</span>
+                    </div>
+                  </div>
+                  <span class="text-xs font-black text-[#1E1B4B]">${pct}%</span>
+                </div>
+
+                <div class="w-full h-2.5 bg-slate-200 border border-[#1E1B4B] rounded-full overflow-hidden">
+                  <div class="bg-emerald-400 h-full transition-all" style="width: ${pct}%"></div>
+                </div>
+
+                <div class="flex flex-wrap gap-1">
+                  ${(window.MENTORSHIP_STAGES || []).map((st) => {
+                    const stDone = doneStages.includes(st.id);
+                    return `
+                      <a href="module.html?area=${mod.slug}&stage=${st.id}"
+                         class="text-[10px] font-black px-2 py-1 rounded-lg border ${
+                           stDone
+                             ? 'bg-emerald-100 text-emerald-950 border-emerald-500'
+                             : 'bg-[#FDFBF7] text-slate-600 border-slate-300 hover:border-[#1E1B4B]'
+                         }">
+                        ${stDone ? '✓' : st.icon} ${st.shortLabel}
+                      </a>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+
+              <a href="module.html?area=${mod.slug}&stage=${modState.lastStage || 'discover'}"
+                 class="w-full py-2.5 px-3 rounded-xl bg-[#FDFBF7] hover:bg-amber-200 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] text-center transition-colors">
+                ${doneStages.length > 0 ? 'Continue Module →' : 'Start Module →'}
+              </a>
+            </article>
+          `;
+        }).join('');
+
+        // Badges Grid
+        document.getElementById('progressBadgesGrid').innerHTML = allBadges.map((b) => {
+          const earned = (session.unlockedBadges || []).includes(b.id);
+          return `
+            <div class="rounded-2xl border-2 p-3.5 flex items-start gap-3 ${
+              earned
+                ? 'bg-emerald-50 border-[#1E1B4B] shadow-[2px_2px_0px_#1E1B4B]'
+                : 'bg-[#FDFBF7] border-dashed border-slate-300 opacity-75'
+            }">
+              <div class="w-10 h-10 rounded-xl border border-[#1E1B4B] bg-white flex items-center justify-center text-xl shrink-0">
+                ${earned ? b.icon : '🔒'}
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <strong class="text-xs font-black text-[#1E1B4B]">${b.title}</strong>
+                  ${earned ? '<span class="text-[9px] font-black uppercase bg-emerald-300 text-[#1E1B4B] px-1.5 py-0.5 rounded">Earned</span>' : ''}
+                </div>
+                <p class="text-[11px] text-slate-600 font-medium mt-0.5 leading-snug">${b.desc}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Surveys & Quiz Card
+        const matchedHtml = (session.activeInterests || []).length
+          ? `<div class="flex flex-wrap gap-1.5 mt-2">${session.activeInterests.map((tag) => `<a href="module.html?area=${window.getMentorshipSlugByInterestTag(tag)}" class="text-[11px] font-black bg-amber-200 text-[#1E1B4B] px-2.5 py-1 rounded-lg border border-[#1E1B4B] hover:bg-amber-300">${tag} →</a>`).join('')}</div>`
+          : '<p class="text-xs text-slate-500 mt-1">Take the 45-second quiz to see personalised suggestions.</p>';
+
+        document.getElementById('progressSurveyCards').innerHTML = `
+          <div class="bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-4 flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm font-black text-[#1E1B4B]">📝 Pre-Programme Survey</div>
+              <div class="text-xs font-medium text-slate-600">${session.preSurveyCompleted ? 'Completed ✓ Thank you for sharing!' : 'Record your starting confidence levels.'}</div>
+            </div>
+            <button type="button" id="btnProgressPreSurvey" class="px-3.5 py-2 rounded-xl font-black text-xs border-2 border-[#1E1B4B] cursor-pointer shrink-0 ${session.preSurveyCompleted ? 'bg-emerald-200' : 'bg-white hover:bg-amber-100'}">
+              ${session.preSurveyCompleted ? 'Review' : 'Start'}
+            </button>
+          </div>
+
+          <div class="bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-4 flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm font-black text-[#1E1B4B]">🌟 Post-Programme Survey</div>
+              <div class="text-xs font-medium text-slate-600">${session.postSurveyCompleted ? 'Completed ✓ Pathway Master unlocked!' : 'Reflect on your growth after exploring modules.'}</div>
+            </div>
+            <button type="button" id="btnProgressPostSurvey" class="px-3.5 py-2 rounded-xl font-black text-xs border-2 border-[#1E1B4B] cursor-pointer shrink-0 ${session.postSurveyCompleted ? 'bg-emerald-200' : 'bg-amber-300 hover:bg-amber-400'}">
+              ${session.postSurveyCompleted ? 'Review' : 'Start'}
+            </button>
+          </div>
+
+          <div class="bg-indigo-50/70 rounded-2xl border-2 border-[#1E1B4B] p-4">
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-sm font-black text-[#1E1B4B]">✨ Curiosity Quiz Matches</div>
+              <a href="quiz.html" class="text-xs font-black text-indigo-800 hover:underline">Open Quiz →</a>
+            </div>
+            ${matchedHtml}
+          </div>
+        `;
+
+        document.getElementById('btnProgressPreSurvey')?.addEventListener('click', () => {
+          window.SurveysAndBadges?.openSurveyModal('pre');
+        });
+        document.getElementById('btnProgressPostSurvey')?.addEventListener('click', () => {
+          window.SurveysAndBadges?.openSurveyModal('post');
+        });
+      }
+
+      document.getElementById('progressCertificateBtn')?.addEventListener('click', () => {
+        window.SurveysAndBadges?.openCertificateModal();
+      });
+      document.getElementById('progressEditProfileBtn')?.addEventListener('click', () => {
+        window.BigMindsUI.openProfileModal();
+      });
+
+      window.addEventListener('bigminds:sessionUpdated', renderProgressDashboard);
+      window.addEventListener('bigminds:surveyCompleted', (e) => {
+        if (e.detail?.type === 'pre') window.BigMindsSession.save({ preSurveyCompleted: true });
+        if (e.detail?.type === 'post') window.BigMindsSession.save({ postSurveyCompleted: true });
+        renderProgressDashboard();
+      });
+      window.addEventListener('bigminds:badgeUnlocked', renderProgressDashboard);
+
+      renderProgressDashboard();
+    });
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

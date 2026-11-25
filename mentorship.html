@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Explore Mentorship Areas | Big Minds</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-[#FDFBF7] text-[#1E1B4B] antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <header id="siteHeader"></header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
+
+    <!-- PAGE INTRO BANNER -->
+    <section class="bg-white rounded-3xl border-2 border-[#1E1B4B] p-6 sm:p-8 shadow-[5px_5px_0px_#1E1B4B]">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="max-w-3xl space-y-2.5">
+          <div class="inline-flex items-center gap-2 bg-indigo-100 text-[#1E1B4B] border border-[#1E1B4B] px-3 py-1 rounded-full text-xs font-black">
+            <span>📚</span>
+            <span>Five Core Mentorship Tracks</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1E1B4B] font-heading">
+            Explore Mentorship Areas
+          </h1>
+          <p class="text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+            Every area follows the same six-stage learning journey—<strong>Discover, Watch, Learn, Practise, Reflect, and Explore Further</strong>. You can start anywhere, jump between stages freely, and revisit modules anytime.
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
+          <a href="quiz.html"
+             class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#1E1B4B]">
+            <span>✨ Take Curiosity Quiz</span>
+          </a>
+          <a href="explore.html"
+             class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#FDFBF7] hover:bg-indigo-50 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#1E1B4B]">
+            <span>🧭 View Pathway Map</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Optional Quiz Recommendations Callout -->
+      <div id="quizMatchBanner" class="hidden mt-5 pt-4 border-t-2 border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2 flex-wrap text-xs font-bold text-slate-700">
+          <span class="bg-amber-300 text-[#1E1B4B] px-2.5 py-1 rounded-lg border border-[#1E1B4B] font-black">✨ Your Matched Focus Areas:</span>
+          <span id="quizMatchList" class="font-black text-indigo-800"></span>
+        </div>
+        <a href="quiz.html" class="text-xs font-black text-indigo-700 hover:underline">Retake Quiz →</a>
+      </div>
+    </section>
+
+    <!-- ALL 5 MENTORSHIP CARDS -->
+    <section id="mentorshipOverviewList" class="space-y-6" aria-label="Mentorship Areas List">
+      <!-- Populated dynamically from MENTORSHIP_MODULES -->
+    </section>
+
+  </main>
+
+  <footer id="siteFooter"></footer>
+
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script src="js/firebaseConfig.js"></script>
+  <script src="js/currencyHelper.js"></script>
+  <script src="js/firebaseSync.js"></script>
+  <script src="js/surveysAndBadges.js"></script>
+  <script src="js/mentorshipData.js"></script>
+  <script src="js/layout.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.BigMindsUI.renderHeader({ activeRoute: 'mentorship' });
+      window.BigMindsUI.renderFooter();
+
+      function renderOverview() {
+        const session = window.BigMindsSession.get();
+        const activeInterests = session.activeInterests || [];
+
+        const banner = document.getElementById('quizMatchBanner');
+        const listEl = document.getElementById('quizMatchList');
+        if (activeInterests.length && banner && listEl) {
+          banner.classList.remove('hidden');
+          listEl.textContent = activeInterests.join(' • ');
+        }
+
+        const container = document.getElementById('mentorshipOverviewList');
+        if (!container || !Array.isArray(window.MENTORSHIP_MODULES)) return;
+
+        container.innerHTML = window.MENTORSHIP_MODULES.map((mod, idx) => {
+          const modState = session.moduleProgress?.[mod.slug] || {};
+          const doneStages = Array.isArray(modState.completedStages) ? modState.completedStages : [];
+          const pct = Math.round((doneStages.length / 6) * 100);
+          const isMatch = activeInterests.includes(mod.interestTag);
+          const lastStage = modState.lastStage || 'discover';
+
+          return `
+            <article class="bg-white rounded-3xl border-2 border-[#1E1B4B] p-6 sm:p-7 shadow-[5px_5px_0px_#1E1B4B]">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                <!-- Identity & Summary -->
+                <div class="lg:col-span-5 space-y-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-14 h-14 rounded-2xl ${mod.theme.badgeBg} border-2 border-[#1E1B4B] flex items-center justify-center text-3xl shadow-[3px_3px_0px_#1E1B4B] shrink-0">
+                      ${mod.icon}
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[11px] font-black uppercase tracking-wider text-slate-500">Module 0${idx + 1}</span>
+                        ${isMatch ? '<span class="text-[10px] font-black uppercase bg-amber-300 text-[#1E1B4B] px-2 py-0.5 rounded-full border border-[#1E1B4B]">✨ Matched to Your Quiz</span>' : ''}
+                      </div>
+                      <h2 class="text-xl sm:text-2xl font-black text-[#1E1B4B] font-heading leading-snug">${mod.title}</h2>
+                    </div>
+                  </div>
+
+                  <p class="text-sm text-slate-700 font-medium leading-relaxed">
+                    ${mod.summary}
+                  </p>
+
+                  <!-- Progress Indicator -->
+                  <div class="bg-[#FDFBF7] rounded-xl border border-slate-300 p-3 space-y-1.5">
+                    <div class="flex items-center justify-between text-xs font-black text-[#1E1B4B]">
+                      <span>Progress: ${doneStages.length} of 6 stages</span>
+                      <span>⏱️ ${mod.estimatedDuration}</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-200 border border-[#1E1B4B] rounded-full overflow-hidden">
+                      <div class="bg-emerald-400 h-full transition-all duration-300" style="width: ${pct}%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Skills & Learning Outcomes -->
+                <div class="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                  <div>
+                    <h3 class="text-xs font-black uppercase tracking-wider text-indigo-800 mb-2">Skills You Practise</h3>
+                    <div class="flex flex-wrap gap-1.5">
+                      ${mod.skills.map((skill) => `
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg border border-[#1E1B4B] ${mod.theme.badgeBg} ${mod.theme.badgeText}">
+                          ${skill}
+                        </span>
+                      `).join('')}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 class="text-xs font-black uppercase tracking-wider text-indigo-800 mb-1.5">Learning Outcomes</h3>
+                    <ul class="space-y-1 text-xs text-slate-700 font-medium">
+                      ${mod.outcomes.map((o) => `<li class="flex items-start gap-1.5"><span class="text-emerald-600 font-black">✓</span><span>${o}</span></li>`).join('')}
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Direct Module Entry Actions -->
+                <div class="lg:col-span-2 flex flex-col justify-between gap-3 h-full">
+                  <a href="module.html?area=${mod.slug}&stage=${doneStages.length > 0 ? lastStage : 'discover'}"
+                     class="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl bg-[#1E1B4B] hover:bg-indigo-900 text-white font-black text-xs sm:text-sm border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#F59E0B] transition-all text-center min-h-[48px]">
+                    <span>${doneStages.length > 0 ? 'Continue Module' : 'Open Module'}</span>
+                    <span>→</span>
+                  </a>
+
+                  <a href="module.html?area=${mod.slug}&stage=practise"
+                     class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] text-center">
+                    <span>🛠️ Jump to Challenge</span>
+                  </a>
+
+                  <a href="explore.html?interest=${encodeURIComponent(mod.interestTag)}"
+                     class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#FDFBF7] hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-300 text-center">
+                    <span>🧭 On Pathway Map</span>
+                  </a>
+                </div>
+
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      window.addEventListener('bigminds:sessionUpdated', renderOverview);
+      renderOverview();
+    });
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

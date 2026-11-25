@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Curiosity Discovery Quiz | Big Minds</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,41 +17,28 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="bg-[#FAF8F5] text-slate-900 antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#FDFBF7] text-[#1E1B4B] antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
-  <!-- HEADER -->
-  <header class="bg-white/95 backdrop-blur-md border-b-2 border-slate-900 sticky top-0 z-30 px-4 md:px-8 py-3 shadow-xs">
-    <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <a href="index.html" class="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 border-2 border-slate-900 flex items-center justify-center text-white font-extrabold text-xl shadow-[2px_2px_0px_#0F172A]">
-          💡
-        </div>
-        <div>
-          <span class="text-lg font-black tracking-tight text-slate-900">Big Minds</span>
-          <span class="text-[10px] font-black uppercase bg-amber-300 text-slate-900 px-1.5 py-0.5 rounded border border-slate-900 ml-1.5">Quiz</span>
-        </div>
-      </a>
-
-      <a href="index.html" class="text-xs font-black text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 px-3 py-1.5 rounded-xl transition-all shadow-[2px_2px_0px_#0F172A]">
-        ← Back to Pathway Map
-      </a>
-    </div>
-  </header>
+  <!-- REUSABLE HEADER -->
+  <header id="siteHeader"></header>
 
   <!-- MAIN QUIZ CONTENT -->
-  <main class="max-w-3xl w-full mx-auto px-4 py-6 flex-1 flex flex-col justify-center">
+  <main class="max-w-3xl w-full mx-auto px-4 py-8 flex-1 flex flex-col justify-center">
 
-    <!-- Hero / Progress Header -->
-    <div class="bg-white rounded-3xl border-2 border-slate-900 p-5 md:p-7 shadow-[4px_4px_0px_#0F172A] mb-5">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+    <!-- Quiz Card -->
+    <div id="quizCardShell" class="bg-white rounded-3xl border-2 border-[#1E1B4B] p-5 sm:p-8 shadow-[5px_5px_0px_#1E1B4B] mb-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-          <h1 class="text-2xl md:text-3xl font-black text-slate-900 font-heading">Discover Your Curiosities ✨</h1>
-          <p class="text-xs md:text-sm text-slate-600 font-bold mt-1">Answer 6 focused questions to explore which mentorship pathways best match your strengths.</p>
+          <h1 class="text-2xl sm:text-3xl font-black text-[#1E1B4B] font-heading">Discover Your Curiosities ✨</h1>
+          <p class="text-xs sm:text-sm text-slate-600 font-bold mt-1">
+            Answer 6 focused questions to connect your strengths with Big Minds mentorship modules and pathway maps.
+          </p>
         </div>
-        <div class="flex items-center gap-2 self-start md:self-auto bg-amber-50 border border-amber-300 px-3 py-1.5 rounded-xl text-xs font-black text-amber-900">
-          <span>⏱️ Takes ~45 secs</span>
+        <div class="flex items-center gap-2 self-start sm:self-auto bg-amber-100 border border-[#1E1B4B] px-3 py-1.5 rounded-xl text-xs font-black text-[#1E1B4B] shrink-0">
+          <span>⏱️ ~45 secs</span>
         </div>
       </div>
+
       <p id="quizProgress" class="text-xs font-black text-indigo-700 mb-3" aria-live="polite"></p>
 
       <!-- Quiz Form Container -->
@@ -61,24 +48,28 @@
         </div>
 
         <!-- Submit & Actions -->
-        <div class="pt-4 border-t-2 border-slate-200 flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <button type="button" id="clearQuizBtn" class="w-full sm:w-auto text-xs font-black text-slate-600 hover:text-slate-900 px-4 py-2.5 rounded-xl border border-slate-300 transition-colors">
+        <div class="pt-4 border-t-2 border-slate-200 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          <button type="button" id="clearQuizBtn" class="text-xs font-black text-slate-600 hover:text-[#1E1B4B] px-4 py-2.5 rounded-xl border border-slate-300 transition-colors cursor-pointer">
             Reset Answers
           </button>
-          <div class="flex w-full sm:w-auto gap-2">
-            <button type="button" id="previousQuestionBtn" class="hidden flex-1 sm:flex-none text-xs font-black text-slate-700 bg-slate-100 border-2 border-slate-900 px-4 py-3 rounded-xl">← Previous</button>
-            <button type="button" id="nextQuestionBtn" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">Next Question →</button>
-            <button type="submit" id="submitStandaloneQuiz" class="hidden flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all">🚀 Reveal Matched Pathways</button>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <button type="button" id="previousQuestionBtn" class="hidden text-xs font-black text-[#1E1B4B] bg-slate-100 border-2 border-[#1E1B4B] px-4 py-3 rounded-xl cursor-pointer">← Previous</button>
+            <button type="button" id="nextQuestionBtn" class="bg-[#1E1B4B] hover:bg-indigo-900 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#F59E0B] transition-all cursor-pointer">Next Question →</button>
+            <button type="submit" id="submitStandaloneQuiz" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm px-6 py-3.5 rounded-2xl border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#1E1B4B] transition-all cursor-pointer">🚀 Reveal My Matched Modules</button>
           </div>
         </div>
       </form>
+
+      <!-- Results View (Shown on completion) -->
+      <div id="quizResultsPanel" class="hidden space-y-5">
+        <!-- Populated on submit -->
+      </div>
     </div>
 
   </main>
 
-  <footer class="border-t border-slate-200 bg-white/70 px-4 py-3 text-center text-xs text-slate-500 font-semibold">
-    Big Minds • Student Interest Exploration & Future Pathways Platform
-  </footer>
+  <!-- REUSABLE FOOTER -->
+  <footer id="siteFooter"></footer>
 
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -91,11 +82,19 @@
   <script src="js/firebaseSync.js"></script>
   <script src="js/surveysAndBadges.js"></script>
   <script src="js/pathwaysData.js"></script>
+  <script src="js/mentorshipData.js"></script>
+  <script src="js/layout.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      if (window.BigMindsUI) {
+        window.BigMindsUI.renderHeader({ activeRoute: 'quiz' });
+        window.BigMindsUI.renderFooter();
+      }
+
       const container = document.getElementById('quizQuestionsContainer');
       const form = document.getElementById('standaloneQuizForm');
+      const resultsPanel = document.getElementById('quizResultsPanel');
       const clearBtn = document.getElementById('clearQuizBtn');
       const progress = document.getElementById('quizProgress');
       const previousBtn = document.getElementById('previousQuestionBtn');
@@ -107,17 +106,17 @@
       function renderQuestion() {
         const q = QUIZ_QUESTIONS[currentQuestion];
         const card = document.createElement('div');
-        card.className = 'bg-slate-50/70 rounded-2xl border-2 border-slate-900 p-4 shadow-[2px_2px_0px_#0F172A]';
+        card.className = 'bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-4 sm:p-5 shadow-[2px_2px_0px_#1E1B4B]';
         card.innerHTML = `
-          <div class="flex items-center gap-2 mb-3">
-            <span class="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center shrink-0">${currentQuestion + 1}</span>
-            <h2 class="text-sm md:text-base font-black text-slate-900">${q.question}</h2>
+          <div class="flex items-start gap-2.5 mb-3.5">
+            <span class="w-7 h-7 rounded-full bg-[#1E1B4B] text-amber-300 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">${currentQuestion + 1}</span>
+            <h2 class="text-sm sm:text-base font-black text-[#1E1B4B] leading-snug">${q.question}</h2>
           </div>
-          <div class="space-y-2">
+          <div class="space-y-2.5">
             ${q.options.map((opt, optIdx) => {
               const selected = answers[q.id] === optIdx;
-              return `<label class="flex items-center gap-3 p-3 rounded-xl border-2 ${selected ? 'border-indigo-600 bg-indigo-100' : 'border-slate-300 bg-white hover:bg-indigo-50/50'} cursor-pointer text-xs md:text-sm font-bold text-slate-800 transition-all select-none quiz-option">
-                <input type="radio" name="question_${q.id}" value="${optIdx}" class="w-4 h-4 text-indigo-600 accent-indigo-600" ${selected ? 'checked' : ''} />
+              return `<label class="flex items-center gap-3 p-3.5 rounded-xl border-2 ${selected ? 'border-[#1E1B4B] bg-amber-100 shadow-[2px_2px_0px_#1E1B4B]' : 'border-slate-300 bg-white hover:bg-indigo-50/50'} cursor-pointer text-xs sm:text-sm font-bold text-slate-800 transition-all select-none quiz-option">
+                <input type="radio" name="question_${q.id}" value="${optIdx}" class="w-4 h-4 text-indigo-600 accent-indigo-600 shrink-0" ${selected ? 'checked' : ''} />
                 <span>${opt.text}</span>
               </label>`;
             }).join('')}
@@ -137,6 +136,82 @@
         if (answers[QUIZ_QUESTIONS[currentQuestion].id] !== undefined) return true;
         alert('Choose an answer before continuing to the next question.');
         return false;
+      }
+
+      function showConnectedResults(topInterests) {
+        form.classList.add('hidden');
+        progress.classList.add('hidden');
+        resultsPanel.classList.remove('hidden');
+
+        const session = window.BigMindsSession ? window.BigMindsSession.get() : {};
+        const name = session.displayName || session.alias || 'Explorer';
+
+        const cardsHtml = topInterests.map((tag, idx) => {
+          const slug = window.getMentorshipSlugByInterestTag ? window.getMentorshipSlugByInterestTag(tag) : 'programming';
+          const mod = window.getMentorshipModuleBySlug ? window.getMentorshipModuleBySlug(slug) : null;
+          return `
+            <div class="bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-4 sm:p-5 shadow-[3px_3px_0px_#1E1B4B] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 rounded-2xl ${mod ? mod.theme.badgeBg : 'bg-indigo-100'} border-2 border-[#1E1B4B] flex items-center justify-center text-2xl shrink-0">
+                  ${mod ? mod.icon : '✨'}
+                </div>
+                <div>
+                  <span class="text-[10px] font-black uppercase bg-amber-300 text-[#1E1B4B] px-2 py-0.5 rounded border border-[#1E1B4B]">
+                    Match #${idx + 1}
+                  </span>
+                  <h3 class="text-base sm:text-lg font-black text-[#1E1B4B] mt-1">${mod ? mod.title : tag}</h3>
+                  <p class="text-xs text-slate-600 font-medium mt-0.5">${mod ? mod.summary : ''}</p>
+                </div>
+              </div>
+              <a href="module.html?area=${slug}"
+                 class="inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-[#1E1B4B] hover:bg-indigo-900 text-white font-black text-xs border-2 border-[#1E1B4B] shadow-[2px_2px_0px_#F59E0B] shrink-0">
+                <span>Start Module</span>
+                <span>→</span>
+              </a>
+            </div>
+          `;
+        }).join('');
+
+        resultsPanel.innerHTML = `
+          <div class="bg-indigo-50 rounded-2xl border-2 border-[#1E1B4B] p-4 sm:p-5">
+            <span class="text-[11px] font-black uppercase bg-white text-[#1E1B4B] px-2.5 py-0.5 rounded-full border border-[#1E1B4B]">
+              ✨ Exploratory Results Ready
+            </span>
+            <h2 class="text-xl sm:text-2xl font-black text-[#1E1B4B] mt-2 font-heading">
+              ${name}’s Recommended Mentorship Tracks
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-700 font-medium mt-1">
+              These tracks align closely with what excites you right now—jump straight into any module below or explore them on the Pathway Map. Remember, you are welcome to explore all five areas!
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            ${cardsHtml}
+          </div>
+
+          <div class="pt-3 border-t-2 border-slate-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <button type="button" id="retakeQuizBtn" class="px-4 py-3 rounded-xl bg-white hover:bg-slate-100 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] cursor-pointer">
+              ↻ Retake Quiz
+            </button>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <a href="mentorship.html" class="px-4 py-3 rounded-xl bg-white hover:bg-amber-100 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] text-center">
+                📚 Compare All 5 Areas
+              </a>
+              <a href="explore.html?fromQuiz=true" class="px-5 py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#1E1B4B] text-center">
+                🧭 Open Highlighted Pathway Map →
+              </a>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('retakeQuizBtn')?.addEventListener('click', () => {
+          Object.keys(answers).forEach((key) => delete answers[key]);
+          currentQuestion = 0;
+          resultsPanel.classList.add('hidden');
+          form.classList.remove('hidden');
+          progress.classList.remove('hidden');
+          renderQuestion();
+        });
       }
 
       clearBtn?.addEventListener('click', () => {
@@ -169,7 +244,7 @@
         const sorted = Object.entries(tagScores).sort((a, b) => b[1] - a[1]);
         const topInterests = sorted.slice(0, 3).map(entry => entry[0]);
 
-        // Load existing session or generate
+        // Load existing session via unified helper
         let session = {};
         try {
           const saved = localStorage.getItem('bigminds_student_session');
@@ -186,7 +261,14 @@
           session.unlockedBadges.push('curiosity-pioneer');
         }
 
-        localStorage.setItem('bigminds_student_session', JSON.stringify(session));
+        if (window.BigMindsSession) {
+          window.BigMindsSession.save({
+            activeInterests: topInterests,
+            unlockedBadges: session.unlockedBadges
+          });
+        } else {
+          localStorage.setItem('bigminds_student_session', JSON.stringify(session));
+        }
 
         // Persist to Firebase RTDB
         if (window.FirebaseSync && typeof window.FirebaseSync.saveQuizSubmission === 'function') {
@@ -195,12 +277,10 @@
             scores: tagScores,
             preferredAreas: topInterests,
             quizVersion: '2.0'
-          }).finally(() => {
-            window.location.href = 'index.html?fromQuiz=true';
-          });
-        } else {
-          window.location.href = 'index.html?fromQuiz=true';
+          }).catch((err) => console.warn('Could not save quiz to Firebase:', err));
         }
+
+        showConnectedResults(topInterests);
       });
     });
   </script>

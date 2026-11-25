@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Big Minds — Student Pathways & Future Skills Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Big Minds — Discover Your Interests &amp; Future Skills</title>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,306 +20,373 @@
   <!-- Custom Neo-Tactile Styles -->
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body class="bg-[#FAF8F5] text-slate-900 antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#FDFBF7] text-[#1E1B4B] antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
 
-  <!-- TOP HEADER -->
-  <header class="bg-white/95 backdrop-blur-md border-b-2 border-slate-900 sticky top-0 z-30 px-3 md:px-8 py-2.5 md:py-3 shadow-xs">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2.5 md:gap-3">
+  <!-- REUSABLE HEADER -->
+  <header id="siteHeader"></header>
 
-      <!-- Brand & Project Identity -->
-      <div class="flex items-center justify-between w-full md:w-auto">
-        <div class="flex items-center gap-2.5 md:gap-3">
-          <div class="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-indigo-600 border-2 border-slate-900 flex items-center justify-center text-white font-extrabold text-xl md:text-2xl shadow-[2px_2px_0px_#0F172A] shrink-0">
-            💡
-          </div>
-          <div>
-            <div class="flex items-center gap-1.5 md:gap-2">
-              <h1 class="text-lg md:text-xl font-black tracking-tight text-slate-900">Big Minds</h1>
-              <span class="text-[9px] md:text-[10px] font-black uppercase bg-amber-300 text-slate-900 px-1.5 py-0.5 rounded border border-slate-900 sticker">
-                Pathways
-              </span>
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 w-full">
+
+    <!-- HERO SECTION -->
+    <section class="border-b-2 border-[#1E1B4B] bg-gradient-to-b from-[#FDFBF7] via-amber-50/40 to-indigo-50/40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+
+          <!-- Left Mission & Primary CTAs -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="inline-flex items-center gap-2 bg-amber-300 text-[#1E1B4B] border-2 border-[#1E1B4B] px-3.5 py-1 rounded-full text-xs font-black shadow-[2px_2px_0px_#1E1B4B]">
+              <span>✨</span>
+              <span>What are you curious about?</span>
             </div>
-            <p class="text-[11px] md:text-xs font-bold text-slate-500 truncate max-w-[240px] md:max-w-none">
-              Discover your interests. Explore possibilities. Build your next step.
+
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1E1B4B] leading-[1.12] font-heading">
+              Discover your interests. Explore your possibilities. Build your next step.
+            </h1>
+
+            <p class="text-sm sm:text-base text-slate-700 font-medium leading-relaxed max-w-2xl">
+              Big Minds helps students explore practical skills, real-world careers, and hands-on challenges across technology, design, finance, communication, and entrepreneurship—at your own pace.
+            </p>
+
+            <div class="flex flex-col sm:flex-row flex-wrap gap-3 pt-1">
+              <a href="quiz.html"
+                 class="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-[#1E1B4B] hover:bg-indigo-900 text-white font-black text-sm border-2 border-[#1E1B4B] shadow-[4px_4px_0px_#F59E0B] hover:translate-x-[1px] hover:translate-y-[1px] transition-all min-h-[48px]">
+                <span>✨ Take the Curiosity Quiz</span>
+                <span>→</span>
+              </a>
+
+              <a href="mentorship.html"
+                 class="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-amber-300 hover:bg-amber-400 text-[#1E1B4B] font-black text-sm border-2 border-[#1E1B4B] shadow-[4px_4px_0px_#1E1B4B] hover:translate-x-[1px] hover:translate-y-[1px] transition-all min-h-[48px]">
+                <span>📚 Explore Mentorship Areas</span>
+              </a>
+
+              <a href="explore.html"
+                 class="inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl bg-white hover:bg-indigo-50 text-[#1E1B4B] font-black text-sm border-2 border-[#1E1B4B] shadow-[4px_4px_0px_#1E1B4B] hover:translate-x-[1px] hover:translate-y-[1px] transition-all min-h-[48px]">
+                <span>🧭 Open Pathway Map</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Personal Session & Quick Start Card -->
+          <div class="lg:col-span-5">
+            <div class="bg-white rounded-3xl border-2 border-[#1E1B4B] p-5 sm:p-6 shadow-[6px_6px_0px_#1E1B4B] space-y-4">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <span class="text-[11px] font-black uppercase tracking-wider text-indigo-700 bg-indigo-100 px-2.5 py-0.5 rounded-full border border-[#1E1B4B]">
+                    Your Explorer Space
+                  </span>
+                  <h2 id="homeWelcomeTitle" class="text-xl font-black text-[#1E1B4B] mt-2 font-heading">
+                    Welcome to Big Minds!
+                  </h2>
+                </div>
+                <button type="button" id="homeEditProfileBtn"
+                  class="text-xs font-black bg-[#FDFBF7] hover:bg-amber-100 text-[#1E1B4B] border-2 border-[#1E1B4B] px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_#1E1B4B] shrink-0 cursor-pointer">
+                  ✏️ Edit Name
+                </button>
+              </div>
+
+              <p id="homeWelcomeDesc" class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                No account or password required. Pick your display name anytime and explore freely across modules, quizzes, and interactive activities.
+              </p>
+
+              <!-- Compact Progress Snapshot -->
+              <div class="bg-[#FDFBF7] rounded-2xl border-2 border-slate-200 p-4 space-y-2.5">
+                <div class="flex items-center justify-between text-xs font-black text-[#1E1B4B]">
+                  <span>Learning Journey Progress</span>
+                  <span id="homeProgressPercent">0%</span>
+                </div>
+                <div class="w-full h-3 bg-slate-200 border border-[#1E1B4B] rounded-full overflow-hidden">
+                  <div id="homeProgressBar" class="bg-emerald-400 h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold text-slate-600 pt-0.5">
+                  <span id="homeProgressDetail">0 of 30 learning stages explored</span>
+                  <a href="progress.html" class="text-indigo-700 hover:underline font-black">View Badges &amp; Certificate →</a>
+                </div>
+              </div>
+
+              <!-- Pre-Survey Quick Prompt -->
+              <div class="flex items-center justify-between gap-3 pt-1 border-t border-slate-200">
+                <span id="homePreSurveyLabel" class="text-xs font-bold text-slate-600">
+                  Just starting? Share your starting confidence:
+                </span>
+                <button type="button" id="homePreSurveyBtn"
+                  class="text-xs font-black bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border-2 border-[#1E1B4B] px-3 py-2 rounded-xl shadow-[2px_2px_0px_#1E1B4B] shrink-0 cursor-pointer">
+                  📝 Pre-Survey
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT YOU CAN ACHIEVE -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <div class="max-w-2xl mb-7">
+        <span class="text-xs font-black uppercase tracking-wider text-indigo-700">Why Explore Here</span>
+        <h2 class="text-2xl sm:text-3xl font-black text-[#1E1B4B] mt-1 font-heading">
+          What You Can Achieve on Big Minds
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="bg-white rounded-2xl border-2 border-[#1E1B4B] p-5 shadow-[4px_4px_0px_#1E1B4B]">
+          <div class="w-10 h-10 rounded-xl bg-amber-200 border-2 border-[#1E1B4B] flex items-center justify-center text-xl mb-3">🧭</div>
+          <h3 class="text-base font-black text-[#1E1B4B] mb-1.5">Spot Your Curiosities</h3>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+            Use the 45-second Curiosity Quiz and visual Pathway Map to see which skills connect with your natural interests.
+          </p>
+        </div>
+
+        <div class="bg-white rounded-2xl border-2 border-[#1E1B4B] p-5 shadow-[4px_4px_0px_#1E1B4B]">
+          <div class="w-10 h-10 rounded-xl bg-indigo-200 border-2 border-[#1E1B4B] flex items-center justify-center text-xl mb-3">📖</div>
+          <h3 class="text-base font-black text-[#1E1B4B] mb-1.5">Learn in Clear Steps</h3>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+            Move freely through six structured stages—Discover, Watch, Learn, Practise, Reflect, and Explore Further.
+          </p>
+        </div>
+
+        <div class="bg-white rounded-2xl border-2 border-[#1E1B4B] p-5 shadow-[4px_4px_0px_#1E1B4B]">
+          <div class="w-10 h-10 rounded-xl bg-emerald-200 border-2 border-[#1E1B4B] flex items-center justify-center text-xl mb-3">🛠️</div>
+          <h3 class="text-base font-black text-[#1E1B4B] mb-1.5">Try Real Challenges</h3>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+            Build a starter webpage, mock up a poster, balance a budget, rehearse a 60-second speech, or pitch a venture.
+          </p>
+        </div>
+
+        <div class="bg-white rounded-2xl border-2 border-[#1E1B4B] p-5 shadow-[4px_4px_0px_#1E1B4B]">
+          <div class="w-10 h-10 rounded-xl bg-purple-200 border-2 border-[#1E1B4B] flex items-center justify-center text-xl mb-3">🏆</div>
+          <h3 class="text-base font-black text-[#1E1B4B] mb-1.5">Celebrate Your Growth</h3>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+            Unlock Curiosity Badges as you explore and download your personalised Explorer Certificate anytime.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREVIEW OF THE FIVE MENTORSHIP AREAS -->
+    <section class="border-y-2 border-[#1E1B4B] bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <span class="text-xs font-black uppercase tracking-wider text-indigo-700">Five Core Tracks</span>
+            <h2 class="text-2xl sm:text-3xl font-black text-[#1E1B4B] mt-1 font-heading">
+              Mentorship Learning Areas
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-600 font-medium mt-1">
+              Jump directly into any mentorship module—in any order you choose.
             </p>
           </div>
-        </div>
-
-        <!-- Mobile Quick Actions -->
-        <div class="flex items-center gap-1.5 md:hidden">
-          <a href="quiz.html" id="mobileQuizBtn" class="text-xs font-black bg-indigo-50 text-indigo-700 px-2.5 py-1.5 rounded-xl border-2 border-slate-900 shadow-[1px_1px_0px_#0F172A] active:scale-95 transition-all">
-            ✨ Quiz
-          </a>
-          <button id="mobileSessionBtn" onclick="window.bigMindsApp.startNewParticipantSession()" class="text-xs font-bold bg-amber-300 text-slate-900 px-2 py-1.5 rounded-xl border-2 border-slate-900 shadow-[1px_1px_0px_#0F172A]">
-            👤
-          </button>
-        </div>
-      </div>
-
-      <!-- Student Identity, Currency & Session Controls -->
-      <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto flex-wrap">
-
-        <!-- Student Greeting Pill -->
-        <div class="flex items-center gap-2 bg-slate-50 border-2 border-slate-900 px-2.5 py-1.5 rounded-xl shadow-[2px_2px_0px_#0F172A]">
-          <div class="flex flex-col">
-            <span id="studentGreeting" class="text-xs font-black text-slate-900">Welcome, Explorer!</span>
-            <div class="flex items-center gap-1">
-              <span class="text-[9px] text-slate-400 font-bold uppercase">ID:</span>
-              <span id="participantIdBadge" class="text-[9px] font-mono font-bold text-slate-600 truncate max-w-[90px]" title="Unique participant session ID"></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Currency Selector -->
-        <div id="currencySelectorContainer" class="flex items-center" title="Select currency for practical budgeting scenarios"></div>
-
-        <!-- Surveys & Milestone Action Buttons -->
-        <!-- Surveys & Milestone Action Buttons -->
-         <div class="flex items-center gap-1.5 flex-wrap">
-          <button id="btnOpenPreSurvey" type="button" class="text-xs font-black bg-white hover:bg-slate-50 text-slate-800 px-2.5 py-1.5 rounded-xl border-2 border-slate-900 shadow-[2px_2px_0px_#0F172A] transition-all">
-            📝 Pre-Survey
-          </button>
-          <button id="btnOpenPostSurvey" type="button" class="text-xs font-black bg-white hover:bg-slate-50 text-slate-800 px-2.5 py-1.5 rounded-xl border-2 border-slate-900 shadow-[2px_2px_0px_#0F172A] transition-all">
-            🌟 Post-Survey
-          </button>
-          <button id="btnOpenCertificate" type="button" class="text-xs font-black bg-amber-300 hover:bg-amber-400 text-slate-900 px-2.5 py-1.5 rounded-xl border-2 border-slate-900 shadow-[2px_2px_0px_#0F172A] transition-all" title="View & print your explorer certificate">
-          📜 Certificate
-           </button>
-        </div>
-
-        <!-- Switch / New Session -->
-        <button id="newSessionBtn" type="button" title="Start a fresh participant session without overwriting past student data" class="text-xs font-black text-slate-900 bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 px-2.5 py-1.5 rounded-xl transition-all shadow-[2px_2px_0px_#0F172A] active:translate-x-0.5 active:translate-y-0.5">
-          👤 Switch Session
-        </button>
-      </div>
-
-    </div>
-  </header>
-
-  <!-- MAIN APP CONTAINER -->
-  <main class="max-w-7xl w-full mx-auto px-3 md:px-8 py-3 flex-1 flex flex-col gap-3">
-
-    <!-- CONTROLS & INTEREST FILTER BAR -->
-    <section class="bg-white rounded-2xl border-2 border-slate-900 p-3.5 md:p-4 shadow-[4px_4px_0px_#0F172A] flex flex-col lg:flex-row lg:items-center justify-between gap-3 md:gap-4">
-      <div class="flex flex-col gap-2">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-1.5 md:gap-2 flex-wrap">
-            <span class="text-xs font-black text-slate-900 uppercase tracking-wider">What are you curious about?</span>
-            <span class="text-[10px] md:text-[11px] font-bold text-slate-500">(Pick 1–3 areas to highlight pathways)</span>
-          </div>
-          <a href="quiz.html" id="takeQuizBtn" class="hidden md:inline-flex text-xs font-black text-indigo-700 hover:text-indigo-900 bg-indigo-50 border-2 border-indigo-200 px-3 py-1.5 rounded-xl transition-all shadow-[1px_1px_0px_#0F172A] hover:bg-indigo-100 items-center gap-1">
-            <span>✨ Take Curiosity Quiz</span>
+          <a href="mentorship.html"
+             class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#FDFBF7] hover:bg-amber-100 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] shadow-[2px_2px_0px_#1E1B4B] self-start sm:self-auto">
+            <span>Compare All 5 Areas</span>
+            <span>→</span>
           </a>
         </div>
-        <div id="interestBadges" class="flex flex-wrap gap-1.5 md:gap-2">
-          <!-- Dynamically populated by app.js -->
-        </div>
-        <div id="curiosityBadges" class="flex flex-wrap gap-1.5 items-center" aria-live="polite">
-          <!-- Earned and locked badges injected by app.js -->
-        </div>
-      </div>
 
-      <!-- Progress & Canvas Controls -->
-      <div class="flex items-center justify-between lg:justify-end gap-2 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-200">
-        <!-- Progress Meter -->
-        <div class="flex items-center gap-2 bg-slate-50 border-2 border-slate-900 px-2.5 py-1.5 rounded-xl shadow-[2px_2px_0px_#0F172A]">
-          <div class="text-left md:text-right">
-            <div class="text-xs font-black text-slate-800">
-              <span id="exploredCount">0</span> of <span id="totalNodesCount">10</span> Explored
-            </div>
-            <div id="progressPercent" class="text-[9px] md:text-[10px] text-slate-500 font-bold">0% Discovered</div>
-          </div>
-          <div class="w-14 md:w-20 bg-slate-200 border border-slate-900 h-2.5 rounded-full overflow-hidden shrink-0">
-            <div id="progressBar" class="bg-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-          </div>
+        <div id="homeModulesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Dynamically populated from MENTORSHIP_MODULES -->
         </div>
-
-        <button id="resetViewBtn" class="text-xs font-black text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 px-3 py-2 rounded-xl transition-all shadow-[2px_2px_0px_#0F172A]">
-          🎯 Center Map
-        </button>
       </div>
     </section>
 
-    <!-- INTERACTIVE CANVAS WORKSPACE -->
-    <section class="relative flex-1 min-h-[540px] bg-slate-100 rounded-3xl border-2 border-slate-900 overflow-hidden shadow-[4px_4px_0px_#0F172A] flex flex-col">
-      <div id="canvasViewport" class="absolute inset-0 cursor-grab active:cursor-grabbing select-none overflow-hidden">
-        <div id="canvasTransform" class="absolute inset-0 origin-top-left">
+    <!-- EXPLORATION TOOLS SPOTLIGHT -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-indigo-50 rounded-3xl border-2 border-[#1E1B4B] p-6 sm:p-7 shadow-[4px_4px_0px_#1E1B4B] flex flex-col justify-between gap-4">
+          <div class="space-y-2">
+            <span class="inline-block text-[11px] font-black uppercase bg-white text-[#1E1B4B] border border-[#1E1B4B] px-2.5 py-0.5 rounded-full">
+              ✨ Discovery Tool
+            </span>
+            <h3 class="text-xl sm:text-2xl font-black text-[#1E1B4B] font-heading">Not sure where to begin?</h3>
+            <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+              Answer 6 quick questions about how you like solving problems. We’ll highlight mentorship areas and pathway nodes tailored to your curiosity—without boxing you in.
+            </p>
+          </div>
+          <div>
+            <a href="quiz.html"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#1E1B4B] hover:bg-indigo-900 text-white font-black text-xs sm:text-sm border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#F59E0B]">
+              <span>Start Curiosity Quiz (45s)</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
 
-          <!-- Background SVG for connecting edges -->
-          <svg id="svgCanvas" class="absolute top-0 left-0 w-[2400px] h-[1600px] pointer-events-none">
-            <defs>
-              <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#94A3B8" />
-              </marker>
-              <marker id="arrow-active" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                <path d="M 0 0 L 10 5 L 0 10 z" fill="#4F46E5" />
-              </marker>
-            </defs>
-          </svg>
-
-          <!-- Nodes container -->
-          <div id="nodesContainer" class="absolute top-0 left-0 w-[2400px] h-[1600px]">
-            <!-- Node cards injected here -->
+        <div class="bg-amber-50 rounded-3xl border-2 border-[#1E1B4B] p-6 sm:p-7 shadow-[4px_4px_0px_#1E1B4B] flex flex-col justify-between gap-4">
+          <div class="space-y-2">
+            <span class="inline-block text-[11px] font-black uppercase bg-white text-[#1E1B4B] border border-[#1E1B4B] px-2.5 py-0.5 rounded-full">
+              🧭 Visual Explorer
+            </span>
+            <h3 class="text-xl sm:text-2xl font-black text-[#1E1B4B] font-heading">See how skills connect together</h3>
+            <p class="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
+              Open the interactive 2D Pathway Map to explore how web development links to UX design, how budgeting fuels entrepreneurship, and how public speaking amplifies every path.
+            </p>
+          </div>
+          <div>
+            <a href="explore.html"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-300 hover:bg-amber-400 text-[#1E1B4B] font-black text-xs sm:text-sm border-2 border-[#1E1B4B] shadow-[3px_3px_0px_#1E1B4B]">
+              <span>Open Pathway Explorer</span>
+              <span>→</span>
+            </a>
           </div>
         </div>
       </div>
-
-      <!-- Zoom & Canvas Controls Overlay -->
-      <div class="absolute bottom-4 right-4 bg-white rounded-2xl border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A] p-1.5 flex items-center gap-1.5 z-20">
-        <button id="zoomInBtn" title="Zoom In" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-900 font-black text-slate-800 flex items-center justify-center transition-colors text-base">+</button>
-        <button id="zoomOutBtn" title="Zoom Out" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-900 font-black text-slate-800 flex items-center justify-center transition-colors text-base">-</button>
-      </div>
-
-      <!-- Helper tip -->
-      <div class="absolute bottom-4 left-4 bg-white/95 backdrop-blur-xs rounded-xl border-2 border-slate-900 px-3 py-1.5 text-[11px] font-bold text-slate-700 shadow-xs pointer-events-none hidden sm:block">
-        💡 Drag canvas to pan • Click any pathway card to explore hands-on skills, practical challenges & career possibilities!
-      </div>
     </section>
+
   </main>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-slate-200 bg-white/70 px-4 py-3 text-center text-xs text-slate-500 font-semibold flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto w-full gap-2">
-    <div>
-      Big Minds • Student Interest Exploration & Future Pathways Platform
-    </div>
-    <div class="flex items-center gap-3">
-      <a href="quiz.html" class="hover:text-indigo-600 font-bold transition-colors">Curiosity Quiz</a>
-    </div>
-  </footer>
-
-  <!-- NODE DISCOVERY DRAWER -->
-  <div id="drawerBackdrop" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 hidden opacity-0 transition-opacity duration-300"></div>
-  <aside id="nodeDrawer" class="fixed inset-y-0 right-0 w-full max-w-lg bg-white border-l-2 border-slate-900 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-out flex flex-col justify-between p-6 overflow-y-auto">
-    <div>
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-xs font-black uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full shadow-xs">
-          🧭 Pathway Exploration
-        </span>
-        <button id="closeDrawerBtn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-900 text-slate-700 font-black flex items-center justify-center transition-colors">
-          ✕
-        </button>
-      </div>
-
-      <h2 id="drawerTitle" class="text-2xl font-black text-slate-900 mb-1 font-heading">Node Title</h2>
-      <p id="drawerDesc" class="text-slate-600 text-xs font-medium leading-relaxed mb-4">Node Description</p>
-
-      <!-- Tags -->
-      <div class="mb-4">
-        <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2">Mentorship Discipline:</h3>
-        <div id="drawerTags" class="flex flex-wrap gap-1.5"></div>
-      </div>
-
-      <!-- Structured Node Information Breakdown -->
-      <div class="space-y-3 mb-6 bg-slate-50 p-4 rounded-2xl border-2 border-slate-900">
-        <div>
-          <h4 class="text-xs font-black uppercase text-indigo-950 tracking-wider">🔍 Explore:</h4>
-          <p id="drawerExploreText" class="text-xs text-slate-700 leading-relaxed mt-0.5"></p>
-        </div>
-        <div>
-          <h4 class="text-xs font-black uppercase text-indigo-950 tracking-wider">🎯 Why It Matters:</h4>
-          <p id="drawerWhyItMatters" class="text-xs text-slate-700 leading-relaxed mt-0.5"></p>
-        </div>
-        <div>
-          <h4 class="text-xs font-black uppercase text-indigo-950 tracking-wider">🛠️ Skills Involved:</h4>
-          <p id="drawerSkills" class="text-xs text-slate-700 leading-relaxed mt-0.5 font-medium"></p>
-        </div>
-        <div>
-          <h4 class="text-xs font-black uppercase text-indigo-950 tracking-wider">🌍 Real-World Applications:</h4>
-          <p id="drawerRealWorld" class="text-xs text-slate-700 leading-relaxed mt-0.5"></p>
-        </div>
-        <div>
-          <h4 class="text-xs font-black uppercase text-indigo-950 tracking-wider">🚀 Next Step to Continue:</h4>
-          <p id="drawerNextStep" class="text-xs text-slate-700 leading-relaxed mt-0.5 font-bold"></p>
-        </div>
-      </div>
-
-      <!-- HANDS-ON MICRO ACTIVITY CHALLENGE -->
-      <div class="bg-gradient-to-br from-indigo-50/70 to-slate-50 border-2 border-slate-900 rounded-2xl p-4 mb-6 shadow-[3px_3px_0px_#0F172A]">
-        <div class="flex items-center justify-between mb-2">
-          <h3 id="activityTitle" class="font-black text-slate-900 text-xs flex items-center gap-1.5">
-            ⚡ Try It: Practical Challenge
-          </h3>
-          <span class="text-[10px] font-black uppercase bg-indigo-200 text-indigo-950 px-2 py-0.5 rounded-full border border-slate-900">
-            Interactive Sandbox
-          </span>
-        </div>
-        <p id="activityDesc" class="text-xs text-slate-600 font-medium leading-relaxed mb-3">Activity details</p>
-
-        <!-- Dynamic Challenge UI Sandbox -->
-        <div id="activitySandbox" class="bg-white rounded-xl border-2 border-slate-900 p-3 shadow-xs">
-          <!-- Interactive widgets injected here by app.js -->
-        </div>
-      </div>
-
-      <!-- CAREER SIMULATION & ROLE MODELS -->
-      <div id="archetypeContainer"></div>
-    </div>
-
-    <!-- Mark as Explored Button -->
-    <div class="pt-3 border-t border-slate-200 flex flex-col gap-2">
-      <button id="toggleExploredBtn" class="w-full py-3.5 px-4 rounded-2xl font-black text-sm transition-all border-2 border-slate-900 bg-indigo-600 hover:bg-indigo-700 text-white shadow-[3px_3px_0px_#0F172A]">
-        🌟 Mark as Explored
-      </button>
-    </div>
-  </aside>
-
-  <!-- CURIOSITY QUIZ MODAL -->
-  <div id="quizModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl border-2 border-slate-900 shadow-[6px_6px_0px_#0F172A] w-full max-w-lg p-6 flex flex-col gap-4 max-h-[90vh]">
-      <div class="flex items-center justify-between border-b-2 border-slate-900 pb-3">
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-black text-slate-900 text-lg">Curiosity Discovery Quiz</h3>
-            <span class="text-[10px] font-black uppercase bg-amber-300 text-slate-900 px-2 py-0.5 rounded-md border border-slate-900">30s</span>
-          </div>
-          <p class="text-xs text-slate-500 font-bold">Answer these questions to explore which pathways align with your curiosity!</p>
-        </div>
-        <button id="closeQuizBtn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-900 text-slate-700 font-black flex items-center justify-center">✕</button>
-      </div>
-
-      <div id="quizBody" class="py-2 overflow-y-auto pr-1">
-        <!-- 6 Quiz questions injected here -->
-      </div>
-
-      <div class="flex justify-end gap-2 border-t border-slate-200 pt-3">
-        <button id="submitQuizBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-2xl transition-all border-2 border-slate-900 shadow-[3px_3px_0px_#0F172A]">
-          ✨ Reveal My Matched Pathways
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- REUSABLE FOOTER -->
+  <footer id="siteFooter"></footer>
 
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <!-- Firebase Compatibility SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-  <!-- Certificate Export Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
-
-  <!-- JavaScript Modules -->
-
-  <!-- JavaScript Modules -->
+  <!-- Core Modules -->
   <script src="js/firebaseConfig.js"></script>
   <script src="js/currencyHelper.js"></script>
   <script src="js/firebaseSync.js"></script>
   <script src="js/surveysAndBadges.js"></script>
-  <script src="js/pathwaysData.js"></script>
-  <script src="js/canvas.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/mentorshipData.js"></script>
+  <script src="js/layout.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.BigMindsUI.renderHeader({ activeRoute: 'home' });
+      window.BigMindsUI.renderFooter();
+
+      const renderHomeState = () => {
+        const session = window.BigMindsSession.get();
+        const stats = window.BigMindsSession.getOverallModuleStats();
+
+        const titleEl = document.getElementById('homeWelcomeTitle');
+        const descEl = document.getElementById('homeWelcomeDesc');
+        const pctEl = document.getElementById('homeProgressPercent');
+        const barEl = document.getElementById('homeProgressBar');
+        const detailEl = document.getElementById('homeProgressDetail');
+        const preBtn = document.getElementById('homePreSurveyBtn');
+        const preLabel = document.getElementById('homePreSurveyLabel');
+
+        if (session.displayName) {
+          titleEl.textContent = `Welcome back, ${session.displayName}!`;
+          descEl.textContent = 'Pick up any mentorship module right where you left off, or check the Curiosity Quiz to discover new skill connections.';
+        } else {
+          titleEl.textContent = 'Welcome to Big Minds!';
+          descEl.textContent = 'No account or password needed. Add your display name to personalise your learning progress and Explorer Certificate.';
+        }
+
+        pctEl.textContent = `${stats.percent}%`;
+        barEl.style.width = `${stats.percent}%`;
+        detailEl.textContent = `${stats.totalCompletedStages} of ${stats.totalPossible} learning stages explored (${(session.exploredIds || []).length} map nodes)`;
+
+        if (session.preSurveyCompleted) {
+          preLabel.textContent = 'Baseline pre-survey completed ✓';
+          preBtn.textContent = 'Review Pre-Survey';
+          preBtn.className = 'text-xs font-black bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border-2 border-[#1E1B4B] px-3 py-2 rounded-xl shadow-[2px_2px_0px_#1E1B4B] shrink-0 cursor-pointer';
+        } else {
+          preLabel.textContent = 'Just starting? Share your starting confidence:';
+          preBtn.textContent = '📝 Pre-Survey';
+        }
+
+        const grid = document.getElementById('homeModulesGrid');
+        if (grid && Array.isArray(window.MENTORSHIP_MODULES)) {
+          const cardsHtml = window.MENTORSHIP_MODULES.map((mod) => {
+            const modState = session.moduleProgress?.[mod.slug];
+            const doneCount = Array.isArray(modState?.completedStages) ? modState.completedStages.length : 0;
+            const isMatched = (session.activeInterests || []).includes(mod.interestTag);
+
+            return `
+              <article class="bg-[#FDFBF7] rounded-2xl border-2 border-[#1E1B4B] p-5 shadow-[4px_4px_0px_#1E1B4B] flex flex-col justify-between gap-4 hover:-translate-y-0.5 transition-transform">
+                <div>
+                  <div class="flex items-center justify-between gap-2 mb-3">
+                    <span class="w-11 h-11 rounded-2xl ${mod.theme.badgeBg} border-2 border-[#1E1B4B] flex items-center justify-center text-2xl shadow-[2px_2px_0px_#1E1B4B]">
+                      ${mod.icon}
+                    </span>
+                    <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                      ${isMatched ? '<span class="text-[10px] font-black uppercase bg-amber-300 text-[#1E1B4B] px-2 py-0.5 rounded-full border border-[#1E1B4B]">✨ Recommended</span>' : ''}
+                      <span class="text-[10px] font-black bg-white text-slate-700 px-2 py-0.5 rounded-full border border-slate-300">
+                        ${doneCount}/6 stages
+                      </span>
+                    </div>
+                  </div>
+                  <h3 class="text-lg font-black text-[#1E1B4B] mb-1.5 font-heading">${mod.title}</h3>
+                  <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    ${mod.summary}
+                  </p>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                  <span class="text-[11px] font-bold text-slate-500">⏱️ ${mod.estimatedDuration}</span>
+                  <a href="module.html?area=${mod.slug}"
+                     class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-amber-300 text-[#1E1B4B] font-black text-xs border-2 border-[#1E1B4B] shadow-[2px_2px_0px_#1E1B4B] transition-colors">
+                    <span>${doneCount > 0 ? 'Continue' : 'Start Module'}</span>
+                    <span>→</span>
+                  </a>
+                </div>
+              </article>
+            `;
+          }).join('');
+
+          const quizCardHtml = `
+            <article class="bg-[#1E1B4B] text-white rounded-2xl border-2 border-[#1E1B4B] p-5 shadow-[4px_4px_0px_#F59E0B] flex flex-col justify-between gap-4">
+              <div>
+                <div class="w-11 h-11 rounded-2xl bg-amber-300 text-[#1E1B4B] border-2 border-white flex items-center justify-center text-2xl mb-3">
+                  ✨
+                </div>
+                <h3 class="text-lg font-black mb-1.5 font-heading">Want personalised suggestions?</h3>
+                <p class="text-xs sm:text-sm text-indigo-100 font-medium leading-relaxed">
+                  Take our 6-question Curiosity Quiz to highlight the mentorship modules that best match how you like to create, calculate, speak, or build.
+                </p>
+              </div>
+              <div class="pt-2">
+                <a href="quiz.html"
+                   class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-300 hover:bg-amber-400 text-[#1E1B4B] font-black text-xs border-2 border-white shadow-[2px_2px_0px_#FFFFFF]">
+                  <span>Take Curiosity Quiz</span>
+                  <span>→</span>
+                </a>
+              </div>
+            </article>
+          `;
+
+          grid.innerHTML = cardsHtml + quizCardHtml;
+        }
+      };
+
+      document.getElementById('homeEditProfileBtn')?.addEventListener('click', () => {
+        window.BigMindsUI.openProfileModal();
+      });
+
+      document.getElementById('homePreSurveyBtn')?.addEventListener('click', () => {
+        if (window.SurveysAndBadges) {
+          window.SurveysAndBadges.openSurveyModal('pre');
+        }
+      });
+
+      window.addEventListener('bigminds:sessionUpdated', renderHomeState);
+      window.addEventListener('bigminds:surveyCompleted', (e) => {
+        if (e.detail?.type === 'pre') {
+          window.BigMindsSession.save({ preSurveyCompleted: true });
+        }
+        renderHomeState();
+      });
+
+      // Legacy redirect compatibility if arriving at index.html?fromQuiz=true
+      if (window.location.search.includes('fromQuiz=true')) {
+        window.BigMindsUI.showToast('✨ Your Curiosity Quiz matches are ready below!');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
+      renderHomeState();
+    });
+  </script>
 
   <!-- PWA Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('⚡ PWA Service Worker active:', reg.scope))
           .catch(err => console.warn('Service worker registration failed:', err));
       });
     }

@@ -674,6 +674,20 @@ window.inspectParticipantModal = function(partId) {
         <strong class="block mb-1">🧭 Explored Pathway Nodes:</strong>
         <p>${(p.pathwayProgress?.exploredNodes || []).join(", ") || "No nodes marked as explored yet."}</p>
       </div>
+
+      <div class="p-3 bg-white rounded-xl border border-slate-300">
+        <strong class="block mb-1">📚 Mentorship Module Progress:</strong>
+        ${p.moduleProgress && Object.keys(p.moduleProgress).length ? `
+          <ul class="space-y-1">
+            ${Object.entries(p.moduleProgress).map(([slug, mp]) => `
+              <li>
+                <strong>${escapeHtml(slug)}:</strong> ${(mp.completedStages || []).length}/6 stages
+                ${mp.reflectionNote ? `<br><span class="text-muted"><em>"${escapeHtml(mp.reflectionNote)}"</em></span>` : ""}
+              </li>
+            `).join("")}
+          </ul>
+        ` : `<p class="text-muted">No module stages recorded yet.</p>`}
+      </div>
     </div>
   `;
 
@@ -688,11 +702,11 @@ function renderParticipantAnalyticsCharts() {
   const participants = Object.values(window.activeParticipants || {});
 
   const areas = [
-    { key: "q_tech", label: "Programming & Web" },
-    { key: "q_design", label: "Graphic Design" },
-    { key: "q_finance", label: "Financial Literacy" },
-    { key: "q_speaking", label: "Public Speaking" },
-    { key: "q_enterprise", label: "Entrepreneurship" }
+    { key: "q_tech", label: "Programming & Web", match: ["Programming & Web", "Programming and Web"] },
+    { key: "q_design", label: "Graphic Design", match: ["Graphic Design"] },
+    { key: "q_finance", label: "Financial Literacy", match: ["Financial Literacy"] },
+    { key: "q_speaking", label: "Public Speaking", match: ["Public Speaking"] },
+    { key: "q_enterprise", label: "Entrepreneurship", match: ["Entrepreneurship"] }
   ];
 
   // Interest breakdown
@@ -700,7 +714,8 @@ function renderParticipantAnalyticsCharts() {
     return participants.reduce((count, p) => {
       const quizAreas = p.quiz?.preferredAreas || [];
       const surveyInterests = p.preSurvey?.interests || [];
-      return count + (quizAreas.includes(a.label) || surveyInterests.includes(a.label) ? 1 : 0);
+      const matched = a.match.some(m => quizAreas.includes(m) || surveyInterests.includes(m));
+      return count + (matched ? 1 : 0);
     }, 0);
   });
 

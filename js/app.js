@@ -43,6 +43,17 @@ class BigMindsApp {
     // Cache DOM Elements
     this.cacheDom();
 
+    // Check if arriving from Mentorship overview/module with an ?interest= filter
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestedInterest = urlParams.get('interest');
+    if (requestedInterest && CATEGORY_COLORS[requestedInterest]) {
+      if (!this.state.activeInterests.includes(requestedInterest)) {
+        if (this.state.activeInterests.length >= 3) this.state.activeInterests.shift();
+        this.state.activeInterests.push(requestedInterest);
+        this.saveState();
+      }
+    }
+
     // Event Listeners & Boot
     this.initEventListeners();
     this.renderHeaderIdentity();
@@ -53,7 +64,7 @@ class BigMindsApp {
     this.checkOnboarding();
 
     // Check if arriving back from standalone quiz page
-    if (window.location.search.includes('fromQuiz=true')) {
+    if (urlParams.get('fromQuiz') === 'true') {
       setTimeout(() => {
         this.showToast('✨ Curiosities loaded from your quiz! Check out your matched pathways!');
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -87,6 +98,7 @@ class BigMindsApp {
       drawerTitle: document.getElementById('drawerTitle'),
       drawerDesc: document.getElementById('drawerDesc'),
       drawerTags: document.getElementById('drawerTags'),
+      drawerModuleLink: document.getElementById('drawerModuleLink'),
       drawerExploreText: document.getElementById('drawerExploreText'),
       drawerWhyItMatters: document.getElementById('drawerWhyItMatters'),
       drawerSkills: document.getElementById('drawerSkills'),
@@ -141,9 +153,17 @@ class BigMindsApp {
 
   saveState() {
     try {
+      const existing = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+      if (existing.moduleProgress && !this.state.moduleProgress) {
+        this.state.moduleProgress = existing.moduleProgress;
+      }
       localStorage.setItem(this.storageKey, JSON.stringify(this.state));
     } catch (e) {
       console.warn('Unable to save state to localStorage', e);
+    }
+
+    if (window.BigMindsUI) {
+      window.BigMindsUI.refreshIdentityPills();
     }
 
     // Sync to Firebase RTDB
@@ -398,6 +418,16 @@ class BigMindsApp {
       this.showToast('Survey submission successfully recorded!');
     });
 
+    // External session update (e.g., from shared header profile modal)
+    window.addEventListener('bigminds:sessionUpdated', () => {
+      this.loadState();
+      this.renderHeaderIdentity();
+      this.renderInterestBadges();
+      this.renderCuriosityBadges();
+      this.updateProgress();
+      this.refreshCanvas();
+    });
+
     // Keyboard ESC closes modals
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -528,6 +558,18 @@ class BigMindsApp {
 
     // Explored Toggle Button State
     this.updateDrawerExploredBtn();
+
+    // Link directly to the matching Six-Stage Mentorship Module
+    if (this.dom.drawerModuleLink && typeof window.getMentorshipSlugByInterestTag === 'function') {
+      const slug = window.getMentorshipSlugByInterestTag(node.interestTags?.[0]);
+      const mod = typeof window.getMentorshipModuleBySlug === 'function'
+        ? window.getMentorshipModuleBySlug(slug)
+        : null;
+      this.dom.drawerModuleLink.href = `module.html?area=${slug}`;
+      this.dom.drawerModuleLink.textContent = mod
+        ? `📚 Open "${mod.shortTitle}" 6-Stage Module →`
+        : '📚 Open Full Mentorship Module →';
+    }
 
     // Slide open drawer
     if (this.dom.drawerBackdrop) {

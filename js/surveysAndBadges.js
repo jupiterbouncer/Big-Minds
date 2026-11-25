@@ -84,6 +84,7 @@
 
     saveStudentData(student) {
       localStorage.setItem(SESSION_KEY, JSON.stringify(student));
+      window.dispatchEvent(new CustomEvent('bigminds:sessionUpdated', { detail: student }));
       if (window.FirebaseSync && typeof window.FirebaseSync.saveParticipant === 'function') {
         window.FirebaseSync.saveParticipant(student).catch(() => {});
       }
@@ -697,11 +698,11 @@
       };
 
       const areas = [
-        { key: 'q_tech', label: 'Programming & Web' },
-        { key: 'q_design', label: 'Graphic Design' },
-        { key: 'q_finance', label: 'Financial Literacy' },
-        { key: 'q_speaking', label: 'Public Speaking' },
-        { key: 'q_enterprise', label: 'Entrepreneurship' }
+        { key: 'q_tech', label: 'Programming & Web', match: ['Programming & Web', 'Programming and Web'] },
+        { key: 'q_design', label: 'Graphic Design', match: ['Graphic Design'] },
+        { key: 'q_finance', label: 'Financial Literacy', match: ['Financial Literacy'] },
+        { key: 'q_speaking', label: 'Public Speaking', match: ['Public Speaking'] },
+        { key: 'q_enterprise', label: 'Entrepreneurship', match: ['Entrepreneurship'] }
       ];
 
       const preScores = areas.map(a => getAvg(preSurveys, a.key));
@@ -711,7 +712,7 @@
       const interestDistribution = areas.map(a => {
         return rawSurveys.reduce((acc, s) => {
           const list = Array.isArray(s.interests) ? s.interests : [];
-          return acc + (list.includes(a.label) ? 1 : 0);
+          return acc + (a.match.some(m => list.includes(m)) ? 1 : 0);
         }, 0);
       });
 
@@ -847,11 +848,15 @@
       document.getElementById('cert-modal-title').textContent = title;
       document.getElementById('cert-modal-body').innerHTML = bodyHtml;
       overlay.classList.remove('hidden');
+      overlay.style.display = 'flex';
     },
 
     closeModal() {
       const overlay = document.getElementById('certificate-modal-overlay');
-      if (overlay) overlay.classList.add('hidden');
+      if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.style.display = 'none';
+      }
     }
   };
 

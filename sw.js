@@ -1,19 +1,26 @@
 /**
  * Big Minds 2.0 — Progressive Web App Service Worker
- * Offline Caching & Stale-While-Revalidate Engine (v4)
+ * Offline Caching & Stale-While-Revalidate Engine (v6)
  */
 
-const CACHE_NAME = 'bigminds-cache-v5';
+const CACHE_NAME = 'bigminds-cache-v6';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
+  './mentorship.html',
+  './module.html',
+  './explore.html',
   './quiz.html',
+  './progress.html',
   './service-project.html',
   './styles.css',
   './favicon.svg',
   './manifest.json',
   './js/currencyHelper.js',
+  './js/layout.js',
+  './js/mentorshipData.js',
+  './js/moduleApp.js',
   './js/app.js',
   './js/canvas.js',
   './js/pathwaysData.js',
